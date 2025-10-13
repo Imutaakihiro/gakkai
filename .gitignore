@@ -1,0 +1,85 @@
+# GitHub用 .gitignore ファイル
+
+# Python関連
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+pip-wheel-metadata/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# PyTorch関連
+*.pth
+*.pt
+*.pkl
+*.pickle
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# 環境設定
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+
+# IDE関連
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS関連
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# ログファイル
+*.log
+
+# 一時ファイル
+*.tmp
+*.temp
+
+# 大きなデータファイル（必要に応じてコメントアウト）
+# *.csv
+# *.json
+# *.png
+# *.jpg
+# *.jpeg
+
+# モデルファイル（サイズが大きい場合）
+# 02_モデル/
+
+# 分析結果の一部（必要に応じて）
+# 03_分析結果/SHAP分析/サンプリング5000件/可視化/
+# 03_分析結果/拡張満足度要因分析/*.png
+
+# 個人情報を含む可能性のあるファイル
+# 01_データ/元データ/
+# 感情分類結果_*.csv

@@ -1,0 +1,65 @@
+{
+  "model_name": "単一タスクモデル1（感情スコア）",
+  "model_path": "C:\\Users\\takahashi.DESKTOP-U0T5SUB\\Downloads\\BERT\\git_excluded\\finetuned_bert_model_20250718_step2_fixed_classweights_variant1_positive重点強化",
+  "evaluation_date": "20251010_171616",
+  "dataset_size": 200,
+  "metrics": {
+    "accuracy": 0.77,
+    "f1_score_macro": 0.706060606060606,
+    "f1_score_weighted": 0.7698787878787878,
+    "precision_macro": 0.7071665161096056,
+    "precision_weighted": 0.7698554652213189,
+    "recall_macro": 0.7051587301587302,
+    "recall_weighted": 0.77
+  },
+  "confusion_matrix": [
+    [
+      27,
+      12,
+      1
+    ],
+    [
+      13,
+      110,
+      9
+    ],
+    [
+      1,
+      10,
+      17
+    ]
+  ],
+  "classification_report": {
+    "0": {
+      "precision": 0.6585365853658537,
+      "recall": 0.675,
+      "f1-score": 0.6666666666666666,
+      "support": 40.0
+    },
+    "1": {
+      "precision": 0.8333333333333334,
+      "recall": 0.8333333333333334,
+      "f1-score": 0.8333333333333334,
+      "support": 132.0
+    },
+    "2": {
+      "precision": 0.6296296296296297,
+      "recall": 0.6071428571428571,
+      "f1-score": 0.6181818181818182,
+      "support": 28.0
+    },
+    "accuracy": 0.77,
+    "macro avg": {
+      "precision": 0.7071665161096056,
+      "recall": 0.7051587301587302,
+      "f1-score": 0.706060606060606,
+      "support": 200.0
+    },
+    "weighted avg": {
+      "precision": 0.7698554652213189,
+      "recall": 0.77,
+      "f1-score": 0.7698787878787878,
+      "support": 200.0
+    }
+  }
+}

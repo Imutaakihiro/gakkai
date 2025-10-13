@@ -1,0 +1,21 @@
+{
+  "model_name": "単一タスクモデル2（評価スコア）",
+  "base_model": "koheiduck/bert-japanese-finetuned-sentiment",
+  "training_date": "20251010_191408",
+  "hyperparameters": {
+    "batch_size": 16,
+    "learning_rate": 5e-06,
+    "num_epochs": 5,
+    "max_length": 512
+  },
+  "dataset_size": {
+    "train": 797,
+    "val": 200
+  },
+  "final_metrics": {
+    "rmse": 0.19720699273498984,
+    "mae": 0.15631056896017015,
+    "r2": 0.01571640722540102,
+    "correlation": 0.190438803466991
+  }
+}

@@ -1,0 +1,43 @@
+{
+  "model_name": "マルチタスク学習モデル（感情スコア+授業評価スコア）",
+  "base_model": "cl-tohoku/bert-base-japanese-whole-word-masking",
+  "training_date": "20251012_221829",
+  "hyperparameters": {
+    "batch_size": 8,
+    "learning_rate": 2e-05,
+    "num_epochs": 5,
+    "max_length": 512,
+    "sentiment_weight": 0.7,
+    "course_weight": 0.3
+  },
+  "results": {
+    "sentiment_metrics": {
+      "rmse": 0.5032304475589412,
+      "mae": 0.3272962272167206,
+      "r2": 0.2764546275138855,
+      "correlation": 0.6281643724706675
+    },
+    "course_metrics": {
+      "rmse": 0.20054060768287985,
+      "mae": 0.1528952568769455,
+      "r2": 0.004066526889801025,
+      "correlation": 0.1156030876786651
+    }
+  },
+  "training_history": {
+    "train_losses": [
+      1.0154276486486196,
+      0.9077356729656458,
+      0.7079075014218688,
+      0.5937906764447689,
+      0.46932171783410015
+    ],
+    "val_losses": [
+      0.9609848082065582,
+      0.7999067932367325,
+      0.74290581792593,
+      0.7843512415885925,
+      0.8528378859162331
+    ]
+  }
+}

@@ -1,0 +1,11 @@
+{
+  "model_type": "BertForMultitask",
+  "base_model": "koheiduck/bert-japanese-finetuned-sentiment",
+  "num_sentiment_classes": 3,
+  "hidden_size": 768,
+  "max_length": 512,
+  "alpha": 0.5,
+  "beta": 0.5,
+  "score_mean": 3.440150602409639,
+  "score_std": 0.19771071047065866
+}

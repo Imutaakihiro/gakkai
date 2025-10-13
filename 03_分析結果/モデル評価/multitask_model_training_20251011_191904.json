@@ -1,0 +1,127 @@
+{
+  "model_name": "マルチタスクモデル（感情スコア+評価スコア）",
+  "base_model": "koheiduck/bert-japanese-finetuned-sentiment",
+  "training_date": "20251011_191904",
+  "hyperparameters": {
+    "batch_size": 16,
+    "learning_rate": 5e-06,
+    "num_epochs": 5,
+    "max_length": 512,
+    "alpha": 0.5,
+    "beta": 0.5
+  },
+  "dataset_size": {
+    "train": 796,
+    "val": 200
+  },
+  "final_metrics": {
+    "sentiment": {
+      "accuracy": 0.725,
+      "f1_macro": 0.6552364118426867,
+      "f1_weighted": 0.7190331418471057,
+      "precision": 0.6915592800484887,
+      "recall": 0.6322751322751323
+    },
+    "score": {
+      "rmse": 0.19284263601622317,
+      "mae": 0.14796140620779188,
+      "r2": -0.1080555175893041,
+      "correlation": 0.09399097684437113
+    }
+  },
+  "history": {
+    "train_loss": [
+      1.5774967908859252,
+      1.099856321811676,
+      0.9873384958505631,
+      0.9259709829092025,
+      0.9181421220302581
+    ],
+    "train_sentiment_loss": [
+      1.2224206268787383,
+      0.8373225438594818,
+      0.7271826183795929,
+      0.731973972916603,
+      0.6778567564487458
+    ],
+    "train_score_loss": [
+      1.932572954893112,
+      1.362390096783638,
+      1.2474943727254868,
+      1.119967994093895,
+      1.158427495956421
+    ],
+    "val_metrics": [
+      {
+        "total_loss": 0.9242152755077069,
+        "sentiment_loss": 0.8532178035149207,
+        "score_loss": 0.995212761255411,
+        "sentiment_accuracy": 0.635,
+        "sentiment_f1_macro": 0.4550141179777434,
+        "sentiment_f1_weighted": 0.5926772413088196,
+        "sentiment_precision": 0.5740740740740741,
+        "sentiment_recall": 0.47222222222222227,
+        "rmse": 0.9858869415716918,
+        "mae": 0.7610339522361755,
+        "r2": -0.13206160068511963,
+        "correlation": 0.10914585739374161
+      },
+      {
+        "total_loss": 0.8465797030008756,
+        "sentiment_loss": 0.7147841086754432,
+        "score_loss": 0.9783752881563627,
+        "sentiment_accuracy": 0.705,
+        "sentiment_f1_macro": 0.575177304964539,
+        "sentiment_f1_weighted": 0.6755957446808512,
+        "sentiment_precision": 0.7309129026110158,
+        "sentiment_recall": 0.5433027011974381,
+        "rmse": 0.9714466831578478,
+        "mae": 0.748680830001831,
+        "r2": -0.09914195537567139,
+        "correlation": 0.06819933652877808
+      },
+      {
+        "total_loss": 0.8479123940834632,
+        "sentiment_loss": 0.6730817166658548,
+        "score_loss": 1.0227430646236126,
+        "sentiment_accuracy": 0.715,
+        "sentiment_f1_macro": 0.6309772492398048,
+        "sentiment_f1_weighted": 0.7042564441625047,
+        "sentiment_precision": 0.6862287606196902,
+        "sentiment_recall": 0.6015037593984962,
+        "rmse": 0.9971210941306583,
+        "mae": 0.7708296775817871,
+        "r2": -0.15800821781158447,
+        "correlation": 0.10189192742109299
+      },
+      {
+        "total_loss": 0.8204954266548157,
+        "sentiment_loss": 0.6529915172320145,
+        "score_loss": 0.987999324615185,
+        "sentiment_accuracy": 0.725,
+        "sentiment_f1_macro": 0.6552364118426867,
+        "sentiment_f1_weighted": 0.7190331418471057,
+        "sentiment_precision": 0.6915592800484887,
+        "sentiment_recall": 0.6322751322751323,
+        "rmse": 0.9753777909112444,
+        "mae": 0.74837327003479,
+        "r2": -0.10805559158325195,
+        "correlation": 0.09399097412824631
+      },
+      {
+        "total_loss": 0.8211863682820246,
+        "sentiment_loss": 0.6445040725744687,
+        "score_loss": 0.997868693791903,
+        "sentiment_accuracy": 0.725,
+        "sentiment_f1_macro": 0.6483870967741936,
+        "sentiment_f1_weighted": 0.7151290322580646,
+        "sentiment_precision": 0.6952991452991454,
+        "sentiment_recall": 0.6200222779170147,
+        "rmse": 0.9780529397861304,
+        "mae": 0.743541419506073,
+        "r2": -0.11414194107055664,
+        "correlation": 0.08998411148786545
+      }
+    ]
+  }
+}
