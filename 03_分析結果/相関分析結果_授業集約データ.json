@@ -1,0 +1,48 @@
+{
+  "analysis_date": "20251015_132131",
+  "data_source": "授業集約データセット_20251012_142504.csv",
+  "sample_size": 3268,
+  "correlation_analysis": {
+    "pearson": {
+      "correlation_coefficient": 0.30965655382685087,
+      "p_value": 1.4599025569995896e-73,
+      "interpretation": "線形相関の強さ"
+    },
+    "spearman": {
+      "correlation_coefficient": 0.2969880601723671,
+      "p_value": 1.532285355897131e-67,
+      "interpretation": "順位相関の強さ"
+    },
+    "kendall": {
+      "correlation_coefficient": 0.20419648983039596,
+      "p_value": 1.4628904608297006e-66,
+      "interpretation": "順位相関の強さ（小標本に適している）"
+    }
+  },
+  "independence_test": {
+    "chi_square_statistic": 192.72976921621466,
+    "p_value": 1.3729816058691292e-40,
+    "degrees_of_freedom": 4,
+    "contingency_table": {
+      "低評価": {
+        "ネガティブ": 80,
+        "ニュートラル": 17,
+        "ポジティブ": 17
+      },
+      "中評価": {
+        "ネガティブ": 727,
+        "ニュートラル": 525,
+        "ポジティブ": 522
+      },
+      "高評価": {
+        "ネガティブ": 316,
+        "ニュートラル": 452,
+        "ポジティブ": 612
+      }
+    }
+  },
+  "conclusions": {
+    "correlation_strength": "中程度の正の相関",
+    "independence": "独立ではない（相関あり）"
+  }
+}

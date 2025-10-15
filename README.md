@@ -57,28 +57,51 @@
 
 ## 🚀 実行方法
 
-### 1. 環境構築
+### ⭐ 最新: 授業レベルマルチタスク学習
+
+#### 1. 環境構築
 ```bash
-pip install -r 99_その他/requirements.txt
+# 仮想環境の作成
+python -m venv venv
+
+# 仮想環境の有効化（Windows）
+venv\Scripts\activate
+
+# 必要なライブラリのインストール
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu118
+pip install transformers pandas numpy scikit-learn matplotlib seaborn scipy fugashi ipadic
 ```
 
-### 2. モデル学習
+#### 2. 授業レベルマルチタスク学習の実行
 ```bash
-# マルチタスク学習
-python 00_スクリプト/train_multitask_sentiment_score.py
-
-# 単一タスク学習
-python 00_スクリプト/train_score_model.py
+cd 00_スクリプト
+python train_class_level_multitask.py
 ```
 
-### 3. SHAP分析
+**推定実行時間**:
+- GPU（RTX 3080以上）: 1〜2時間
+- GPU（RTX 3060）: 2〜3時間
+
+詳細は `04_Docs/GitHub移行手順_授業レベルマルチタスク.md` を参照
+
+---
+
+### その他のスクリプト
+
+#### 相関分析
 ```bash
-python 00_スクリプト/analyze_sentiment_shap_5000.py
+cd 00_スクリプト
+python analyze_correlation.py
 ```
 
-### 4. モデル比較
+#### 個人レベルマルチタスク学習（参考）
 ```bash
-python 00_スクリプト/compare_models.py
+python train_multitask_sentiment_score.py
+```
+
+#### SHAP分析
+```bash
+python analyze_sentiment_shap_5000.py
 ```
 
 ## 📈 技術スタック
