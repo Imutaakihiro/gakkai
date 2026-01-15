@@ -1,0 +1,217 @@
+\documentclass[10.5bp, jafontscale=1.00]{ltjsarticle}
+\usepackage{stix,amsmath,cite,citesort,eclbkbox,listings,jlisting}
+\usepackage{graphicx}
+\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{caption}
+\captionsetup{justification=centering}
+\usepackage[no-math,expert,haranoaji]{luatexja-preset}
+\setmainfont{Times New Roman}[BoldFont=TimesNewRomanPS-BoldMT]
+\setsansfont{Times New Roman}[BoldFont=TimesNewRomanPS-BoldMT]
+\setlength{\oddsidemargin}{-0.in}
+\setlength{\evensidemargin}{-0.in}
+\setlength{\topmargin}{-0.in}
+\setlength{\headheight}{0cm}
+\setlength{\headsep}{0mm}
+\setlength{\textheight}{43.5\baselineskip}
+\setlength{\columnsep}{9mm}
+\setlength{\topsep}{0pt}
+\setlength{\partopsep}{0pt}
+\setlength{\parsep}{0pt}
+\titleformat*{\section}{\normalsize\bfseries}
+\titleformat*{\subsection}{\normalsize\bfseries}
+\titleformat*{\subsubsection}{\normalsize\bfseries}
+\makeatletter
+\renewcommand\section{%
+  \@startsection{section}%
+    {1}%
+    {0pt}%
+    {-0\baselineskip plus -1ex minus -.2ex}%
+    {0\baselineskip plus.2ex}%
+    {\normalfont\normalsize\bfseries}%
+  }
+\renewcommand{\subsection}{%
+  \@startsection{subsection}%
+    {2}%
+    {0pt}%
+    {-0\baselineskip plus -1ex minus -0.2ex}%
+	{0\baselineskip plus 0.2ex}%
+    {\normalsize\bfseries}%
+}
+\renewcommand{\subsubsection}{%
+  \@startsection{subsubsection}%
+    {3}%
+    {0pt}%
+    {-0.\baselineskip plus -1ex minus -0.2ex}%
+	{0.\baselineskip plus 0.2ex}%
+    {\normalsize\bfseries}%
+}
+\def\linesperpage#1{%
+\baselineskip=\textheight
+\divide\baselineskip by #1}
+\def\fitwidth#1#2{\leavevmode{%
+  \setbox0=\hbox{#2}%
+  \ifdim\wd0>#1 \resizebox{#1}{\height}{#2}%
+  \else
+    \def\@tempa{#2}%
+    \ifx\@tempa\empty\hbox to#1{\hss}%
+    \else\relax\hbox to#1\bgroup\hfil\@fitwidth#2{}\end@fitwidth\fi
+  \fi}}
+\def\@fitwidth#1#2\end@fitwidth{\def\@tempa{#2}#1%
+  \ifx\@tempa\empty\let\next\end@fitwidth
+  \else\hfill\def\next{\@fitwidth#2\end@fitwidth}\fi
+  \next}
+\def\end@fitwidth{\hfil\egroup}
+\makeatother
+\begin{document}
+\linesperpage{48}
+\pagestyle{empty}
+\twocolumn[
+\fontsize{14bp}{\baselineskip}\selectfont
+\begin{flushleft}
+{\bf Aー10}
+\end{flushleft}
+\vspace*{-\baselineskip}
+\begin{center}
+\textbf{授業評価の数値に表れない学生の本音}
+\end{center}
+\vspace*{0.5\baselineskip}
+\fontsize{10.5bp}{\baselineskip}\selectfont
+\begin{center}
+22M11178　藺牟田　晃弘
+\end{center}
+\begin{flushright}
+指導教員　佐藤　大輔
+\end{flushright}
+\hspace*{1cm}
+\vspace*{-0.\baselineskip}
+]
+\fontsize{10.5bp}{\baselineskip}\selectfont
+\section{はじめに}
+現在，大学では教育の質向上のために，学生の授業評価は，教育改善の重要な指標とされている．一般的にアンケートは，多段階のスコアと自由記述で構成されている．現状の課題として，一個人がどのような項目に重きを置いて授業評価スコアを判断しているかが不明である．また，数値化された評価スコアだけでは捉えきれない学生の本音が存在していると考えられる．
+
+そこで，学生の本音を見ることができる自由記述に着目する．自由記述には，学生個人の授業や教員に対する感情を反映していると考えられる．本研究では，授業ごとの自由記述から読み取れる感情スコアと，授業評価スコアの関係性を分析し，授業評価の要因を明らかにすることを目的とする．
+\section{手法}
+\subsection{用いるデータセット}
+本研究では，福岡工業大学の授業評価システムの期間6年分，9学科を対象としたデータを使用した．総データ数は83,851件である．授業評価スコアは4段階（1～4点）で，以下のように定義されている：1点（全く意義なし），2点（あまり意義なし），3点（ある程度意義あり），4点（十分意義あり）．
+
+授業アンケートの構成として，授業評価スコアと自由記述がある．授業評価スコアは，択一式質問の点数化による単純平均である．自由記述は，「先生に向けてこの授業の感想や学んだこと，意見や要望を記述してください」と「次期履修者に向けて，この授業についてのアドバイスを記述してください」の2つの質問から構成されている．
+
+モデル構築のために，ランダム抽出した1,000件を手動でラベリングし，教師あり学習のデータとして使用した．自由記述を手動で分類した結果，ネガティブ191件（感情スコア-1），ポジティブ180件（感情スコア+1），ニュートラル628件（感情スコア0）となった．
+
+表\ref{tab:stats}に，感情スコアと授業評価スコアの基本統計量を示す．感情スコアの平均は0.001でほぼニュートラルであり，標準偏差は0.260で適度なばらつきがある．授業評価スコアの平均は3.459点（4点満点）であり，標準偏差は0.216で比較的小さいばらつきである．
+
+\begin{table}[b]
+\centering
+\caption{データの基本統計量}
+\label{tab:stats}
+\small
+\begin{tabular}{lrr}
+\toprule
+\multicolumn{1}{c}{統計量} & \multicolumn{1}{c}{感情スコア} & \multicolumn{1}{c}{授業評価スコア} \\
+\midrule
+平均 & 0.001 & 3.459 \\
+標準偏差 & 0.260 & 0.216 \\
+最小値 & -1.000 & 2.000 \\
+中央値 & 0.000 & 3.480 \\
+最大値 & 1.000 & 4.000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+\subsection{モデル}
+本研究では，日本語の事前学習済みBERTモデル（\texttt{koheiduck/bert-japanese-finetuned-sentiment}）をベースモデルとして使用した．BERT（Bidirectional Encoder Representations from Transformers）は，Googleが2018年に開発した双方向のTransformerベースの言語モデルである．このモデルを，本研究で作成した教師データ（1,000件）で微調整（fine-tuning）した．
+
+本研究では，感情スコア予測と授業評価スコア予測を同時に学習するマルチタスクモデルを構築した．マルチタスク学習により，感情スコアと授業評価スコアの両方に影響する要因（共通要因）と，それぞれに特有の要因（感情特化要因，評価特化要因）を分離することができた．
+
+SHAP（SHapley Additive exPlanations）は，機械学習モデルの予測に対する各特徴量の寄与度を定量的に算出する手法である．SHAP値は，協力ゲーム理論のShapley値に基づいており，各特徴量が予測にどの程度寄与しているかを公平に分配する．本研究では，単一タスクモデルとマルチタスクモデルに対してSHAP分析を実施した．
+\section{結果}
+\subsection{相関分析の結果}
+授業に対して1対1にするために，自由記述1つに対して1つ出る個人の感情スコアを授業ごとの平均感情スコアとして使用した．これにより，3,268授業の感情スコア平均と授業評価スコアの関係性を分析した．
+表\ref{tab:correlation}に，3つの相関係数の結果を示す．ピアソン相関係数は0.3097（p < 0.000001）であり，統計的に極めて有意な正の相関が確認された．スピアマン順位相関係数は0.2970（p < 0.000001），ケンドール順位相関係数は0.2042（p < 0.000001）であり，すべて統計的に極めて有意であった．この結果から，\textbf{感情スコアが高い授業ほど，授業評価スコアも高い傾向がある}ことが明らかになった．
+\begin{table}[t]
+\centering
+\caption{相関分析の結果}
+\label{tab:correlation}
+\small
+\begin{tabular}{lrr}
+\toprule
+\multicolumn{1}{c}{相関係数} & \multicolumn{1}{c}{相関係数} & \multicolumn{1}{c}{p値} \\
+\midrule
+ピアソン & 0.3097 & $<$ 0.000001 \\
+スピアマン & 0.2970 & $<$ 0.000001 \\
+ケンドール & 0.2042 & $<$ 0.000001 \\
+\bottomrule
+\end{tabular}
+\end{table}
+\subsection{単一タスクモデルのSHAP分析}
+満足度測定のために，ポジティブに影響を与えている要因を調査した．分析には，層化サンプリングにより抽出した5,000件（POSITIVE: 2,500件，NEGATIVE: 2,500件）を使用した．
+表\ref{tab:single_shap}に，ポジティブ判定に寄与する重要語TOP10を示す．「やす」（SHAP値0.2660），「良かっ」（0.2466），「おもしろ」（0.2438）などの単語が上位にランクインし，理解しやすさと面白さが満足度に大きく寄与することが定量的に示された．
+\begin{table}[t]
+\centering
+\caption{ポジティブ判定に寄与する重要語TOP10}
+\label{tab:single_shap}
+\small
+\begin{tabular}{crrr}
+\toprule
+ & \multicolumn{1}{c}{単語} & \multicolumn{1}{c}{SHAP値} & \multicolumn{1}{c}{出現回数} \\
+\midrule
+1 & やす & 0.2660 & 337 \\
+2 & 良かっ & 0.2466 & 207 \\
+3 & おもしろ & 0.2438 & 10 \\
+4 & よかっ & 0.2251 & 195 \\
+5 & 面白 & 0.2178 & 100 \\
+6 & 楽しい & 0.1959 & 67 \\
+7 & 楽しめる & 0.1876 & 6 \\
+8 & ありが & 0.1760 & 19 \\
+9 & 楽し & 0.1642 & 192 \\
+10 & 面白い & 0.1518 & 37 \\
+\bottomrule
+\end{tabular}
+\end{table}
+\subsection{マルチタスク学習のSHAP分析}
+マルチタスク学習のSHAP分析により，以下の4つの要因タイプを特定した．単語の影響度（閾値 $>$ 0.0005）に基づき，感情スコア閾値と評価スコア閾値の組み合わせにより分類した．
+表\ref{tab:multitask_factors}に，4つの要因タイプの結果を示す．共通要因（満足度要因）は577語彙（18.0\%）が特定され，学生満足度と教育効果の両方に影響する要因である．感情特化要因は1,200語彙（37.5\%），評価特化要因は532語彙（16.6\%），低重要度要因は889語彙（27.8\%）が特定された．
+\begin{table}[t]
+\centering
+\caption{SHAP分析による要因タイプ（マルチタスク学習）}
+\label{tab:multitask_factors}
+\small
+\begin{tabular}{lrrl}
+\toprule
+\multicolumn{1}{c}{要因タイプ} & \multicolumn{1}{c}{語彙数} & \multicolumn{1}{c}{割合} & \multicolumn{1}{c}{影響} \\
+\midrule
+共通要因（満足度） & 577 & 18.0\% & 両方 \\
+感情特化要因 & 1,200 & 37.5\% & 感情のみ \\
+評価特化要因 & 532 & 16.6\% & 評価のみ \\
+低重要度要因 & 889 & 27.8\% & 影響が小さい \\
+\bottomrule
+\end{tabular}
+\end{table}
+表\ref{tab:common_factors}に，共通要因（満足度要因）の代表例TOP5を示す．「学ぶ」「理解」「総括」「推奨」などが含まれ，これらの要因は，1つの施策で学生満足度と教育効果の両方を向上させることができるため，投資効果が高い．
+\begin{table}[t]
+\centering
+\caption{共通要因（満足度要因）TOP5}
+\label{tab:common_factors}
+\small
+\begin{tabular}{crrr}
+\toprule
+\multicolumn{1}{c}{順位} & \multicolumn{1}{c}{単語} & \multicolumn{1}{c}{感情重要度} & \multicolumn{1}{c}{評価重要度} \\
+\midrule
+1 & 学ぶ & 0.001278 & 0.001386 \\
+2 & 理解 & 0.001073 & 0.000833 \\
+3 & 総括 & 0.000974 & 0.000952 \\
+4 & 推奨 & 0.001132 & 0.000755 \\
+5 & 人数 & 0.001195 & 0.000704 \\
+\bottomrule
+\end{tabular}
+\end{table}
+\section{おわりに}
+本研究では，自由記述の感情分析により，授業評価の要因を明らかにした．主要な発見は以下の通りである．本研究により，\textbf{共通要因（満足度要因）への投資が最も効率的}であり，限られたリソースを効果的に配分することで，確実に学生満足度と教育効果の両方を向上させることができることが明らかになった．
+% 第一に，授業ごとに集約した感情スコアと授業評価スコアには，統計的に有意な正の相関関係（r = 0.31，p $<$ 0.000001）があることが明らかになった．
+% 第二に，単一タスクモデルのSHAP分析により，「やす」（SHAP値0.2660），「良かっ」（0.2466），「おもしろ」（0.2438）などの単語が上位にランクインし，理解しやすさと面白さが満足度に大きく寄与することが定量的に示された．
+% 第三に，マルチタスク学習のSHAP分析により，577語彙（18.0\%）が共通要因（満足度要因）として特定された．これらの要因は，感情スコアと評価スコアの両方に影響を与えるため，1つの施策で学生満足度と教育効果の両方を向上させることが可能である．
+\begin{thebibliography}{9}
+\bibitem{bert} Devlin, J., Chang, M. W., Lee, K., and Toutanova, K., ``BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding,'' \textit{NAACL-HLT}, 2019.
+\bibitem{shap} Lundberg, S. M., and Lee, S. I., ``A Unified Approach to Interpreting Model Predictions,'' \textit{Advances in Neural Information Processing Systems}, Vol. 30, 2017.
+\end{thebibliography}
+\end{document}
