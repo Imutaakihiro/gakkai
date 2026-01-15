@@ -1,0 +1,256 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+順序回帰モデル GPU最優先SHAP分析（堅牢版）
+
+**作成日**: 2025年1月
+
+特徴:
+- エラーハンドリング強化
+- GPU使用を最優先
+- 互換性問題を回避
+"""
+
+import os
+import sys
+import warnings
+warnings.filterwarnings('ignore')
+
+# パス設定
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+import torch
+import pandas as pd
+import numpy as np
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
+print("="*70)
+print("順序回帰モデル GPU最優先SHAP分析（堅牢版）")
+print("="*70)
+
+# NumPy互換性チェック
+try:
+    import numpy as np
+    if np.__version__.startswith('2.'):
+        print(f"⚠️ NumPy {np.__version__}検出 - PyTorch 1.13.1と互換性問題の可能性")
+        print("💡 python ULTIMATE_FIX.py を実行してください")
+except:
+    pass
+
+# SHAPインポート
+try:
+    import shap
+    print(f"✅ SHAP {shap.__version__} 読み込み成功")
+except ImportError as e:
+    print(f"❌ SHAPインポートエラー: {e}")
+    print("💡 python ULTIMATE_FIX.py を実行してください")
+    sys.exit(1)
+
+# デバイス選択（GPU最優先）
+def get_device_gpu_priority():
+    """GPUを最優先で選択"""
+    # 1. CUDAを試す
+    if torch.cuda.is_available():
+        try:
+            device = torch.device("cuda")
+            _ = torch.tensor([1.0]).to(device)
+            print(f"✅ CUDA使用: {torch.cuda.get_device_name(0)}")
+            return device
+        except Exception as e:
+            print(f"⚠️ CUDAエラー: {e}")
+    
+    # 2. DirectMLを試す
+    try:
+        import torch_directml as dml
+        if dml.is_available():
+            device = dml.device()
+            print(f"✅ DirectML使用")
+            return device
+    except Exception:
+        pass
+    
+    # 3. CPU（最後の手段）
+    print("⚠️ GPUが見つかりません。CPUで実行します")
+    return torch.device("cpu")
+
+device = get_device_gpu_priority()
+print(f"使用デバイス: {device}")
+
+# モデル読み込み（エラーハンドリング強化）
+print("\n📥 モデル読み込み中...")
+try:
+    from train_class_level_ordinal_llp import CourseOrdinalLLPModel, BASE_MODEL
+    from transformers import BertJapaneseTokenizer
+    
+    tokenizer = BertJapaneseTokenizer.from_pretrained(BASE_MODEL)
+    model = CourseOrdinalLLPModel(BASE_MODEL)
+    
+    MODEL_PATH = os.path.join(BASE_DIR, "02_モデル", "授業レベルマルチタスクモデル", "class_level_ordinal_llp_20251030_162353.pth")
+    if not os.path.exists(MODEL_PATH):
+        MODEL_PATH = os.path.join("02_モデル", "授業レベルマルチタスクモデル", "class_level_ordinal_llp_20251030_162353.pth")
+    
+    model.load_state_dict(torch.load(MODEL_PATH, map_location="cpu"))
+    model.to(device)
+    model.eval()
+    
+    if device.type == 'cuda':
+        torch.cuda.empty_cache()
+    
+    print("✅ モデル読み込み完了")
+except Exception as e:
+    print(f"❌ モデル読み込みエラー: {e}")
+    import traceback
+    traceback.print_exc()
+    print("\n💡 解決方法:")
+    print("   python ULTIMATE_FIX.py を実行してください")
+    sys.exit(1)
+
+# データ読み込み
+CSV_PATH = os.path.join(BASE_DIR, "01_データ", "マルチタスク用データ", "授業集約データセット 回答分布付き.csv")
+if not os.path.exists(CSV_PATH):
+    CSV_PATH = os.path.join("01_データ", "マルチタスク用データ", "授業集約データセット 回答分布付き.csv")
+
+print("\n📊 データ読み込み中...")
+df = pd.read_csv(CSV_PATH)
+texts = df['自由記述まとめ'].fillna("").astype(str).tolist()
+
+MAX_SAMPLES = 100
+BATCH_SIZE = 128  # GPU使用率最大化
+MAX_LENGTH = 192
+
+if len(texts) > MAX_SAMPLES:
+    np.random.seed(42)
+    sample_indices = np.random.choice(len(texts), MAX_SAMPLES, replace=False)
+    sample_texts = [texts[i] for i in sample_indices]
+else:
+    sample_texts = texts
+
+print(f"分析サンプル数: {len(sample_texts)}")
+print(f"バッチサイズ: {BATCH_SIZE}")
+
+# GPU最適化予測関数
+def predict_sentiment_gpu(list_of_texts):
+    """感情スコア予測（GPU最優先）"""
+    if isinstance(list_of_texts, str):
+        list_of_texts = [list_of_texts]
+    
+    if device.type == 'cuda':
+        torch.cuda.empty_cache()
+    
+    pred = []
+    model.eval()
+    
+    with torch.no_grad():
+        for i in range(0, len(list_of_texts), BATCH_SIZE):
+            batch = [str(x) if not isinstance(x, str) else x for x in list_of_texts[i:i+BATCH_SIZE]]
+            encoding = tokenizer(batch, padding=True, truncation=True, max_length=MAX_LENGTH, return_tensors="pt")
+            
+            input_ids = encoding['input_ids'].to(device, non_blocking=True)
+            attention_mask = encoding['attention_mask'].to(device, non_blocking=True)
+            chunk_mask = torch.ones(input_ids.shape[:2], dtype=torch.bool, device=device)
+            
+            out = model(input_ids, attention_mask, chunk_mask)
+            y_sent_pred = out[3]
+            
+            pred.extend(y_sent_pred.cpu().numpy().tolist())
+    
+    return np.array(pred).reshape(-1, 1)
+
+def predict_course_gpu(list_of_texts):
+    """授業評価スコア予測（GPU最優先）"""
+    if isinstance(list_of_texts, str):
+        list_of_texts = [list_of_texts]
+    
+    if device.type == 'cuda':
+        torch.cuda.empty_cache()
+    
+    pred = []
+    model.eval()
+    
+    with torch.no_grad():
+        for i in range(0, len(list_of_texts), BATCH_SIZE):
+            batch = [str(x) if not isinstance(x, str) else x for x in list_of_texts[i:i+BATCH_SIZE]]
+            encoding = tokenizer(batch, padding=True, truncation=True, max_length=MAX_LENGTH, return_tensors="pt")
+            
+            input_ids = encoding['input_ids'].to(device, non_blocking=True)
+            attention_mask = encoding['attention_mask'].to(device, non_blocking=True)
+            chunk_mask = torch.ones(input_ids.shape[:2], dtype=torch.bool, device=device)
+            
+            out = model(input_ids, attention_mask, chunk_mask)
+            y_course_pred = out[4]
+            
+            pred.extend(y_course_pred.cpu().numpy().tolist())
+    
+    return np.array(pred).reshape(-1, 1)
+
+# SHAP分析実行
+OUTPUT_DIR = os.path.join(BASE_DIR, "03_分析結果", "順序回帰SHAP_GPU最適化")
+os.makedirs(OUTPUT_DIR, exist_ok=True)
+
+print("\n" + "="*70)
+print("SHAP分析実行（GPU最優先）")
+print("="*70)
+
+if device.type == 'cuda':
+    print(f"\n📊 GPU使用状況:")
+    print(f"   デバイス: {torch.cuda.get_device_name(0)}")
+    print(f"   メモリ使用: {torch.cuda.memory_allocated(0) / 1e9:.2f} GB")
+
+# 1. 感情スコアSHAP分析
+print("\n🔍 感情スコアSHAP分析実行中...")
+try:
+    explainer_sent = shap.Explainer(predict_sentiment_gpu, tokenizer)
+    print("   SHAP値計算中（GPU推論を使用）...")
+    shap_values_sent = explainer_sent(sample_texts)
+    
+    importance = np.abs(shap_values_sent.values).mean(axis=0)
+    words = shap_values_sent.feature_names if hasattr(shap_values_sent, "feature_names") else list(range(len(importance)))
+    
+    df_sent = pd.DataFrame({
+        'word': words,
+        'importance': importance.flatten() if importance.ndim > 1 else importance
+    }).sort_values('importance', ascending=False)
+    
+    df_sent.to_csv(f"{OUTPUT_DIR}/word_importance_sentiment_gpu.csv", index=False, encoding='utf-8')
+    print(f"✅ 感情スコアSHAP分析完了: {len(df_sent)}語")
+except Exception as e:
+    print(f"❌ 感情スコアSHAP分析エラー: {e}")
+    import traceback
+    traceback.print_exc()
+
+# 2. 授業評価スコアSHAP分析
+print("\n🔍 授業評価スコアSHAP分析実行中...")
+try:
+    explainer_course = shap.Explainer(predict_course_gpu, tokenizer)
+    print("   SHAP値計算中（GPU推論を使用）...")
+    shap_values_course = explainer_course(sample_texts)
+    
+    importance = np.abs(shap_values_course.values).mean(axis=0)
+    words = shap_values_course.feature_names if hasattr(shap_values_course, "feature_names") else list(range(len(importance)))
+    
+    df_course = pd.DataFrame({
+        'word': words,
+        'importance': importance.flatten() if importance.ndim > 1 else importance
+    }).sort_values('importance', ascending=False)
+    
+    df_course.to_csv(f"{OUTPUT_DIR}/word_importance_course_gpu.csv", index=False, encoding='utf-8')
+    print(f"✅ 授業評価スコアSHAP分析完了: {len(df_course)}語")
+except Exception as e:
+    print(f"❌ 授業評価スコアSHAP分析エラー: {e}")
+    import traceback
+    traceback.print_exc()
+
+if device.type == 'cuda':
+    print(f"\n📊 最終GPU使用状況:")
+    print(f"   最大メモリ使用: {torch.cuda.max_memory_allocated(0) / 1e9:.2f} GB")
+
+print("\n" + "="*70)
+print("✅ GPU最優先SHAP分析完了！")
+print(f"📁 結果保存先: {OUTPUT_DIR}")
+print("="*70)
+
+
+

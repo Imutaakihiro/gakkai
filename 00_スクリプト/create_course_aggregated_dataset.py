@@ -112,6 +112,14 @@ def create_aggregated_dataset(min_texts=3):
         if eval_score is None:
             continue
         
+        # 回答者数・履修者数・回答率（列14）
+        survey_info_text = group.iloc[0, 14] if group.shape[1] > 14 else None
+        respondents, enrolled, response_rate = parse_survey_info(survey_info_text)
+
+        # 評価分布（列15）
+        distribution_text = group.iloc[0, 15] if group.shape[1] > 15 else None
+        dist = parse_distribution(distribution_text)
+
         # 自由記述数のフィルタリング
         num_texts = len(group)
         if num_texts < min_texts:
@@ -157,7 +165,15 @@ def create_aggregated_dataset(min_texts=3):
             'ネガティブ比率': negative_ratio,
             'ニュートラル比率': neutral_ratio,
             'ポジティブ比率': positive_ratio,
-            '授業評価スコア': eval_score
+            '授業評価スコア': eval_score,
+            '分布_十分意義あり_人数': dist['十分意義あり']['count'],
+            '分布_十分意義あり_割合(%)': dist['十分意義あり']['rate'],
+            '分布_ある程度意義あり_人数': dist['ある程度意義あり']['count'],
+            '分布_ある程度意義あり_割合(%)': dist['ある程度意義あり']['rate'],
+            '分布_あまり意義なし_人数': dist['あまり意義なし']['count'],
+            '分布_あまり意義なし_割合(%)': dist['あまり意義なし']['rate'],
+            '分布_全く意義なし_人数': dist['全く意義なし']['count'],
+            '分布_全く意義なし_割合(%)': dist['全く意義なし']['rate']
         })
     
     df_aggregated = pd.DataFrame(aggregated_data)

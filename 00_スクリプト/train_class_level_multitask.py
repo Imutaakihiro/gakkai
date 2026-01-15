@@ -11,6 +11,63 @@
 → レベルの一致により学習可能
 """
 
+import os
+# CUDA同期モード（デバッグ用）: デフォルトOFF
+DEBUG_CUDA_SYNC = False
+if DEBUG_CUDA_SYNC:
+    os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
+else:
+    # 以前の実行で環境変数が残っている場合の保険
+    if os.environ.get("CUDA_LAUNCH_BLOCKING") == "1":
+        del os.environ["CUDA_LAUNCH_BLOCKING"]
+
+# デバイス自動切替機能
+def get_available_device():
+    """利用可能なデバイスを自動選択（CUDA → DirectML → CPU）"""
+    try:
+        # まずCUDAを試行
+        if torch.cuda.is_available():
+            # CUDAが利用可能でも、実際にテストして確認
+            try:
+                test_tensor = torch.tensor([1.0]).cuda()
+                _ = test_tensor + test_tensor  # 簡単な演算でテスト
+                print("✅ CUDA デバイスが利用可能です")
+                return torch.device('cuda')
+            except RuntimeError as e:
+                if "no kernel image" in str(e):
+                    print("⚠️ CUDA で 'no kernel image' エラーが発生しました")
+                    print("🔄 DirectML または CPU にフォールバックします")
+                else:
+                    print(f"⚠️ CUDA エラー: {e}")
+                    print("🔄 DirectML または CPU にフォールバックします")
+    except Exception as e:
+        print(f"⚠️ CUDA チェックエラー: {e}")
+    
+    # DirectMLを試行
+    try:
+        import torch_directml as dml
+        if dml.is_available():
+            # DirectMLデバイスを実際にテスト
+            try:
+                device = dml.device()
+                test_tensor = torch.randn(2, 2, device=device)
+                _ = test_tensor @ test_tensor  # 簡単な演算でテスト
+                print("✅ DirectML デバイスが利用可能です")
+                return device
+            except Exception as dml_error:
+                print(f"⚠️ DirectML デバイステストエラー: {dml_error}")
+                if "staticmethod" in str(dml_error):
+                    print("   これは PyTorch 2.4.x + torch-directml の互換性問題です")
+                    print("   推奨: PyTorch 2.2.2 + torch-directml 0.2.3.dev240715")
+    except ImportError:
+        print("ℹ️ DirectML がインストールされていません")
+    except Exception as e:
+        print(f"⚠️ DirectML エラー: {e}")
+    
+    # CPUにフォールバック
+    print("🔄 CPU デバイスを使用します")
+    return torch.device('cpu')
+
 import torch
 import torch.nn as nn
 from torch.utils.data import Dataset, DataLoader
@@ -23,24 +80,104 @@ from sklearn.metrics import mean_squared_error, mean_absolute_error, r2_score
 import matplotlib.pyplot as plt
 from datetime import datetime
 import json
-import os
 import warnings
+import sys
+import time
 warnings.filterwarnings('ignore')
 
-# デバイス設定
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+# デバイス設定（自動切替機能を使用）
+device = get_available_device()
 print(f"使用デバイス: {device}")
+
+# GPU詳細情報の表示
+print(f"🔍 CUDA環境チェック:")
+print(f"   CUDA available: {torch.cuda.is_available()}")
+print(f"   Device count: {torch.cuda.device_count()}")
+print(f"   PyTorch version: {torch.__version__}")
+print(f"   CUDA version: {torch.version.cuda}")
+if torch.cuda.is_available():
+    print(f"   Device name: {torch.cuda.get_device_name(0)}")
+    print(f"🚀 GPU詳細情報:")
+    print(f"   📊 GPU名: {torch.cuda.get_device_name(0)}")
+    print(f"   💾 総メモリ: {torch.cuda.get_device_properties(0).total_memory / (1024**3):.1f}GB")
+    print(f"   🔧 Compute Capability: {torch.cuda.get_device_capability(0)}")
+    print(f"   📈 現在の使用メモリ: {torch.cuda.memory_allocated(0) / (1024**3):.2f}GB")
+    print(f"   🔧 CUDA_LAUNCH_BLOCKING: {os.environ.get('CUDA_LAUNCH_BLOCKING', 'Not set')}")
+else:
+    print("⚠️  GPUが利用できません。CPUで実行します。")
+
+# ---- CUDA/SDPA 安定化設定（Windows + RTX 40 系での初回 forward ハング対策）----
+try:
+    import platform
+    # cuDNN の自動最適化を無効化し、決定論的に（デバッグ性向上）
+    torch.backends.cudnn.benchmark = False
+    torch.backends.cudnn.deterministic = True
+
+    if torch.cuda.is_available():
+        # PyTorch 2.x の SDPA backend を math のみに固定して Flash/MemEfficient を無効化
+        try:
+            from torch.backends.cuda import sdp_kernel
+            sdp_kernel.enable_flash(False)
+            sdp_kernel.enable_mem_efficient(False)
+            sdp_kernel.enable_math(True)
+            print("🧯 SDPA: flash/mem_efficient 無効化 (math のみ)")
+        except Exception:
+            # 旧 API（バージョン差分用）
+            try:
+                torch.backends.cuda.enable_flash_sdp(False)
+                torch.backends.cuda.enable_mem_efficient_sdp(False)
+                torch.backends.cuda.enable_math_sdp(True)
+                print("🧯 SDPA: 旧APIで math のみに固定")
+            except Exception:
+                print("ℹ️ SDPA backend の固定はスキップ（非対応バージョン）")
+        # Fuser のフォールバック抑止（稀なフリーズ回避）
+        os.environ.setdefault("PYTORCH_CUDA_FUSER_DISABLE_FALLBACK", "1")
+except Exception as _e:
+    print(f"⚠️ CUDA/SDPA 安定化設定で例外: {_e}")
+
+# 追加の高速化/安定化（TF32）
+try:
+    if torch.cuda.is_available():
+        torch.backends.cuda.matmul.allow_tf32 = True
+        torch.set_float32_matmul_precision("high")
+        print("⚡ TF32 有効化: high precision matmul")
+except Exception as _e:
+    print(f"ℹ️ TF32設定スキップ: {_e}")
 
 # ベースモデル
 BASE_MODEL = "koheiduck/bert-japanese-finetuned-sentiment"
 
-# ハイパーパラメータ
-MAX_LENGTH = 512
-BATCH_SIZE = 8
+# ハイパーパラメータ（長文対応: 分割 + 集約 方式）
+MAX_LENGTH = 256   # 単一チャンクの長さ（トークン数）
+BATCH_SIZE = 2     # 物理バッチ
+ACCUM_STEPS = 4    # 勾配蓄積（実効バッチ = BATCH_SIZE * ACCUM_STEPS）
+USE_AMP = True     # 自動混合精度
+# 既定は高速設定だが、古いTorch/Windowsでは安全側に自動ダウングレード
+PIN_MEMORY = True         # HtoD転送を固定メモリ化
+NON_BLOCKING = True       # 非同期転送（pin_memory=True時に有効）
+USE_GRADIENT_CHECKPOINTING = False  # PyTorch 1.13 環境では無効化が安定
+WARMUP_FORWARD = False    # 初回forwardウォームアップ（停止の原因になる場合があるためデフォルトOFF）
+
+# DataLoader 並列設定（デフォルト）
+NUM_WORKERS = 2
+PREFETCH_FACTOR = 2
+PERSISTENT_WORKERS = True
+
+# チャンク設定（長文スライディングウィンドウ）
+CHUNK_LEN = 256
+STRIDE = 200
+MAX_CHUNKS = 10
 LEARNING_RATE = 2e-5
 NUM_EPOCHS = 20
 ALPHA = 0.5  # 感情スコアの重み
 BETA = 0.5   # 評価スコアの重み
+
+print(f"🔧 ハイパーパラメータ設定（長文対応・高速化）:")
+print(f"   CHUNK_LEN: {CHUNK_LEN} / STRIDE: {STRIDE} / MAX_CHUNKS: {MAX_CHUNKS}")
+print(f"   MAX_LENGTH(=CHUNK_LEN): {MAX_LENGTH}")
+print(f"   BATCH_SIZE: {BATCH_SIZE}  ACCUM_STEPS: {ACCUM_STEPS}  USE_AMP: {USE_AMP}")
+print(f"   LEARNING_RATE: {LEARNING_RATE}")
+print(f"   NUM_EPOCHS: {NUM_EPOCHS}")
 
 # 日本語フォント設定
 try:
@@ -53,39 +190,208 @@ except:
 plt.rcParams['axes.unicode_minus'] = False
 
 
-class ClassLevelDataset(Dataset):
-    """授業レベルのデータセット"""
+def create_progress_bar(current, total, width=50, prefix="", suffix=""):
+    """プログレスバーを作成"""
+    percent = current / total
+    filled = int(width * percent)
+    bar = "█" * filled + "░" * (width - filled)
+    return f"\r{prefix} |{bar}| {percent:.1%} {suffix}"
+
+
+def get_gpu_status():
+    """GPU使用状況を取得"""
+    if torch.cuda.is_available():
+        gpu_memory_allocated = torch.cuda.memory_allocated(0) / (1024**3)  # GB
+        gpu_memory_reserved = torch.cuda.memory_reserved(0) / (1024**3)   # GB
+        gpu_memory_total = torch.cuda.get_device_properties(0).total_memory / (1024**3)  # GB
+        gpu_utilization = (gpu_memory_allocated / gpu_memory_total) * 100
+        
+        return {
+            'allocated': gpu_memory_allocated,
+            'reserved': gpu_memory_reserved,
+            'total': gpu_memory_total,
+            'utilization': gpu_utilization
+        }
+    return None
+
+
+def print_progress_gauge(current, total, prefix="", suffix="", show_percent=True, show_gpu=True):
+    """ゲージ風の進捗表示（GPU状況付き）- 毎秒更新"""
+    percent = current / total
     
-    def __init__(self, texts, sentiment_scores, course_scores, tokenizer, max_length=512):
+    # ゲージの幅
+    gauge_width = 20
+    filled = int(gauge_width * percent)
+    empty = gauge_width - filled
+    
+    # ゲージの色（ターミナルで色分け）
+    gauge_bar = "█" * filled + "░" * empty
+    
+    # パーセンテージ表示
+    percent_str = f"{percent:.1%}" if show_percent else ""
+    
+    # GPU状況の表示
+    gpu_info = ""
+    if show_gpu and torch.cuda.is_available():
+        gpu_status = get_gpu_status()
+        if gpu_status:
+            gpu_info = f" | GPU: {gpu_status['utilization']:.1f}% ({gpu_status['allocated']:.1f}GB/{gpu_status['total']:.1f}GB)"
+    
+    # 現在時刻を追加
+    current_time = datetime.now().strftime("%H:%M:%S")
+    
+    # 毎秒更新出力（同じ行を上書き）
+    print(f"\r[{current_time}] {prefix} [{gauge_bar}] {percent_str}{gpu_info} {suffix}", end="", flush=True)
+    
+    if current == total:
+        print()  # 完了時に改行
+
+
+def print_epoch_summary(epoch, total_epochs, train_loss, val_loss, sent_r2, course_r2, 
+                       best_val_loss, current_lr, elapsed_time=None):
+    """エポックサマリーをゲージ風で表示"""
+    print(f"\n{'='*80}")
+    print(f"🎯 EPOCH {epoch}/{total_epochs} 完了")
+    print(f"{'='*80}")
+    
+    # GPU状況の表示
+    if torch.cuda.is_available():
+        gpu_status = get_gpu_status()
+        if gpu_status:
+            print(f"🚀 GPU状況: {gpu_status['utilization']:.1f}% 使用中")
+            print(f"   📊 メモリ: {gpu_status['allocated']:.1f}GB / {gpu_status['total']:.1f}GB")
+            print(f"   🔒 予約済み: {gpu_status['reserved']:.1f}GB")
+    
+    # エポック進捗ゲージ
+    epoch_progress = epoch / total_epochs
+    print_progress_gauge(epoch, total_epochs, "📈 エポック進捗", f"({epoch}/{total_epochs})", True, False)
+    
+    # 損失のゲージ表示
+    max_loss = max(train_loss, val_loss) * 1.2  # 最大値の120%を基準
+    train_loss_gauge = min(train_loss / max_loss, 1.0)
+    val_loss_gauge = min(val_loss / max_loss, 1.0)
+    
+    print(f"🔥 学習損失: {train_loss:.4f}")
+    print_progress_gauge(train_loss_gauge, 1.0, "  ", f"({train_loss:.4f})", False, False)
+    
+    print(f"✅ 検証損失: {val_loss:.4f}")
+    print_progress_gauge(val_loss_gauge, 1.0, "  ", f"({val_loss:.4f})", False, False)
+    
+    # R²スコアのゲージ表示
+    print(f"📊 感情スコア R²: {sent_r2:.4f}")
+    print_progress_gauge(max(0, sent_r2), 1.0, "  ", f"({sent_r2:.4f})", False, False)
+    
+    print(f"📊 授業評価 R²: {course_r2:.4f}")
+    print_progress_gauge(max(0, course_r2), 1.0, "  ", f"({course_r2:.4f})", False, False)
+    
+    # ベストモデル状況
+    if val_loss < best_val_loss:
+        print(f"🏆 ベストモデル更新！ (Val Loss: {val_loss:.4f})")
+    else:
+        print(f"⏳ ベストモデル維持 (Best: {best_val_loss:.4f})")
+    
+    # 学習率と時間
+    print(f"📚 学習率: {current_lr:.2e}")
+    if elapsed_time:
+        print(f"⏰ 経過時間: {elapsed_time/60:.1f}分")
+    
+    print(f"{'='*80}")
+
+
+class ClassLevelDataset(Dataset):
+    """授業レベルのデータセット（長文対応: チャンク化）"""
+    def __init__(self, texts, sentiment_scores, course_scores, tokenizer,
+                 chunk_len=256, stride=200, max_chunks=10):
         self.texts = texts
         self.sentiment_scores = sentiment_scores
         self.course_scores = course_scores
         self.tokenizer = tokenizer
-        self.max_length = max_length
-    
+        self.chunk_len = chunk_len
+        self.stride = stride
+        self.max_chunks = max_chunks
+
+        # 特殊トークンID
+        self.cls_id = tokenizer.cls_token_id
+        self.sep_id = tokenizer.sep_token_id
+
     def __len__(self):
         return len(self.texts)
-    
+
+    def _chunk_encode(self, text):
+        # 特殊トークンを自前で付与するため add_special_tokens=False
+        token_ids = self.tokenizer.encode(str(text), add_special_tokens=False)
+        inner_max = self.chunk_len - 2
+        chunks_ids = []
+
+        if len(token_ids) == 0:
+            # 空文字対策: [CLS][SEP] のみ
+            ids = [self.cls_id, self.sep_id] + [0]*(self.chunk_len-2)
+            attn = [1, 1] + [0]*(self.chunk_len-2)
+            return [torch.tensor(ids, dtype=torch.long)], [torch.tensor(attn, dtype=torch.long)]
+
+        for start in range(0, len(token_ids), self.stride):
+            inner = token_ids[start:start+inner_max]
+            ids = [self.cls_id] + inner + [self.sep_id]
+            # パディング
+            pad_len = self.chunk_len - len(ids)
+            if pad_len > 0:
+                ids = ids + [0]*pad_len
+                attn = [1]*len(inner+ [self.cls_id, self.sep_id]) + [0]*pad_len
+            else:
+                ids = ids[:self.chunk_len]
+                attn = [1]*self.chunk_len
+            chunks_ids.append((torch.tensor(ids, dtype=torch.long), torch.tensor(attn, dtype=torch.long)))
+            if len(chunks_ids) >= self.max_chunks:
+                break
+
+        input_ids_list = [x[0] for x in chunks_ids]
+        attention_list = [x[1] for x in chunks_ids]
+        return input_ids_list, attention_list
+
     def __getitem__(self, idx):
-        text = str(self.texts[idx])
+        text = self.texts[idx]
         sentiment_score = self.sentiment_scores[idx]
         course_score = self.course_scores[idx]
-        
-        # トークン化
-        encoding = self.tokenizer(
-            text,
-            truncation=True,
-            padding='max_length',
-            max_length=self.max_length,
-            return_tensors='pt'
-        )
-        
+
+        ids_list, attn_list = self._chunk_encode(text)
+
         return {
-            'input_ids': encoding['input_ids'].squeeze(0),
-            'attention_mask': encoding['attention_mask'].squeeze(0),
+            'input_ids_list': ids_list,
+            'attention_mask_list': attn_list,
+            'num_chunks': len(ids_list),
             'sentiment_score': torch.tensor(sentiment_score, dtype=torch.float),
             'course_score': torch.tensor(course_score, dtype=torch.float)
         }
+
+
+def collate_chunked_batch(batch):
+    """可変チャンクを (B, C, L) にまとめるcollate"""
+    B = len(batch)
+    C = MAX_CHUNKS
+    L = CHUNK_LEN
+
+    input_ids = torch.zeros((B, C, L), dtype=torch.long)
+    attention_mask = torch.zeros((B, C, L), dtype=torch.long)
+    chunk_mask = torch.zeros((B, C), dtype=torch.bool)
+    y_sent = torch.zeros((B,), dtype=torch.float)
+    y_course = torch.zeros((B,), dtype=torch.float)
+
+    for i, item in enumerate(batch):
+        n = min(item['num_chunks'], C)
+        for j in range(n):
+            input_ids[i, j] = item['input_ids_list'][j]
+            attention_mask[i, j] = item['attention_mask_list'][j]
+            chunk_mask[i, j] = True
+        y_sent[i] = item['sentiment_score']
+        y_course[i] = item['course_score']
+
+    return {
+        'input_ids': input_ids,
+        'attention_mask': attention_mask,
+        'chunk_mask': chunk_mask,
+        'sentiment_score': y_sent,
+        'course_score': y_course
+    }
 
 
 class ClassLevelMultitaskModel(nn.Module):
@@ -94,8 +400,12 @@ class ClassLevelMultitaskModel(nn.Module):
     def __init__(self, base_model_name, dropout_rate=0.1):
         super().__init__()
         
-        # BERTエンコーダ（共有層）
-        self.bert = BertModel.from_pretrained(base_model_name)
+        # BERTエンコーダ（共有層）- safetensors使用でセキュリティ要件対応
+        try:
+            self.bert = BertModel.from_pretrained(base_model_name, use_safetensors=True)
+        except Exception:
+            # safetensorsが利用できない場合は従来の方法
+            self.bert = BertModel.from_pretrained(base_model_name)
         hidden_size = self.bert.config.hidden_size
         
         # 感情スコア予測ヘッド（回帰）
@@ -116,40 +426,120 @@ class ClassLevelMultitaskModel(nn.Module):
             nn.Linear(256, 1)
         )
     
-    def forward(self, input_ids, attention_mask):
-        # BERT出力
-        outputs = self.bert(
-            input_ids=input_ids,
-            attention_mask=attention_mask
-        )
-        
-        # [CLS]トークンの出力を使用
-        pooled_output = outputs.last_hidden_state[:, 0, :]
-        
+    def forward(self, input_ids, attention_mask, chunk_mask=None):
+        # 入力が (B, C, L) の場合は平坦化してまとめてエンコード
+        if input_ids.dim() == 3:
+            B, C, L = input_ids.shape
+            x_ids = input_ids.view(B*C, L)
+            x_mask = attention_mask.view(B*C, L)
+            outputs = self.bert(input_ids=x_ids, attention_mask=x_mask)
+            cls = outputs.last_hidden_state[:, 0, :]  # (B*C, H)
+            H = cls.size(-1)
+            cls = cls.view(B, C, H)  # (B, C, H)
+
+            if chunk_mask is None:
+                # すべてのチャンクを平均
+                pooled = cls.mean(dim=1)
+            else:
+                # マスク付き平均
+                mask = chunk_mask.float().unsqueeze(-1)  # (B, C, 1)
+                summed = (cls * mask).sum(dim=1)  # (B, H)
+                denom = mask.sum(dim=1).clamp_min(1e-6)  # (B, 1)
+                pooled = summed / denom
+        else:
+            # 互換: (B, L)
+            outputs = self.bert(input_ids=input_ids, attention_mask=attention_mask)
+            pooled = outputs.last_hidden_state[:, 0, :]
+
         # 各タスクの予測
-        sentiment_pred = self.sentiment_head(pooled_output).squeeze(-1)
-        course_pred = self.course_head(pooled_output).squeeze(-1)
-        
+        sentiment_pred = self.sentiment_head(pooled).squeeze(-1)
+        course_pred = self.course_head(pooled).squeeze(-1)
         return sentiment_pred, course_pred
 
 
+def find_latest_csv_file():
+    """最新の授業集約データセットCSVファイルを自動検出"""
+    import os
+    import glob
+    
+    # 複数のパス候補を試す
+    possible_paths = [
+        '../01_データ/マルチタスク用データ/',
+        '../../01_データ/マルチタスク用データ/',
+        '01_データ/マルチタスク用データ/',
+        '../01_データ/マルチタスク用データ',
+        '../../01_データ/マルチタスク用データ',
+        '01_データ/マルチタスク用データ'
+    ]
+    
+    csv_files = []
+    for base_path in possible_paths:
+        pattern = os.path.join(base_path, '授業集約データセット_*.csv')
+        found_files = glob.glob(pattern)
+        csv_files.extend(found_files)
+    
+    if not csv_files:
+        # より広範囲で検索
+        for root, dirs, files in os.walk('..'):
+            for file in files:
+                if file.startswith('授業集約データセット_') and file.endswith('.csv'):
+                    csv_files.append(os.path.join(root, file))
+    
+    if csv_files:
+        # 最新のファイルを選択（ファイル名の日時でソート）
+        latest_file = max(csv_files, key=os.path.getctime)
+        print(f"📁 見つかったCSVファイル: {latest_file}")
+        return latest_file
+    else:
+        raise FileNotFoundError("授業集約データセットのCSVファイルが見つかりません")
+
+
 def load_data(sample_size=1000):
-    """データの読み込み（最小限のサンプリング）"""
+    """データの読み込み（層化サンプリング）"""
     print("\n" + "="*60)
-    print("📊 授業集約データセットの読み込み")
+    print("📊 授業集約データセットの読み込み（層化サンプリング）")
     print("="*60)
     
-    # CSVファイルの読み込み
-    df = pd.read_csv('../01_データ/マルチタスク用データ/授業集約データセット_20251012_142504.csv')
+    # CSVファイルの自動検出と読み込み
+    csv_file_path = find_latest_csv_file()
+    df = pd.read_csv(csv_file_path)
     
     print(f"総授業数: {len(df)}件")
     
-    # ランダムサンプリング（層化サンプリングは後で実施）
+    # 層化サンプリングのための層を作成
+    # 感情スコアと授業評価スコアの両方を考慮して層を作成
+    sentiment_bins = pd.qcut(df['感情スコア平均'], q=3, labels=['低', '中', '高'], duplicates='drop')
+    course_bins = pd.qcut(df['授業評価スコア'], q=3, labels=['低', '中', '高'], duplicates='drop')
+    
+    # 層ラベルを組み合わせて詳細な層を作成
+    stratify_labels = [f'{s}_{c}' for s, c in zip(sentiment_bins, course_bins)]
+    
+    print(f"\n層化サンプリングの分布:")
+    unique, counts = np.unique(stratify_labels, return_counts=True)
+    for label, count in zip(unique, counts):
+        print(f"  {label}: {count}件")
+    
+    # 層化サンプリングを実行
     np.random.seed(42)
     if sample_size < len(df):
-        sample_indices = np.random.choice(len(df), sample_size, replace=False)
-        df_sampled = df.iloc[sample_indices].reset_index(drop=True)
-        print(f"サンプリング: {sample_size}件を抽出（実用的最小データ数）")
+        # 各層から比例的にサンプリング
+        df_sampled = df.groupby(stratify_labels, group_keys=False).apply(
+            lambda x: x.sample(n=min(len(x), int(sample_size * len(x) / len(df))), random_state=42)
+        ).reset_index(drop=True)
+        
+        # 目標件数に調整
+        if len(df_sampled) < sample_size:
+            # 不足分をランダムに追加
+            remaining_indices = df[~df.index.isin(df_sampled.index)].index
+            additional_size = sample_size - len(df_sampled)
+            if len(remaining_indices) >= additional_size:
+                additional_indices = np.random.choice(remaining_indices, additional_size, replace=False)
+                df_sampled = pd.concat([df_sampled, df.iloc[additional_indices]]).reset_index(drop=True)
+        elif len(df_sampled) > sample_size:
+            # 超過分をランダムに削除
+            df_sampled = df_sampled.sample(n=sample_size, random_state=42).reset_index(drop=True)
+        
+        print(f"層化サンプリング: {len(df_sampled)}件を抽出")
     else:
         df_sampled = df
         print(f"サンプリング: 全データを使用")
@@ -231,20 +621,64 @@ def prepare_data(texts, sentiment_scores, course_scores, tokenizer):
     y_course_val_scaled = course_scaler.transform(y_course_val.reshape(-1, 1)).flatten()
     y_course_test_scaled = course_scaler.transform(y_course_test.reshape(-1, 1)).flatten()
     
-    # データセットの作成
-    train_dataset = ClassLevelDataset(X_train, y_sent_train_scaled, y_course_train_scaled, tokenizer, MAX_LENGTH)
-    val_dataset = ClassLevelDataset(X_val, y_sent_val_scaled, y_course_val_scaled, tokenizer, MAX_LENGTH)
-    test_dataset = ClassLevelDataset(X_test, y_sent_test_scaled, y_course_test_scaled, tokenizer, MAX_LENGTH)
+    # データセットの作成（長文対応: チャンク化）
+    train_dataset = ClassLevelDataset(
+        X_train, y_sent_train_scaled, y_course_train_scaled, tokenizer,
+        chunk_len=CHUNK_LEN, stride=STRIDE, max_chunks=MAX_CHUNKS
+    )
+    val_dataset = ClassLevelDataset(
+        X_val, y_sent_val_scaled, y_course_val_scaled, tokenizer,
+        chunk_len=CHUNK_LEN, stride=STRIDE, max_chunks=MAX_CHUNKS
+    )
+    test_dataset = ClassLevelDataset(
+        X_test, y_sent_test_scaled, y_course_test_scaled, tokenizer,
+        chunk_len=CHUNK_LEN, stride=STRIDE, max_chunks=MAX_CHUNKS
+    )
     
-    # DataLoaderの作成
-    train_loader = DataLoader(train_dataset, batch_size=BATCH_SIZE, shuffle=True)
-    val_loader = DataLoader(val_dataset, batch_size=BATCH_SIZE, shuffle=False)
-    test_loader = DataLoader(test_dataset, batch_size=BATCH_SIZE, shuffle=False)
+    # DataLoaderの作成（Windows環境対応: num_workers=0）
+    print(f"📦 DataLoader作成中...")
+    # バージョン/OSに応じて安全なDataLoader設定を自動選択
+    import platform
+    torch_major = int(torch.__version__.split('.')[0])
+    is_windows = platform.system().lower().startswith('win')
+    use_safe_loader = (torch_major < 2) or is_windows
+
+    if use_safe_loader:
+        print("⚙️ DataLoader: 安全設定で起動 (num_workers=0, pin_memory=False)")
+        train_loader = DataLoader(
+            train_dataset, batch_size=BATCH_SIZE, shuffle=True,
+            num_workers=0, pin_memory=False, collate_fn=collate_chunked_batch
+        )
+        val_loader = DataLoader(
+            val_dataset, batch_size=BATCH_SIZE, shuffle=False,
+            num_workers=0, pin_memory=False, collate_fn=collate_chunked_batch
+        )
+        test_loader = DataLoader(
+            test_dataset, batch_size=BATCH_SIZE, shuffle=False,
+            num_workers=0, pin_memory=False, collate_fn=collate_chunked_batch
+        )
+        # 転送の非同期は無効化
+        global NON_BLOCKING
+        NON_BLOCKING = False
+    else:
+        print(f"⚙️ DataLoader: 高速設定 (num_workers={NUM_WORKERS}, pin_memory={PIN_MEMORY}, prefetch={PREFETCH_FACTOR}, persistent={PERSISTENT_WORKERS})")
+        dl_kwargs = dict(
+            batch_size=BATCH_SIZE,
+            pin_memory=PIN_MEMORY,
+            num_workers=NUM_WORKERS,
+            prefetch_factor=PREFETCH_FACTOR,
+            persistent_workers=PERSISTENT_WORKERS,
+            collate_fn=collate_chunked_batch,
+        )
+        train_loader = DataLoader(train_dataset, shuffle=True, **dl_kwargs)
+        val_loader = DataLoader(val_dataset, shuffle=False, **dl_kwargs)
+        test_loader = DataLoader(test_dataset, shuffle=False, **dl_kwargs)
+    print(f"✅ DataLoader作成完了")
     
     return train_loader, val_loader, test_loader, sentiment_scaler, course_scaler
 
 
-def train_epoch(model, train_loader, optimizer, scheduler, epoch, num_epochs):
+def train_epoch(model, train_loader, optimizer, scheduler, scaler, epoch, num_epochs):
     """1エポックの学習"""
     model.train()
     total_loss = 0
@@ -252,43 +686,165 @@ def train_epoch(model, train_loader, optimizer, scheduler, epoch, num_epochs):
     course_losses = 0
     
     criterion = nn.MSELoss()
+    last_update_time = time.time()
     
+    print(f"  📊 学習バッチ数: {len(train_loader)}")
+    print(f"  🔧 デバイス: {device}")
+    print(f"  🚀 学習ループ開始...", flush=True)
+    
+    optimizer.zero_grad(set_to_none=True)
+
     for batch_idx, batch in enumerate(train_loader):
+        # 最初のバッチでデバッグ情報を表示
+        if batch_idx == 0:
+            print(f"  🚀 最初のバッチ処理開始...")
+            print(f"  📦 バッチサイズ: {batch['input_ids'].shape[0]}")
+        
         # データをデバイスに転送
-        input_ids = batch['input_ids'].to(device)
-        attention_mask = batch['attention_mask'].to(device)
-        sentiment_true = batch['sentiment_score'].to(device)
-        course_true = batch['course_score'].to(device)
+        if batch_idx == 0:
+            print(f"  📤 データを{device}に転送中...", flush=True)
+        input_ids = batch['input_ids'].to(device, non_blocking=NON_BLOCKING)
+        attention_mask = batch['attention_mask'].to(device, non_blocking=NON_BLOCKING)
+        chunk_mask = batch['chunk_mask'].to(device, non_blocking=NON_BLOCKING)
+        sentiment_true = batch['sentiment_score'].to(device, non_blocking=NON_BLOCKING)
+        course_true = batch['course_score'].to(device, non_blocking=NON_BLOCKING)
+        
+        # 最初のバッチでデバイス転送確認
+        if batch_idx == 0:
+            print(f"  ✅ データを{device}に転送完了")
+            print(f"  📊 input_ids device: {input_ids.device}")
+            print(f"  📊 sentiment_true device: {sentiment_true.device}")
         
         # 勾配をゼロ化
         optimizer.zero_grad()
         
         # 予測
-        sentiment_pred, course_pred = model(input_ids, attention_mask)
+        if batch_idx == 0:
+            print(f"  🔮 モデル予測開始...", flush=True)
+            print(f"  📊 input_ids shape: {input_ids.shape}")
+            print(f"  📊 attention_mask shape: {attention_mask.shape}")
+            print(f"  📊 model device: {next(model.parameters()).device}")
+        
+        try:
+            # モデルを明示的にtrainモードに設定
+            if batch_idx == 0:
+                print(f"  🔧 モデルをtrainモードに設定...", flush=True)
+                model.train()
+                print(f"  ✅ trainモード設定完了", flush=True)
+                
+                # モデルパラメータのデバイス確認
+                print(f"  🔍 モデルパラメータのデバイス確認...", flush=True)
+                cpu_params = []
+                for name, param in model.named_parameters():
+                    if not param.is_cuda:
+                        cpu_params.append(name)
+                if cpu_params:
+                    print(f"  ⚠️ CPU上にあるパラメータ: {cpu_params[:3]}...", flush=True)
+                    print(f"  🔧 モデルを再びGPUに転送...", flush=True)
+                    model.to(device)
+                    print(f"  ✅ GPU転送完了", flush=True)
+                else:
+                    print(f"  ✅ 全パラメータがGPU上にあります", flush=True)
+                
+                # 入力テンソルの型確認・修正
+                print(f"  🔍 入力テンソルの型確認...", flush=True)
+                print(f"  📊 input_ids dtype: {input_ids.dtype}")
+                print(f"  📊 attention_mask dtype: {attention_mask.dtype}")
+                
+                # 型を明示的にlongに変換
+                input_ids = input_ids.long()
+                attention_mask = attention_mask.long()
+                print(f"  ✅ 入力テンソルをlong型に変換完了", flush=True)
+            
+            # forward実行
+            if batch_idx == 0:
+                print(f"  🚀 forward実行開始...", flush=True)
+                print(f"  📊 input_ids shape: {input_ids.shape}, dtype: {input_ids.dtype}")
+                print(f"  📊 attention_mask shape: {attention_mask.shape}, dtype: {attention_mask.dtype}")
+            
+            with torch.cuda.amp.autocast(enabled=USE_AMP):
+                sentiment_pred, course_pred = model(input_ids, attention_mask, chunk_mask)
+            
+            if batch_idx == 0:
+                print(f"  ✅ モデル予測完了", flush=True)
+                print(f"  📊 sentiment_pred shape: {sentiment_pred.shape}")
+                print(f"  📊 course_pred shape: {course_pred.shape}")
+                print(f"  📊 sentiment_pred device: {sentiment_pred.device}")
+                print(f"  📊 sentiment_pred dtype: {sentiment_pred.dtype}")
+        except Exception as e:
+            print(f"  ❌ モデル予測エラー: {e}", flush=True)
+            print(f"  🔍 エラー詳細:", flush=True)
+            import traceback
+            traceback.print_exc()
+            print(f"  🛑 学習を停止します", flush=True)
+            break
         
         # 損失計算
-        sentiment_loss = criterion(sentiment_pred, sentiment_true)
-        course_loss = criterion(course_pred, course_true)
-        loss = ALPHA * sentiment_loss + BETA * course_loss
+        with torch.cuda.amp.autocast(enabled=USE_AMP):
+            sentiment_loss = criterion(sentiment_pred, sentiment_true)
+            course_loss = criterion(course_pred, course_true)
+            loss = ALPHA * sentiment_loss + BETA * course_loss
+        
+        if batch_idx == 0:
+            print(f"  📊 損失計算完了: {loss.item():.4f}")
         
         # 逆伝播
-        loss.backward()
+        if batch_idx == 0:
+            print(f"  🔄 逆伝播開始...", flush=True)
+        try:
+            # 勾配蓄積
+            loss_acc = loss / ACCUM_STEPS
+            scaler.scale(loss_acc).backward()
+            if batch_idx == 0:
+                print(f"  ✅ 逆伝播完了", flush=True)
+        except Exception as e:
+            print(f"  ❌ 逆伝播エラー: {e}", flush=True)
+            import traceback
+            traceback.print_exc()
+            break
         
         # 勾配クリッピング
-        torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+        if batch_idx == 0:
+            print(f"  ✂️ 勾配クリッピング開始...", flush=True)
+        # 勾配更新のタイミングでのみクリップとstep
+        if (batch_idx + 1) % ACCUM_STEPS == 0:
+            scaler.unscale_(optimizer)
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+        if batch_idx == 0:
+            print(f"  ✅ 勾配クリッピング完了", flush=True)
         
         # パラメータ更新
-        optimizer.step()
+        if batch_idx == 0:
+            print(f"  🔧 パラメータ更新開始...", flush=True)
+        try:
+            if (batch_idx + 1) % ACCUM_STEPS == 0:
+                scaler.step(optimizer)
+                scaler.update()
+                optimizer.zero_grad(set_to_none=True)
+                if batch_idx == 0:
+                    print(f"  ✅ パラメータ更新完了", flush=True)
+                    print(f"  🎉 最初のバッチ処理完了！学習を継続します...", flush=True)
+        except Exception as e:
+            print(f"  ❌ パラメータ更新エラー: {e}", flush=True)
+            import traceback
+            traceback.print_exc()
+            break
         
         # 損失の記録
         total_loss += loss.item()
         sentiment_losses += sentiment_loss.item()
         course_losses += course_loss.item()
         
-        # 進捗表示（10バッチごと）
-        if batch_idx % 10 == 0:
-            print(f'  Epoch {epoch+1}/{num_epochs}, Batch {batch_idx+1}/{len(train_loader)}, '
-                  f'Loss: {loss.item():.4f}')
+        # 毎秒更新のリアルタイム進捗表示
+        current_time = time.time()
+        if current_time - last_update_time >= 1.0:  # 1秒ごとに更新
+            print_progress_gauge(
+                batch_idx + 1, len(train_loader),
+                f"🔥 Epoch {epoch+1}/{num_epochs}",
+                f"Loss: {loss.item():.4f} | Sent: {sentiment_loss.item():.4f} | Course: {course_loss.item():.4f}",
+                True, True
+            )
+            last_update_time = current_time
     
     # 学習率の調整
     scheduler.step()
@@ -313,17 +869,20 @@ def validate(model, val_loader):
     course_true_list = []
     
     criterion = nn.MSELoss()
+    last_update_time = time.time()
     
     with torch.no_grad():
         for batch_idx, batch in enumerate(val_loader):
             # データをデバイスに転送
-            input_ids = batch['input_ids'].to(device)
-            attention_mask = batch['attention_mask'].to(device)
-            sentiment_true = batch['sentiment_score'].to(device)
-            course_true = batch['course_score'].to(device)
+            input_ids = batch['input_ids'].to(device, non_blocking=NON_BLOCKING)
+            attention_mask = batch['attention_mask'].to(device, non_blocking=NON_BLOCKING)
+            chunk_mask = batch['chunk_mask'].to(device, non_blocking=NON_BLOCKING)
+            sentiment_true = batch['sentiment_score'].to(device, non_blocking=NON_BLOCKING)
+            course_true = batch['course_score'].to(device, non_blocking=NON_BLOCKING)
             
             # 予測
-            sentiment_pred, course_pred = model(input_ids, attention_mask)
+            with torch.cuda.amp.autocast(enabled=USE_AMP):
+                sentiment_pred, course_pred = model(input_ids, attention_mask, chunk_mask)
             
             # 損失計算
             sentiment_loss = criterion(sentiment_pred, sentiment_true)
@@ -341,9 +900,16 @@ def validate(model, val_loader):
             course_preds_list.extend(course_pred.cpu().numpy())
             course_true_list.extend(course_true.cpu().numpy())
             
-            # 進捗表示（5バッチごと）
-            if batch_idx % 5 == 0:
-                print(f'    Validation Batch {batch_idx+1}/{len(val_loader)}')
+            # 毎秒更新のリアルタイム検証進捗表示
+            current_time = time.time()
+            if current_time - last_update_time >= 1.0:  # 1秒ごとに更新
+                print_progress_gauge(
+                    batch_idx + 1, len(val_loader),
+                    "✅ Validation",
+                    f"Loss: {loss.item():.4f} | Sent: {sentiment_loss.item():.4f} | Course: {course_loss.item():.4f}",
+                    True, True
+                )
+                last_update_time = current_time
     
     avg_loss = total_loss / len(val_loader)
     avg_sentiment_loss = sentiment_losses / len(val_loader)
@@ -370,11 +936,26 @@ def train_model(model, train_loader, val_loader, num_epochs):
     print("🚀 授業レベルマルチタスク学習を開始")
     print("="*60)
     
+    # GPU初期状況の表示
+    if torch.cuda.is_available():
+        gpu_status = get_gpu_status()
+        if gpu_status:
+            print(f"🚀 GPU初期状況:")
+            print(f"   📊 メモリ: {gpu_status['allocated']:.1f}GB / {gpu_status['total']:.1f}GB")
+            print(f"   🔒 予約済み: {gpu_status['reserved']:.1f}GB")
+            print(f"   📈 使用率: {gpu_status['utilization']:.1f}%")
+    else:
+        print("⚠️  GPUが利用できません。CPUで実行中...")
+    
+    # 開始時刻を記録
+    start_time = datetime.now()
+    
     # オプティマイザとスケジューラ
-    optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE)
+    optimizer = torch.optim.AdamW(model.parameters(), lr=LEARNING_RATE, weight_decay=1e-2)
     scheduler = torch.optim.lr_scheduler.LinearLR(
         optimizer, start_factor=1.0, end_factor=0.1, total_iters=num_epochs
     )
+    scaler = torch.cuda.amp.GradScaler(enabled=USE_AMP)
     
     # 学習履歴
     history = {
@@ -395,15 +976,17 @@ def train_model(model, train_loader, val_loader, num_epochs):
     
     for epoch in range(num_epochs):
         print(f"\n{'='*60}")
-        print(f"Epoch {epoch+1}/{num_epochs}")
+        print(f"🎯 Epoch {epoch+1}/{num_epochs} 開始")
         print(f"{'='*60}")
         
         # 学習
+        print(f"\n🔥 学習フェーズ開始...")
         train_loss, train_sent_loss, train_course_loss = train_epoch(
-            model, train_loader, optimizer, scheduler, epoch, num_epochs
+            model, train_loader, optimizer, scheduler, scaler, epoch, num_epochs
         )
         
         # 検証
+        print(f"\n✅ 検証フェーズ開始...")
         val_loss, val_sent_loss, val_course_loss, sent_r2, sent_corr, course_r2, course_corr = validate(
             model, val_loader
         )
@@ -420,22 +1003,19 @@ def train_model(model, train_loader, val_loader, num_epochs):
         history['val_course_r2'].append(course_r2)
         history['val_course_corr'].append(course_corr)
         
-        # 結果表示
-        print(f"\n学習結果:")
-        print(f"  Total Loss: {train_loss:.4f}")
-        print(f"  Sentiment Loss: {train_sent_loss:.4f}")
-        print(f"  Course Loss: {train_course_loss:.4f}")
+        # ゲージ風サマリー表示
+        current_lr = optimizer.param_groups[0]['lr']
+        elapsed_time = (datetime.now() - start_time).total_seconds()
         
-        print(f"\n検証結果:")
-        print(f"  Total Loss: {val_loss:.4f}")
-        print(f"  Sentiment - R²: {sent_r2:.4f}, 相関: {sent_corr:.4f}")
-        print(f"  Course    - R²: {course_r2:.4f}, 相関: {course_corr:.4f}")
+        print_epoch_summary(
+            epoch + 1, num_epochs, train_loss, val_loss, 
+            sent_r2, course_r2, best_val_loss, current_lr, elapsed_time
+        )
         
         # ベストモデルの保存
         if val_loss < best_val_loss:
             best_val_loss = val_loss
             best_model_state = model.state_dict().copy()
-            print(f"\n✅ ベストモデルを更新！ (Val Loss: {val_loss:.4f})")
     
     # ベストモデルをロード
     model.load_state_dict(best_model_state)
@@ -457,20 +1037,31 @@ def evaluate_model(model, test_loader, sentiment_scaler, course_scaler):
     course_true_list = []
     
     with torch.no_grad():
-        for batch in test_loader:
-            input_ids = batch['input_ids'].to(device)
-            attention_mask = batch['attention_mask'].to(device)
-            sentiment_true = batch['sentiment_score'].to(device)
-            course_true = batch['course_score'].to(device)
+        for batch_idx, batch in enumerate(test_loader):
+            input_ids = batch['input_ids'].to(device, non_blocking=NON_BLOCKING)
+            attention_mask = batch['attention_mask'].to(device, non_blocking=NON_BLOCKING)
+            chunk_mask = batch['chunk_mask'].to(device, non_blocking=NON_BLOCKING)
+            sentiment_true = batch['sentiment_score'].to(device, non_blocking=NON_BLOCKING)
+            course_true = batch['course_score'].to(device, non_blocking=NON_BLOCKING)
             
             # 予測
-            sentiment_pred, course_pred = model(input_ids, attention_mask)
+            with torch.cuda.amp.autocast(enabled=USE_AMP):
+                sentiment_pred, course_pred = model(input_ids, attention_mask, chunk_mask)
             
             # 予測値の記録
             sentiment_preds_list.extend(sentiment_pred.cpu().numpy())
             sentiment_true_list.extend(sentiment_true.cpu().numpy())
             course_preds_list.extend(course_pred.cpu().numpy())
             course_true_list.extend(course_true.cpu().numpy())
+            
+            # 進捗表示（ゲージ風）
+            if batch_idx % 2 == 0:
+                print_progress_gauge(
+                    batch_idx + 1, len(test_loader),
+                    "📊 テスト評価",
+                    "",
+                    True
+                )
     
     # numpy配列に変換
     sentiment_preds = np.array(sentiment_preds_list)
@@ -522,8 +1113,8 @@ def save_results(model, history, results, timestamp):
     print("💾 結果の保存")
     print("="*60)
     
-    # 保存ディレクトリの作成
-    output_dir = f'../02_モデル/授業レベルマルチタスクモデル'
+    # 保存ディレクトリの作成（プロジェクト直下）
+    output_dir = os.path.join('02_モデル', '授業レベルマルチタスクモデル')
     os.makedirs(output_dir, exist_ok=True)
     
     # モデルの保存
@@ -550,8 +1141,8 @@ def save_results(model, history, results, timestamp):
         json.dump(config, f, ensure_ascii=False, indent=2)
     print(f"設定を保存: {config_path}")
     
-    # 結果の保存
-    results_dir = f'../03_分析結果/授業レベルマルチタスク学習'
+    # 結果の保存（プロジェクト直下）
+    results_dir = os.path.join('03_分析結果', '授業レベルマルチタスク学習')
     os.makedirs(results_dir, exist_ok=True)
     
     results_data = {
@@ -614,7 +1205,7 @@ def create_visualizations(history, sentiment_preds, sentiment_true, course_preds
     axes[1, 1].grid(True, alpha=0.3)
     
     plt.tight_layout()
-    results_dir = '../03_分析結果/授業レベルマルチタスク学習'
+    results_dir = os.path.join('03_分析結果', '授業レベルマルチタスク学習')
     os.makedirs(results_dir, exist_ok=True)
     plt.savefig(os.path.join(results_dir, f'training_curves_{timestamp}.png'), dpi=300, bbox_inches='tight')
     print(f"学習曲線を保存しました")
@@ -656,14 +1247,51 @@ def main():
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     
     try:
+        # 実行ディレクトリを適切に設定
+        script_dir = os.path.dirname(os.path.abspath(__file__))
+        project_root = os.path.dirname(script_dir)  # 00_スクリプトの親ディレクトリ
+        os.chdir(project_root)
+        print(f"📁 実行ディレクトリ: {os.getcwd()}")
+        
         print("\n" + "="*60)
         print("🎯 授業レベルマルチタスク学習")
         print("="*60)
         print(f"開始時刻: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
         
+        # PyTorchとDirectMLのバージョン情報を表示
+        print(f"\n🧠 PyTorch version: {torch.__version__}")
+        try:
+            import torch_directml as dml
+            print(f"🧩 DirectML available: {dml.is_available()}")
+            if torch.__version__.startswith("2.4"):
+                print("⚠️ PyTorch 2.4.x は DirectML と互換性の問題があります")
+                print("   推奨: PyTorch 2.2.2 + torch-directml 0.2.3.dev240715")
+        except ImportError:
+            print("ℹ️ DirectML がインストールされていません")
+        
         # トークナイザーの初期化
         print("\n🔧 トークナイザーの初期化...")
-        tokenizer = BertJapaneseTokenizer.from_pretrained(BASE_MODEL)
+        try:
+            tokenizer = BertJapaneseTokenizer.from_pretrained(BASE_MODEL)
+            print("✅ 日本語BERTトークナイザーの初期化が完了しました")
+            # 長文チャンク化を自前で行うため、警告抑制用にモデル長を拡張
+            try:
+                tokenizer.model_max_length = 10**6
+            except Exception:
+                pass
+        except Exception as e:
+            print(f"⚠️  日本語BERTトークナイザーの初期化に失敗: {e}")
+            print("🔧 代替トークナイザーを使用します...")
+            try:
+                # 代替としてAutoTokenizerを使用
+                from transformers import AutoTokenizer
+                tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL)
+                print("✅ 代替トークナイザーの初期化が完了しました")
+            except Exception as e2:
+                print(f"❌ 代替トークナイザーも失敗: {e2}")
+                print("💡 必要なライブラリをインストールしてください:")
+                print("   pip install fugashi ipadic unidic-lite")
+                raise e2
         
         # データの読み込み
         texts, sentiment_scores, course_scores = load_data()
@@ -675,13 +1303,47 @@ def main():
         
         # モデルの初期化
         print("\n🔧 モデルの初期化...")
-        model = ClassLevelMultitaskModel(BASE_MODEL)
-        model = model.to(device)
+        print(f"📥 ベースモデル読み込み中: {BASE_MODEL}")
         
-        total_params = sum(p.numel() for p in model.parameters())
-        trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
-        print(f"総パラメータ数: {total_params:,}")
-        print(f"学習可能パラメータ数: {trainable_params:,}")
+        try:
+            model = ClassLevelMultitaskModel(BASE_MODEL)
+            print(f"✅ ベースモデル読み込み完了")
+            
+            print(f"🚀 モデルをGPUに移動中...")
+            model = model.to(device)
+            print(f"✅ モデルGPU移動完了")
+            if WARMUP_FORWARD:
+                # 事前ウォームアップ（初回forwardのコンパイル/初期化待ちを先に消化）
+                try:
+                    model.eval()
+                    with torch.no_grad():
+                        dummy_ids = torch.zeros((1, 1, CHUNK_LEN), dtype=torch.long, device=device)
+                        dummy_mask = torch.zeros((1, 1, CHUNK_LEN), dtype=torch.long, device=device)
+                        dummy_cmask = torch.tensor([[1]], dtype=torch.bool, device=device)
+                        _ = model(dummy_ids, dummy_mask, dummy_cmask)
+                    model.train()
+                    print("🔥 ウォームアップforward完了")
+                except Exception as _e:
+                    print(f"ℹ️ ウォームアップforward失敗: {_e}")
+
+            # 勾配チェックポイントでVRAM節約
+            if USE_GRADIENT_CHECKPOINTING:
+                try:
+                    model.bert.gradient_checkpointing_enable()
+                    print("🧠 Gradient Checkpointing 有効化")
+                except Exception as _e:
+                    print(f"ℹ️ Gradient Checkpointing 無効（非対応）: {_e}")
+            
+            total_params = sum(p.numel() for p in model.parameters())
+            trainable_params = sum(p.numel() for p in model.parameters() if p.requires_grad)
+            print(f"総パラメータ数: {total_params:,}")
+            print(f"学習可能パラメータ数: {trainable_params:,}")
+            
+        except Exception as e:
+            print(f"❌ モデル初期化エラー: {e}")
+            import traceback
+            traceback.print_exc()
+            raise
         
         # 学習
         model, history = train_model(model, train_loader, val_loader, NUM_EPOCHS)
