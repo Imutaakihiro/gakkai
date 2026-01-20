@@ -1,0 +1,200 @@
+\documentclass[10.5bp, jafontscale=1.00]{ltjsarticle}
+\usepackage{stix,amsmath,cite,citesort,eclbkbox,listings,jlisting}
+\usepackage{graphicx}
+\usepackage{titlesec}
+%\usepackage[morisawa-pro]{luatexja-preset}
+\usepackage[no-math,expert,haranoaji]{luatexja-preset}
+\setmainfont{Times New Roman}[BoldFont=TimesNewRomanPS-BoldMT]
+\setsansfont{Times New Roman}[BoldFont=TimesNewRomanPS-BoldMT]
+\setlength{\oddsidemargin}{-0.in}
+\setlength{\evensidemargin}{-0.in}
+\setlength{\topmargin}{-0.in}
+\setlength{\headheight}{0cm}
+\setlength{\headsep}{0mm}
+\setlength{\textheight}{43.5\baselineskip}
+%\setlength{\textwidth}{50zw}
+\setlength{\columnsep}{9mm}
+\setlength{\topsep}{0pt}
+\setlength{\partopsep}{0pt}
+\setlength{\parsep}{0pt}
+\titleformat*{\section}{\normalsize\bfseries}
+\titleformat*{\subsection}{\normalsize\bfseries}
+\titleformat*{\subsubsection}{\normalsize\bfseries}
+\makeatletter % 「@」を含む場合は\makeatletterと\makeatotherで囲んだ範囲内で処理をする
+\renewcommand\section{%
+  \@startsection{section}% name
+    {1}% level
+    {0pt}% indent
+    {-0\baselineskip plus -1ex minus -.2ex}% beforeskip
+    {0\baselineskip plus.2ex}% afterskip
+    {\normalfont\normalsize\bfseries}% style
+  }
+\renewcommand{\subsection}{% \newcommand から \renewcommand に変更すること
+  \@startsection{subsection}% 区切りコマンドの名前（section, subsection等）
+    {2}% 深さ(sectionが1, subsectionは2等）
+    {0pt}% 左のインデント量
+    {-0\baselineskip plus -1ex minus -0.2ex}% 前アキ 見出し上のスペース
+	{0\baselineskip plus 0.2ex}% 後アキ 見出し下のスペース 負にすると見出し後のスペース
+    {\normalsize\bfseries}% 見出しのフォント
+}
+\renewcommand{\subsubsection}{% \newcommand から \renewcommand に変更すること
+  \@startsection{subsubsection}% 区切りコマンドの名前（section, subsection等）
+    {3}% 深さ(sectionが1, subsectionは2等）
+    {0pt}% 左のインデント量
+    {-0.\baselineskip plus -1ex minus -0.2ex}% 前アキ 見出し上のスペース
+	{0.\baselineskip plus 0.2ex}% 後アキ 見出し下のスペース 負にすると見出し後のスペース
+    {\normalsize\bfseries}% 見出しのフォント
+}
+\def\linesperpage#1{%
+\baselineskip=\textheight
+\divide\baselineskip by #1}
+
+\def\fitwidth#1#2{\leavevmode{%
+  \setbox0=\hbox{#2}%
+  \ifdim\wd0>#1 \resizebox{#1}{\height}{#2}%
+  \else
+    \def\@tempa{#2}%
+    \ifx\@tempa\empty\hbox to#1{\hss}%
+    \else\relax\hbox to#1\bgroup\hfil\@fitwidth#2{}\end@fitwidth\fi
+  \fi}}
+\def\@fitwidth#1#2\end@fitwidth{\def\@tempa{#2}#1%
+  \ifx\@tempa\empty\let\next\end@fitwidth
+  \else\hfill\def\next{\@fitwidth#2\end@fitwidth}\fi
+  \next}
+\def\end@fitwidth{\hfil\egroup}
+
+\makeatother
+\begin{document}
+\linesperpage{48}
+\pagestyle{empty}
+\twocolumn[
+\fontsize{14bp}{\baselineskip}\selectfont
+\begin{flushleft}
+{\bf Aー10}%セッション番号を入れる
+\end{flushleft}
+\vspace*{-\baselineskip}
+\begin{center}
+\textbf{卒研題目} % 卒研題目を入れる
+\end{center}
+\vspace*{0.5\baselineskip}
+\fontsize{10.5bp}{\baselineskip}\selectfont
+\begin{center}
+22M1XXX　福工　太郎
+\end{center}
+
+\begin{flushright}
+指導教員　小林　稔
+\end{flushright}
+\hspace*{1cm}
+\vspace*{-0.\baselineskip}
+
+]
+\fontsize{10.5bp}{\baselineskip}\selectfont
+
+\section{はじめに}
+本研究では・・を行い，・・を明らかにする．
+
+\section{理論}
+
+\section{予稿集の書き方}
+\subsection{原稿のサイズ}
+原稿はA4サイズで作成し，この見本を参考にすること．フォントを埋め込んだPDFファイルをmyFITにて提出する．
+\subsection{文章量}
+1編あたりの本文（表題，教員名，氏名は含まない）は，全角22字×42行×2段を原則とするが，表題，氏名欄が増えた場合，行数減少は可とする．
+\subsection{文字のと色と大きさ}
+黒色，明朝体10.5ポイントを原則とする．英数字は見出しを除き半角英数字とし，Times系のTimes New Romanフォント10.5ポイントの使用を原則とする．句点は「．」，読点は「，」を用いる．
+\subsection{配置}
+表題：原稿用紙の第1行に割り当てられた発表番号を14ポイントで書く．続けて中央に表題を（長ければ2行）に14ポイントで書く．
+学籍番号と氏名：表題からポイント数を10.5に下げて1行空け，学籍番号順に並べて中央に書く．
+指導教員名：その次の行に“指導教員　○○○○”と右寄せで書く．
+本文：1行空けて2段組とし，本文を10.5ポイントで書く．
+\subsection{図表}
+図表は，原則としてPDF形式もしくは拡張メタファイルやSVGなどのベクター形式で貼り付ける． 
+\subsection{原稿の余白}
+天地左右のマージンは25mmとする．
+\section{本文内容}
+はじめに，本文，おわりに等の見出しはゴシック体10.5ptで数字は半角英数の太字（{\bf Bold体}）とする．
+
+見出しの次は行を空けずに本文を書く．
+
+各段落の文頭1字下げる．
+
+数式には数式番号を行末に付ける．
+
+数式には数式番号を行末に付ける．
+
+数式には数式番号を行末に付ける．
+
+\section{文字数の確認}
+１２３４５６７８９０１２３４５６７８９０１１２３４５６７８９０１２３４５６７８９０１２
+
+　４
+
+　５
+
+　６
+
+　７
+
+　８
+
+　９
+
+１０
+
+１１
+
+１２
+
+１３
+
+１４
+
+１５
+
+１６
+
+１７
+
+１８
+
+１９
+
+２０
+
+２１
+
+２２
+
+２３
+
+２４
+
+２５
+
+２６
+
+２７
+
+２８
+
+２９
+
+３０行目
+
+\section{おわりに}
+本研究では，・・・・・・し，・・・であることを明らかにした．
+\begin{thebibliography}{9}%←文献の編数が10以上となる場合には99に変更する
+\bibitem{美人} ナンシー・エトコフ, なぜ美人ばかりが得をするのか, 285p., 草思社 (2000年)
+\bibitem{品質} 小林稔, 村松健児, \lq\lq 生産の計画立案技術の品質\rq\rq, 生産管理, Vol. 20, No. 2, pp. 29-37 (2014年)
+\end{thebibliography}
+\vspace*{-0.5\baselineskip}
+
+４０行目
+
+４１行目
+
+４２行目
+
+４２行目
+\end{document}

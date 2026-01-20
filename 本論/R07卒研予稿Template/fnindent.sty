@@ -1,0 +1,583 @@
+% fnindent, version 0.1 (c) Joseph Hilferty <hilferty@lingua.fil.ub.es>
+%
+% The purpose of this package is do indented (hanging) footnotes that
+% look like:
+%  
+%  1. XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX
+%     XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX
+%
+%  2. XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX
+%     XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX XXX
+%
+% There are options for adding parentheses, square brackets, etc. There
+% are also options for lengthening or shortening the footnote rule and
+% adjusting the footnote indentation.
+%
+% If you would like to see some examples, check out the following URL:
+%
+% http://www.biwako.shiga-u.ac.jp/sensei/kumazawa/tex2/fnindent.html
+% 
+% I know that this is an embarrassing hack. Use at your own risk. ;)
+% All improvements are welcome!
+%
+% ***********************************************************************
+%                                USAGE 
+% ***********************************************************************
+%
+% If you want an indented (hanging) footnote, just go:
+%
+% \usepackage{fnindent}
+%
+% This will give you a plain-vanilla indented footnote.
+% 
+%
+% Options:
+% -------
+%
+% \usepackage[<option>]{fnindent}
+%
+% where the <option> can be:
+%
+% dot, parenthesis, parentheses, brackets, tiny, scriptsize,
+% footnotesize, small, normalsize, large, Large, LARGE, huge,
+% Huge, normalfont, rm, sf, tt, md, bf, up, it, sl, sc emph,
+% tinyfn, scriptsizefn, footnotesizefn, smallfn, normalsizefn,
+% footnotesizebracketsfn, smallbracketsfn, normalsizebracketsfn,
+% footnotesizeparenthesesfn, smallparenthesesfn,
+% normalsizeparenthesesfn, footnotesizeparenthesisfn,
+% smallparenthesisfn, normalsizeparenthesisfn, superscript,
+% overridefontshape.
+%
+% Obviously, some of these names are overly long! I'll change
+% them if anyone complains.
+% 
+% I've also implemented two extra options:
+%
+% indentedfn, twocolunmfn
+%
+% The former indents the footnote mark (like _Journal of
+% Lingustics_), and seems to work okay.
+%
+% The latter still has a ways to go, but it is functional (just
+% barely), and should be used with \twocolumn.
+%
+% Finally, there are the footnote rule options:
+%
+% norule, tinyrule, shortrule, halfrule, Halfrule, longrule
+%
+% See each \DeclareOption below for more info. Some possibilities
+% can be combined. Some options, such as smallbracketsfn, have
+% predefined combinations.
+%
+%
+% User commands:
+% -------------
+%
+% \indentfntext{<lengthvalue>}
+% \indentfnmark{<lengthvalue>}
+%  
+% where <lengthvalue> is something like 3pt, 2em, etc.
+% 
+% What \indentfntext does is make the footnote width smaller. This gives
+% the impression of having a larger space between the the footnote mark
+% and the footnote text. \indentfnmark, on the other hand, really does
+% indent.
+%
+% NB: you can even make the space between the footnote mark and the
+% footnote text smaller by using a negative length such as -.6em. Beware
+% of errors, though, since it easy for the footnote text to spill out
+% into the left or (especially) the right margin.
+%
+% ***********************************************************************
+%                            TO  DO LIST
+% ***********************************************************************
+% 1. Write up some proper documentation for the package.
+% 2. Automatic detection of twocolumn.
+% 3. Get the \thanks command working.
+%
+%------------------------------------------------------------------------
+%                             Begin Hack
+%------------------------------------------------------------------------
+%
+\ProvidesPackage{fnindent}[2001/11/26]
+\NeedsTeXFormat{LaTeX2e}
+\RequirePackage{calc}
+%
+%
+% New commands:
+%
+% Font stuff
+%
+\newcommand{\fnfontfamily}{}
+\newcommand{\fnfontseries}{}
+\newcommand{\fnfontshape}{}
+\newcommand{\fnfontsize}{}
+\newcommand{\fndelimitersize}{}
+\newcommand{\fnfonttype}{\fnfontsize\fnfontfamily\fnfontseries\fnfontshape}
+\newcommand{\fnmarksize}{}
+\newcommand{\fnmarktype}{}
+\newcommand{\overridefshape}{}
+%
+% "Insertion-point commands." These are needed in order to put parentheses,
+% etc. around the footnote mark.
+%
+\newcommand{\fndelimiterpre}{}
+\newcommand{\fndelimiterpost}{}
+\newcommand{\dotdelimiter}{}
+\newcommand{\indentfntext}[1]{#1}
+\newcommand{\indentfnmark}[1]{#1}
+%
+% New lengths
+%
+\newlength{\fnlinewidth}
+\newlength{\fnmarkindent}
+\newlength{\fnmarkwidth}
+\newlength{\fntextwidth}
+%
+% Set to width.
+% This gives us the exact width of the footnote mark.
+% 
+\renewcommand{\@makefntext}{
+\settowidth{\fnmarkwidth}{
+   \fnfonttype
+   \fnmarktype{%
+   \fndelimitersize\fndelimiterpre
+   \fnmarksize
+   \@thefnmark
+   \dotdelimiter
+   \fndelimitersize\fndelimiterpost
+   }
+  }
+}
+%
+%  Set lengths
+%
+\setlength{\fnmarkindent}{0pt}
+\setlength{\fnlinewidth}{\textwidth-1.25em-\fnmarkwidth-\fnmarkindent}
+\setlength{\fntextwidth}{\fnlinewidth}
+%
+%
+%
+% \indentfntext allows you to control the footnote text width; note that
+% this is how the footnote text indentation is taken care of.
+%
+\renewcommand{\indentfntext}[1]{%
+     \addtolength{\fntextwidth}{-#1}
+}
+%
+% \identfnmark allows you to control indentation of the footnote mark.
+%
+\renewcommand{\indentfnmark}[1]{%
+     \addtolength{\fnmarkindent}{#1}
+     \addtolength{\fntextwidth}{-#1}
+}
+%
+%
+%
+%------------------------Beginning of main hack-------------------------
+%
+% First, we get rid of the footnote mark:
+%
+\renewcommand\@makefntext[1]{%
+  \parindent 1em%
+  \noindent
+  \hb@xt@0em{\relax}#1
+}
+%
+% Then, define a command so that we can hold the footnote text. Part of
+%  the basic idea for the following code comes from Anthony Goreham
+% in a post to comp.text.tex. This hack allows you to change the
+% font size, etc.
+%
+\let\hold@fntext=\@makefntext
+%
+% Now, we start hacking the footnote.
+%
+\renewcommand{\@makefntext}[1]{%
+%
+\hspace*{-.67em} % This brings the footnote mark flushleft.
+\hspace*{\fnmarkindent} % This controls the indentation of the footnote mark.
+%
+% Next, we place the footnote mark in a \makebox
+%
+\makebox[\fnmarkwidth][l]{
+% Then we redefine the footnote mark so that includes "insertion points."
+  \fnfonttype
+  \fnmarktype{%
+  \fndelimitersize\fndelimiterpre
+  \fnmarksize
+  \@thefnmark
+  \dotdelimiter
+  \fndelimitersize\fndelimiterpost
+ }
+}
+%
+% Sometimes this is needed to ensure that the right margin is correct.
+\hspace*{\fill}
+%
+% This is the new home of the footnote text.
+\parbox[t]{\fntextwidth}{\hold@fntext{\fnfonttype #1}}
+}
+%
+%
+%-------------------------End of main hack-----------------------------
+%
+%
+% font sizes:
+%
+\DeclareOption{tiny}{\renewcommand{\fnfontsize}{\tiny}}
+%
+\DeclareOption{scriptsize}{\renewcommand{\fnfontsize}{\scriptsize}}
+%
+\DeclareOption{footnotesize}{\relax}
+%
+\DeclareOption{small}{\renewcommand{\fnfontsize}{\small}}
+%
+\DeclareOption{normalsize}{\renewcommand{\fnfontsize}{\normalsize}}
+%
+\DeclareOption{large}{\renewcommand{\fnfontsize}{\large}}
+%
+\DeclareOption{Large}{\renewcommand{\fnfontsize}{\Large}}
+%
+\DeclareOption{LARGE}{\renewcommand{\fnfontsize}{\LARGE}}
+%
+\DeclareOption{huge}{\renewcommand{\fnfontsize}{\huge}}
+%
+\DeclareOption{Huge}{\renewcommand{\fnfontsize}{\Huge}}
+%
+% Normal font:
+%
+\DeclareOption{normalfont}{\renewcommand{\fnfontsize}{\normalfont}}
+%
+% font families:
+%
+\DeclareOption{rm}{\renewcommand{\fnfontfamily}{\rmfamily}}
+%
+\DeclareOption{sf}{\renewcommand{\fnfontfamily}{\sffamily}}
+%
+\DeclareOption{tt}{\renewcommand{\fnfontfamily}{\ttfamily}}
+%
+% font series:
+%
+\DeclareOption{md}{\renewcommand{\fnfontseries}{\mdseries}}
+%
+\DeclareOption{bf}{\renewcommand{\fnfontseries}{\bfseries}}
+%
+% font shapes:
+%
+\DeclareOption{up}{\renewcommand{\fnfontshape}{\upshape}}
+%
+\DeclareOption{it}{\renewcommand{\fnfontshape}{\itshape}}
+%
+\DeclareOption{sl}{\renewcommand{\fnfontshape}{\slshape}}
+%
+\DeclareOption{sc}{\renewcommand{\fnfontshape}{\scshape}}
+%
+\DeclareOption{emph}{\renewcommand{\fnfontshape}{\emph}}
+%
+%
+% The following are the options for placing parentheses and so forth
+% around the footnote mark.
+%
+% The \dot option places a period after the footnote mark:
+%
+\DeclareOption{dot}{\renewcommand{\dotdelimiter}{.}
+                           \addtolength{\fntextwidth}{-.167em}
+}
+%
+% The \parenthesis option gives one parenthesis after the footnote mark:
+%
+\DeclareOption{parenthesis}{\renewcommand{\fndelimiterpost}{)}
+                           \addtolength{\fntextwidth}{-.333em}
+}
+%
+% The \brackets option places the footnote mark within square brackets:
+%
+\DeclareOption{brackets}{%
+                    \renewcommand{\fndelimiterpre}{[}
+                    \renewcommand{\fndelimiterpost}{]}
+                    \addtolength{\fntextwidth}{-.67em}
+}
+%
+% The parentheses option places the footnote mark within parentheses:
+%
+\DeclareOption{parentheses}{%
+                     \renewcommand{\fndelimiterpre}{(}
+                     \renewcommand{\fndelimiterpost}{)}
+                     \addtolength{\fntextwidth}{-.67em}
+}
+%
+% The following options control font size when you use parentheses
+% and so forth. What they do is make parentheses (etc.) slightly
+% larger than normal in comparison to the footnote mark.
+%
+\DeclareOption{tinyfn}{%
+         \renewcommand{\fndelimitersize}{\scriptsize}
+          \renewcommand{\fnmarksize}{\tiny}
+      % \renewcommand{\fntextsize}{\tiny}}
+          \renewcommand{\fnfontsize}{\tiny}
+}
+%
+\DeclareOption{scriptsizefn}{%
+       \renewcommand{\fndelimitersize}{\footnotesize}
+       \renewcommand{\fnmarksize}{\scriptsize}
+       % \renewcommand{\fntextsize}{\scriptsize}}
+       \renewcommand{\fnfontsize}{\scriptsize}
+}
+%
+\DeclareOption{footnotesizefn}{%
+        \renewcommand{\fndelimitersize}{\small}
+        \renewcommand{\fnmarksize}{\footnotesize}
+        % \renewcommand{\fntextsize}{\footnotesize}}
+        \renewcommand{\fnfontsize}{\footnotesize}
+}
+%
+\DeclareOption{smallfn}{%
+       \renewcommand{\fndelimitersize}{\normalsize}
+       \renewcommand{\fnmarksize}{\small}       
+       % \renewcommand{\fntextsize}{\small}}
+       \renewcommand{\fnfontsize}{\small}
+}
+%
+\DeclareOption{normalsizefn}{%
+       \renewcommand{\fndelimitersize}{\large}
+       \renewcommand{\fnmarksize}{\normalsize}
+       % \renewcommand{\fntextsize}{\normalsize}}
+       \renewcommand{\fnfontsize}{\normalsize}
+}
+%
+% The following give predefined formatting. The names should be
+% transparent. Note that here the size of the footnote mark is
+% smaller than the parentheses. Thus, it gives the opposite effect
+% as compared to the previous section.
+% 
+% Brackets:
+%
+\DeclareOption{footnotesizebracketsfn}{%
+       \renewcommand{\fndelimitersize}{\footnotesize}
+       \renewcommand{\fnmarksize}{\scriptsize}
+       % \renewcommand{\fntextsize}{\footnotesize}
+       \renewcommand{\fnfontsize}{\footnotesize}
+       \renewcommand{\fndelimiterpre}{[}
+       \renewcommand{\fndelimiterpost}{]}
+       \addtolength{\fntextwidth}{-.67em}
+}
+%
+\DeclareOption{smallbracketsfn}{%
+      \renewcommand{\fndelimitersize}{\small}
+      \renewcommand{\fnmarksize}{\scriptsize}
+      % \renewcommand{\fntextsize}{\small}
+      \renewcommand{\fnfontsize}{\small}
+      \renewcommand{\fndelimiterpre}{[}
+      \renewcommand{\fndelimiterpost}{]}
+      \addtolength{\fntextwidth}{-.67em}
+}
+%
+\DeclareOption{normalsizebracketsfn}{%
+      \renewcommand{\fndelimitersize}{\normalsize}
+      \renewcommand{\fnmarksize}{\footnotesize}
+      % \renewcommand{\fntextsize}{\normalsize}
+      \renewcommand{\fnfontsize}{\normalsize}
+      \renewcommand{\fndelimiterpre}{[}
+      \renewcommand{\fndelimiterpost}{]}
+      \addtolength{\fntextwidth}{-.67em}
+}
+%
+% Parentheses
+%
+\DeclareOption{footnotesizeparenthesesfn}{%
+      \renewcommand{\fndelimitersize}{\footnotesize}
+      \renewcommand{\fnmarksize}{\scriptsize}
+      % \renewcommand{\fntextsize}{\footnotesize}
+      \renewcommand{\fnfontsize}{\footnotesize}
+      \renewcommand{\fndelimiterpre}{(}
+      \renewcommand{\fndelimiterpost}{)}
+      \addtolength{\fntextwidth}{-.67em}
+}
+%
+\DeclareOption{smallparenthesesfn}{%
+      \renewcommand{\fndelimitersize}{\small}
+      \renewcommand{\fnmarksize}{\scriptsize}
+      % \renewcommand{\fntextsize}{\small}
+      \renewcommand{\fnfontsize}{\small}
+      \renewcommand{\fndelimiterpre}{(}
+      \renewcommand{\fndelimiterpost}{)}
+      \addtolength{\fntextwidth}{-.67em}
+}
+%
+\DeclareOption{normalsizeparenthesesfn}{%
+      \renewcommand{\fndelimitersize}{\normalsize}
+      \renewcommand{\fnmarksize}{\footnotesize}
+      % \renewcommand{\fntextsize}{\normalsize}
+      \renewcommand{\fnfontsize}{\normalsize}
+      \renewcommand{\fndelimiterpre}{(}
+      \renewcommand{\fndelimiterpost}{)}
+      \addtolength{\fntextwidth}{-.67em}
+}
+%
+\DeclareOption{footnotesizeparenthesisfn}{%
+      \renewcommand{\fndelimitersize}{\footnotesize}
+      \renewcommand{\fnmarksize}{\scriptsize}
+      % \renewcommand{\fntextsize}{\footnotesize}
+      \renewcommand{\fnfontsize}{\footnotesize}
+      \renewcommand{\fndelimiterpost}{)}
+      \addtolength{\fntextwidth}{-.333em}
+}
+%
+\DeclareOption{smallparenthesisfn}{%
+      \renewcommand{\fndelimitersize}{\small}
+      \renewcommand{\fnmarksize}{\scriptsize}
+      % \renewcommand{\fntextsize}{\small}
+      \renewcommand{\fnfontsize}{\small}
+      \renewcommand{\fndelimiterpost}{)}
+      \addtolength{\fntextwidth}{-.333em}
+}
+%
+\DeclareOption{normalsizeparenthesisfn}{%
+      \renewcommand{\fndelimitersize}{\normalsize}
+      \renewcommand{\fnmarksize}{\footnotesize}
+      % \renewcommand{\fntextsize}{\normalsize}
+      \renewcommand{\fnfontsize}{\normalsize}
+      \renewcommand{\fndelimiterpost}{)}
+      \addtolength{\fntextwidth}{-.333em}
+}
+%
+% 
+% This will give you a superscript footnote mark.
+%
+\DeclareOption{superscript}{%
+                \renewcommand{\fnmarktype}[1]{\textsuperscript{#1}}
+                \indentfntext{-.67em}
+}
+%
+% This will override the font shape of the footnote mark. For example,
+% if, for some strange reason, you want the footnote text in italic
+% but the footnote mark in \normalfont, then you would use this option.
+%
+\DeclareOption{overridefontshape}{%
+               \renewcommand{\fnfonttype}{%
+                 \fnfontsize\fnfontfamily\fnfontseries
+       }
+}
+%
+% This will indent the footnote mark.
+%
+%
+\DeclareOption{indentedfn}{%
+\setlength{\fnmarkindent}{.67em}% This controls the indentation of the footnote mark.
+\addtolength{\fntextwidth}{-.67em}
+\renewcommand{\@makefntext}[1]{%
+\hspace*{-.67em} % This is just to have a starting point.
+\hspace*{\fnmarkindent} % This indents the footnote mark (see above).
+\makebox[\fnmarkwidth][l]{
+  \fnfonttype
+  \fnmarktype{%
+  \fndelimitersize\fndelimiterpre
+  \fnmarksize
+  \@thefnmark
+  \dotdelimiter
+  \fndelimitersize\fndelimiterpost
+ }
+}
+\hspace*{\fill}
+\parbox[t]{\fntextwidth}{%
+                 \hold@fntext{\fnfonttype #1}
+            }
+     }
+}
+%
+% These are footnote-rule hacks:
+%
+\DeclareOption{norule}{\renewcommand\footnoterule{\relax}}
+%
+\DeclareOption{tinyrule}{%
+\renewcommand\footnoterule{\kern-.\p@\hrule\@width.075\columnwidth\kern2.6\p@}
+}
+%
+\DeclareOption{shortrule}{%
+\renewcommand\footnoterule{\kern-.\p@\hrule\@width.125\columnwidth\kern2.6\p@}
+}
+%
+\DeclareOption{halfrule}{%
+\renewcommand\footnoterule{\kern-.\p@\hrule\@width.2\columnwidth\kern2.6\p@}
+}
+%
+\DeclareOption{Halfrule}{%
+\renewcommand\footnoterule{\kern-.\p@\hrule\@width.3\columnwidth\kern2.6\p@}
+}
+%
+\DeclareOption{longrule}{%
+\renewcommand\footnoterule{\kern-.\p@\hrule\@width.6\columnwidth\kern2.6\p@}
+}
+%
+% This is the \twocolumn option. It would be nice to have automatic
+% detection.
+%
+\DeclareOption{twocolumnfn}{%
+\setlength{\fnmarkindent}{1.333em}
+\setlength{\fnlinewidth}{1.333em}
+\setlength{\fntextwidth}{-1.333em}
+\renewcommand\@makefntext[1]{%
+\parindent 1em%
+\noindent
+\mbox{\hspace{.1em}}
+\hb@xt@\fnmarkindent{\hss{%
+   \fnfonttype
+   \fnmarktype{%
+   \fndelimitersize\fndelimiterpre
+   \fnmarksize
+   \@thefnmark
+   \dotdelimiter
+   \fndelimitersize\fndelimiterpost
+   }
+  }
+ }
+\mbox{\hspace{-1.5em}}
+\hspace{\fill}
+\addtolength{\fntextwidth}{\fnlinewidth}
+\parbox[t]{\columnwidth-\fnmarkindent-\fntextwidth}{\hold@fntext{\fnfonttype #1}}
+}
+}
+%
+%
+%
+\ProcessOptions
+%
+\endinput
+%
+%-----------------------------------------------------------------------
+%                              End Hack
+%----------------------------------------------------------------------- 
+% End of file
+
+% Some junk:
+
+\setlength{\fnmarkindent}{-4pt}
+\setlength{\fntextwidth}{-6pt}%-.333em}
+
+\renewcommand\@makefntext[1]{%
+
+\@setpar{\@@par
+\@tempdima = \linewidth
+\advance\@tempdima -15pt %-15.6pt
+\parshape \@ne 10pt \@tempdima
+}%
+\par
+\parindent 1em\noindent
+
+\hbox to \z@{\hss{%
+   \fnfonttype
+   \fnmarktype{%
+   \fndelimitersize\fndelimiterpre
+   \fnmarksize
+   \@thefnmark
+   \dotdelimiter
+   \fndelimitersize\fndelimiterpost
+   }
+  }
+}
+% \hspace{-\fnmarkwidth}
+\hspace{\fntextwidth}
+\parbox[t]{\@tempdima}{\hold@fntext{\fnfonttype #1}}
+}
+}

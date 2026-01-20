@@ -1,0 +1,339 @@
+\documentclass[10.5bp, jafontscale=1.00]{ltjsarticle}
+\usepackage{stix,amsmath,cite,citesort,eclbkbox,listings,jlisting}
+\usepackage{graphicx}
+\usepackage{titlesec}
+\usepackage{booktabs}
+\usepackage{caption}
+\captionsetup{justification=centering, skip=2pt}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning}
+\usepackage[no-math,expert,haranoaji]{luatexja-preset}
+\setmainfont{Times New Roman}[BoldFont=TimesNewRomanPS-BoldMT]
+\setsansfont{Times New Roman}[BoldFont=TimesNewRomanPS-BoldMT]
+\setlength{\oddsidemargin}{-0.in}
+\setlength{\evensidemargin}{-0.in}
+\setlength{\topmargin}{-0.in}
+\setlength{\headheight}{0cm}
+\setlength{\headsep}{0mm}
+\setlength{\textheight}{43.5\baselineskip}
+\setlength{\columnsep}{9mm}
+\setlength{\topsep}{0pt}
+\setlength{\partopsep}{0pt}
+\setlength{\parsep}{0pt}
+\titleformat*{\section}{\normalsize\bfseries}
+\titleformat*{\subsection}{\normalsize\bfseries}
+\titleformat*{\subsubsection}{\normalsize\bfseries}
+\makeatletter
+\renewcommand\section{%
+  \@startsection{section}%
+    {1}%
+    {0pt}%
+    {-0\baselineskip plus -1ex minus -.2ex}%
+    {0\baselineskip plus.2ex}%
+    {\normalfont\normalsize\bfseries}%
+  }
+\renewcommand{\subsection}{%
+  \@startsection{subsection}%
+    {2}%
+    {0pt}%
+    {-0\baselineskip plus -1ex minus -0.2ex}%
+	{0\baselineskip plus 0.2ex}%
+    {\normalsize\bfseries}%
+}
+\renewcommand{\subsubsection}{%
+  \@startsection{subsubsection}%
+    {3}%
+    {0pt}%
+    {-0.\baselineskip plus -1ex minus -0.2ex}%
+	{0.\baselineskip plus 0.2ex}%
+    {\normalsize\bfseries}%
+}
+\def\linesperpage#1{%
+\baselineskip=\textheight
+\divide\baselineskip by #1}
+\def\fitwidth#1#2{\leavevmode{%
+  \setbox0=\hbox{#2}%
+  \ifdim\wd0>#1 \resizebox{#1}{\height}{#2}%
+  \else
+    \def\@tempa{#2}%
+    \ifx\@tempa\empty\hbox to#1{\hss}%
+    \else\relax\hbox to#1\bgroup\hfil\@fitwidth#2{}\end@fitwidth\fi
+  \fi}}
+\def\@fitwidth#1#2\end@fitwidth{\def\@tempa{#2}#1%
+  \ifx\@tempa\empty\let\next\end@fitwidth
+  \else\hfill\def\next{\@fitwidth#2\end@fitwidth}\fi
+  \next}
+\def\end@fitwidth{\hfil\egroup}
+\makeatother
+\begin{document}
+\linesperpage{48}
+\pagestyle{empty}
+\twocolumn[
+\fontsize{14bp}{\baselineskip}\selectfont
+\begin{flushleft}
+{\bf Eー3}
+\end{flushleft}
+\vspace*{-\baselineskip}
+\begin{center}
+\textbf{授業評価の数値に表れない学生の本音}
+\end{center}
+\vspace*{0.5\baselineskip}
+\fontsize{10.5bp}{\baselineskip}\selectfont
+\begin{center}
+22M11178　藺牟田　晃弘
+\end{center}
+\begin{flushright}
+指導教員　佐藤　大輔
+\end{flushright}
+\hspace*{1cm}
+\vspace*{-0.\baselineskip}
+]
+\fontsize{10.5bp}{\baselineskip}\selectfont
+
+%==============================
+% 1. はじめに
+%==============================
+\section{はじめに}
+
+\subsection{研究背景}
+現在，大学では教育の質向上のために，学生による授業評価は教育改善のための重要な指標とされている．多くの大学では，学期末に授業評価アンケートを実施し，その結果を教員にフィードバックしている．一般的にアンケートは，多段階のスコアと自由記述で構成されている．
+
+現状の課題として，一個人がどのような項目に重きを置いて授業評価スコアを判断しているかが不明である．また，評価スコアだけでは捉えきれない学生の本音が存在していると考えられる．従来の授業評価研究では，選択式の評価スコアに着目した分析が多いが，学生の具体的な感情や意見を定量的に把握することは困難であった．
+
+\subsection{本研究の目的と仮説}
+本研究では，学生の本音を見ることができる自由記述に着目する．自由記述には，学生個人の授業や教員に対する感情が反映されていると考えられる．本研究の目的は，自然言語処理技術を用いて自由記述から感情スコアを算出し，授業評価スコアとの関係性を分析することで，授業評価の要因を明らかにすることである．
+
+本研究では以下の仮説を検証する．（1）授業レベルでは，学生の感情スコアと授業評価スコアには相関関係がある．（2）マルチタスク学習により，感情スコアと授業評価スコアの両方に影響する共通要因と，それぞれに特有の要因を分離できる．
+
+\subsection{本研究の意義}
+本研究の意義は以下の3点である．（1）自由記述の定量的分析により，従来の選択式評価では把握できなかった学生の本音を可視化する．（2）SHAP分析による要因の特定により，教育改善に対する具体的な示唆を提供する．（3）マルチタスク学習の教育データへの適用可能性を検証する．
+
+%==============================
+% 2. 関連研究
+%==============================
+\section{関連研究}
+
+\subsection{自然言語処理による感情分析}
+BERT（Bidirectional Encoder Representations from Transformers）は，Googleが2018年に開発した双方向Transformerベースの言語モデルである\cite{bert}．BERTは文脈を考慮した単語表現を学習でき，感情分析タスクにおいて高い精度を達成している．本研究では，日本語の事前学習済みBERTモデルを微調整して使用する．
+
+\subsection{マルチタスク学習}
+マルチタスク学習は，複数のタスクを同時に学習することで，タスク間の共通した特徴を効率的に学習できる手法である\cite{mtl_survey}．関連するタスクを同時に学習することで，単一タスク学習よりも汎化性能が向上する場合がある．一方で，タスク間の干渉により性能が低下する可能性も指摘されている．
+
+\subsection{解釈可能AI（SHAP）}
+SHAP（SHapley Additive exPlanations）は，機械学習モデルの予測結果に対する各特徴量の寄与度を定量的に算出する説明可能AI手法である\cite{shap}．ゲーム理論のShapley値に基づき，各特徴量の貢献度を公平に分配する．SHAP値が正であれば予測を高める方向に，負であれば低める方向に寄与する．
+
+\subsection{既存研究との比較と本研究の位置づけ}
+授業評価に関する研究は数多く行われているが，多くは選択式の評価項目を対象としており，自由記述の定量的分析は限られている．本研究は，BERTによる感情分析，マルチタスク学習，SHAP分析を組み合わせることで，自由記述から授業評価の要因を解明する新しいアプローチを提案する．
+
+%==============================
+% 3. 研究方法
+%==============================
+\section{研究方法}
+
+\subsection{データセットと前処理}
+本研究では，福岡工業大学の授業評価システムの6年分のデータを使用した．対象期間は2018年度から2023年度までであり，授業数は3,268件，総自由記述数は83,851件である．
+
+授業アンケートは授業評価スコアと自由記述で構成される．授業評価スコアは，択一式質問の点数化による単純平均（1〜4点）である．自由記述は2つの質問から構成される．
+
+モデル構築のために，ランダム抽出した1,000件を手動でラベリングした．分類結果は，ネガティブ191件（感情スコア-1），ポジティブ180件（感情スコア+1），ニュートラル628件（感情スコア0）である．表\ref{tab:stats}にデータの基本統計量を示す．
+
+\begin{table}[b]
+\centering
+\caption{データの基本統計量}
+\label{tab:stats}
+\small
+\begin{tabular}{lrr}
+\toprule
+\multicolumn{1}{c}{統計量} & \multicolumn{1}{c}{感情スコア} & \multicolumn{1}{c}{授業評価スコア} \\
+\midrule\midrule
+平均 & 0.001 & 3.459 \\
+標準偏差 & 0.260 & 0.216 \\
+最小値 & -1.000 & 2.000 \\
+中央値 & 0.000 & 3.480 \\
+最大値 & 1.000 & 4.000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{予備分析（相関関係の探索）}
+授業ごとの感情スコア平均と授業評価スコアの相関分析を行った．表\ref{tab:correlation}に結果を示す．ピアソン相関係数は0.31であり，統計的に有意な中程度の正の相関が確認された（$p < 0.001$）．また，個人レベルの相関（0.12）と比較して，授業レベルでの集約により相関が大幅に向上した．
+
+\begin{table}[t]
+\centering
+\caption{相関分析の結果}
+\label{tab:correlation}
+\small
+\begin{tabular}{lrr}
+\toprule
+\multicolumn{1}{c}{指標} & \multicolumn{1}{c}{値} & \multicolumn{1}{c}{p値} \\
+\midrule\midrule
+ピアソン相関 & 0.310 & $<$ 0.001 \\
+スピアマン相関 & 0.297 & $<$ 0.001 \\
+ケンドール相関 & 0.204 & $<$ 0.001 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{モデル構成（単一タスク / マルチタスク）}
+本研究では，日本語の事前学習済みBERTモデルをベースモデルとして使用した．以下の3つのモデルを構築した．
+
+\textbf{単一タスクモデル1}：自由記述から感情スコアを予測する3クラス分類モデル．
+
+\textbf{単一タスクモデル2}：自由記述から授業評価スコアを予測する回帰モデル．
+
+\textbf{マルチタスクモデル}：感情スコア予測と授業評価スコア予測を同時に学習するモデル．図\ref{fig:architecture}にアーキテクチャを示す．BERTエンコーダの共有層から感情分析ヘッドと評価スコアヘッドが分岐する．
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{test2.png}
+\caption{マルチタスクモデルのアーキテクチャ}
+\label{fig:architecture}
+\end{figure}
+
+\subsection{学習設定と評価指標}
+学習設定は以下の通りである．バッチサイズ16，学習率$5 \times 10^{-6}$，エポック数5，最大系列長512．マルチタスクモデルの損失関数の重みは$\alpha = 0.5$，$\beta = 0.5$とした．
+
+評価指標として，感情分析タスクにはAccuracy，F1-score（マクロ平均）を使用し，評価スコア予測タスクにはRMSE，MAE，$R^2$，相関係数を使用した．データは学習用796件，検証用200件に分割した．
+
+%==============================
+% 4. 実験結果と考察
+%==============================
+\section{実験結果と考察}
+
+\subsection{マルチタスク学習の性能評価}
+表\ref{tab:multitask_result}にマルチタスクモデルの性能を示す．感情分析タスクではAccuracy 72.5\%，F1-score 0.655を達成した．一方，評価スコア予測タスクでは$R^2 = -0.108$となり，予測が困難であることが明らかになった．
+
+\begin{table}[t]
+\centering
+\caption{マルチタスクモデルの性能}
+\label{tab:multitask_result}
+\small
+\begin{tabular}{llr}
+\toprule
+タスク & 指標 & 値 \\
+\midrule\midrule
+\multirow{2}{*}{感情分析} & Accuracy & 0.725 \\
+ & F1-score & 0.655 \\
+\midrule
+\multirow{4}{*}{評価スコア} & RMSE & 0.193 \\
+ & MAE & 0.148 \\
+ & $R^2$ & -0.108 \\
+ & 相関係数 & 0.094 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{単一タスクモデルとの比較}
+表\ref{tab:comparison}に単一タスクモデルとの比較を示す．感情分析では，単一タスクモデル1がAccuracy 77.0\%を達成し，マルチタスクモデル（72.5\%）を4.5ポイント上回った．これは，評価スコア予測タスクが感情分析の学習に干渉したことを示唆する．
+
+評価スコア予測では，両モデルとも$R^2 \approx 0$であり，予測が困難であった．ただし，マルチタスクモデルはRMSE，MAEで若干の改善（2-5\%）が見られた．
+
+\begin{table}[t]
+\centering
+\caption{単一タスクモデルとの比較}
+\label{tab:comparison}
+\small
+\begin{tabular}{lrrr}
+\toprule
+ & 単一タスク & マルチタスク & 差分 \\
+\midrule\midrule
+\multicolumn{4}{l}{\textbf{感情分析}} \\
+Accuracy & 0.770 & 0.725 & -0.045 \\
+F1-score & 0.706 & 0.655 & -0.051 \\
+\midrule
+\multicolumn{4}{l}{\textbf{評価スコア予測}} \\
+RMSE & 0.197 & 0.193 & -0.004 \\
+$R^2$ & 0.016 & -0.108 & -0.124 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{総合考察}
+評価スコア予測が困難な主な原因は，データ構造の不一致にある．入力は個人の自由記述（1人の主観的意見）であるのに対し，出力は授業評価スコア（複数学生の平均値）である．個人の意見が必ずしも集団の傾向を反映しないため，1人の記述から全体の平均を予測することは理論的に限界がある．
+
+マルチタスク学習では，困難なタスク（評価スコア予測）が容易なタスク（感情分析）に負の影響を与えることが確認された．これは，共有エンコーダが両タスクの妥協点を探すためと考えられる．
+
+%==============================
+% 5. SHAP分析による満足度要因の解明
+%==============================
+\section{SHAP分析による満足度要因の解明}
+
+\subsection{SHAP分析の手法}
+単一タスクモデル1（Accuracy 77\%）とマルチタスクモデルに対してSHAP分析を実施した．分析には層化サンプリングにより抽出した5,000件を使用した．
+
+\subsection{満足度要因の抽出}
+表\ref{tab:single_shap}に，単一タスクモデルにおけるポジティブ判定に寄与する重要語TOP10を示す．「やす」（SHAP値0.27）は「わかりやす」「取りやす」などの語幹であり，理解しやすさを表す．「面白」「楽しい」などの面白さに関連する単語も上位にランクインした．
+
+\begin{table}[t]
+\centering
+\caption{ポジティブ判定に寄与する重要語TOP10}
+\label{tab:single_shap}
+\small
+\begin{tabular}{crrr}
+\toprule
+ & \multicolumn{1}{c}{単語} & \multicolumn{1}{c}{SHAP値} & \multicolumn{1}{c}{出現回数} \\
+\midrule\midrule
+1 & やす & 0.266 & 337 \\
+2 & 良かっ & 0.247 & 207 \\
+3 & おもしろ & 0.244 & 10 \\
+4 & よかっ & 0.225 & 195 \\
+5 & 面白 & 0.218 & 100 \\
+6 & 楽しい & 0.196 & 67 \\
+7 & 楽しめる & 0.188 & 6 \\
+8 & ありが & 0.176 & 19 \\
+9 & 楽し & 0.164 & 192 \\
+10 & 面白い & 0.152 & 37 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+マルチタスク学習のSHAP分析により，4つの要因タイプを特定した（表\ref{tab:multitask_factors}）．共通要因（満足度要因）は577語彙（18.0\%）であり，感情スコアと評価スコアの両方に影響する．感情特化要因は1,200語彙（37.5\%），評価特化要因は532語彙（16.6\%）が特定された．
+
+\begin{table}[t]
+\centering
+\caption{SHAP分析による要因分類}
+\label{tab:multitask_factors}
+\small
+\begin{tabular}{lrrl}
+\toprule
+\multicolumn{1}{c}{要因タイプ} & \multicolumn{1}{c}{語彙数} & \multicolumn{1}{c}{割合} & \multicolumn{1}{c}{影響} \\
+\midrule\midrule
+共通要因 & 577 & 18.0\% & 両方 \\
+感情特化 & 1,200 & 37.5\% & 感情のみ \\
+評価特化 & 532 & 16.6\% & 評価のみ \\
+低重要度 & 889 & 27.8\% & 影響小 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+共通要因の代表例として「学ぶ」「理解」「総括」「推奨」などが特定された．これらは感情と評価の両方に正の影響を与えるため，1つの施策で両方を向上させることができる．
+
+\subsection{実用的示唆}
+カテゴリ別の集計結果では，「面白さ・興味」カテゴリが最高の平均SHAP値（0.128）を記録し，次いで「感謝・満足」（0.124），「わかりやすさ」（0.089）が続いた．これは，授業の面白さを高める工夫が学生満足度向上に有効である可能性を示唆している．
+
+共通要因（18.0\%）への投資が最も効率的であり，1つの施策で学生満足度と教育効果の両方を向上させることができる．教育改善における投資効果を最大化するためには，共通要因に注力することが推奨される．
+
+%==============================
+% 6. おわりに
+%==============================
+\section{おわりに}
+
+\subsection{研究のまとめ}
+本研究では，自由記述の感情分析により，授業評価の要因を明らかにした．主要な発見は以下の通りである．
+
+（1）授業レベルで感情スコアと授業評価スコアには統計的に有意な相関関係がある（$r = 0.31$，$p < 0.001$）．
+
+（2）感情分析では単一タスクモデルが優位であり（Accuracy 77\% vs 72.5\%），評価スコア予測は両モデルとも困難であった（$R^2 \approx 0$）．これはデータ構造の不一致（個人→集団平均）に起因する．
+
+（3）SHAP分析により，理解しやすさと面白さが満足度に大きく寄与することが示された．また，マルチタスク学習により共通要因（18.0\%）を特定した．
+
+\subsection{今後の展望}
+本研究は相関関係に基づく探索的研究であり，因果関係の証明には実験的検証が必要である．今後は，（1）特定された満足度要因に基づく授業改善施策の効果検証，（2）他大学データでの汎用性の確認，（3）マルチタスク学習の損失関数の重み調整による性能改善を予定している．
+
+\begin{thebibliography}{9}
+\bibitem{bert} Devlin, J., et al., ``BERT: Pre-training of Deep Bidirectional Transformers for Language Understanding,'' \textit{Proc.~of NAACL-HLT}, pp.~4171--4186, 2019.
+\bibitem{mtl_survey} Zhang, Y., and Yang, Q., ``A Survey on Multi-Task Learning,'' \textit{IEEE Trans.~on Knowledge and Data Engineering}, Vol.~34, No.~12, pp.~5586--5609, 2022.
+\bibitem{shap} Lundberg, S.~M., and Lee, S.~I., ``A Unified Approach to Interpreting Model Predictions,'' \textit{Advances in NeurIPS}, pp.~4765--4774, 2017.
+\end{thebibliography}
+
+\end{document}
