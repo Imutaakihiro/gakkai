@@ -1,0 +1,665 @@
+\chapter{準備}
+\section{はじめに}
+
+本章では，本研究で一貫して用いることとなる GNL モデルについて説明する．
+GNL モデルは Wen and Koppelman (2001) \cite{WK01} で示された，極めて高い自由度があり，なおかつ（ランダム）効用最大化と整合的な離散選択モデルである．
+GNL モデルが導出されるまでには，長い離散選択モデル発展の流れがある．
+これらは離散選択モデルの主要な適用対象である，交通計画分野，マーケティング・サイエンス分野でその多くがなされている．
+
+
+本章の構成は次のとおりである．
+まず，2節で GNL モデルに至るまでの離散選択モデルをレビューする．
+3 節では GNL モデルのランダム効用最大化仮説からの選択確率式の導出を行なう．
+4 節では，効用最大化と整合的であるモデル族である GEV Family からの選択確率式の導出を行ない，3 節の定式化と等価であることを示す．
+次に 5 節で GNL モデルの基本的な性質として集計レベルでのエントロピー最大化問題との等価性について示す．
+
+%****************************************************************************************************************************************
+\section{離散選択モデル}
+%****************************************************************************************************************************************
+離散選択モデルとは，選択肢の様々な属性に応じて選択者個人が選択集合の中からどの選択肢を選ぶかという行動を表現するモデルである．
+ここで，選択（肢）集合は次のような性質を持たなければならない\cite{Tra09}：
+\begin{enumerate}
+\item 選択肢は互いに排他的，
+\item 選択（肢）集合は網羅的，
+\item 選択肢の数は有限．
+\end{enumerate}
+
+もともと，離散的な個々人選択行動についての研究がなされていた分野は，心理学である．
+この類のモデルの先駆的なモデルとして，Thurstone (1927) \cite{Thu27} の Binary Probit (BP) モデルが挙げられる．
+このモデルは確率項に独立な正規分布を仮定したものであり，効用 （Utility） という経済学の言葉ではなく，刺激 (Stimuli) という心理学用語を用い記述されている．
+ただし，選択そのものがバイナリであり，確率項が独立としている．
+
+これに対し，特に確率項を明示的には考えず，公理的な立場からモデルを構築したのが Luce (1958)\cite{Luc58}，Luce (1959) \cite{Luc59} である．
+Luce は選択公理\footnote{数学の選択公理とは異なる．この選択公理の導出については，何ら数学とは関係なく，合理性とも関係ないという批判が，当初からある\cite{Deb60}．}という公理を提唱し，これを満たす選択モデル（Luce モデル）は次の形となるとなることを示している：
+\begin{align}
+Q_k^h = \frac{U_k^h}{\sum \limits_{k^{\prime} \in {\cal K}} U_{k^{\prime}}^h} = \frac{U_k^h}{\sum \limits_{k^{\prime}=1}^{N_k} U_{k^{\prime}}^h} \label{eq2-1}
+\end{align}
+ここで，$Q_k^h$ は消費者 $h$ の選択肢 $k$ の（濃度）選択確率，$U_k^h$ は選択肢 $k$ の重みであり，通常経済学では効用と呼ばれる．
+また，${\cal K}$ は選択肢集合であり，$N_k$ は選択肢数である．
+Luce の選択公理については付録\ref{sec:2-A-1} に詳しく示す．
+ここで注意すべきは，$U_k^h$ という効用が選択を行なう消費者，観測者にとっても確定的であるという点である．
+
+これに対し，Marschek (1960) \cite{Mar60} は，モデル内の確率的な要素を消費者にとって確定的であり，観測者にとって確率的であるとしたランダム効用仮説を提唱している．
+その代表的なモデルが，McFadden (1973) \cite{McF73} により厳密な導出が行われた Multinomial Logit (MNL) モデルである．
+MNL モデルの選択確率式は，
+\begin{align}
+Q_k^h = \frac{\exp V_k^h}{\sum \limits_{k^{\prime} \in {\cal K}} \exp V_{k^{\prime}}^h} = \frac{\exp V_k^h}{\sum \limits_{k^{\prime}=1}^{N_k} \exp V_{k^{\prime}}^h}\label{eq2-2}
+\end{align}
+となる．ここで，$V_k^h$ は消費者 $h$ 選択肢 $k$ の確定的効用である．
+賢明な読者は，式\eqref{eq2-2} で表された選択確率式が，Luce モデルの特殊形であることに気づくだろう．
+実際，MNL モデルは Luce の選択公理から導かれる Independence from Irrelevant Alternatives (I.I.A) 特性
+\footnote{確定的な場合の I.I.A 特性は，\cite{Arr58} により導かれた．ただし，確定的な場合と確率的な場合とは直接的な繋がりがないことが示されている\cite{Ray73}．}を満たしている．
+しかし，実際の選択行動では，I.I.A 特性を犯した行動が多く観察され，MNL モデルは選択行動を記述するには不十分である．
+
+これに対し，離散選択モデルにおいて画期的な解決策をもたらしたのが，Ben-Akiva (1973) \cite{Ben73} により開発された，Nested Logit (NL) モデル：
+\begin{align}
+Q_k^h &= P_j^h P_{k|j}^h, \label{eq2-3}\\
+P_j^h &= \frac{ \left( \sum \limits_{k^{\prime} \in {\cal K}_j} \left( \exp V_{k^{\prime}}^h \right)^{1/\mu_j} \right)^{\mu_j}}{\sum \limits_{j^{\prime}=1}^{N_j} \left( \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left( \exp V_{k^{\prime}}^h \right)^{1/\mu_{j^{\prime}}} \right)^{\mu_{j^{\prime}}}},\label{eq2-4}\\
+P_{k|j}^h &= \frac{\left( \exp V_k^h \right)^{1/\mu_j}}{\sum \limits_{k^{\prime} \in {\cal K}_j} \left( \exp V_{k^{\prime}}^h \right)^{1/\mu_j}} \label{eq2-5}
+\end{align}
+である．ここで，$N_j$ はネスト数，${\cal K}_j$ はネスト $j$ に属する選択肢集合である．
+NL モデルは消費者がネスト $j$ を選択し，その次にそのネストに所属する選択肢集合 ${\cal K}_j$ から選択肢 $k$ を選ぶという構造により，
+I.I.A 特性を緩和したものである．
+NL モデルの $\mu_j$ は類似度パラメータと呼ばれ，
+\begin{align}
+0<\mu_j \leq 1,~~\forall j \label{eq2-6}
+\end{align}
+のとき，ランダム効用最大化と整合的である．
+このように画期的な NL モデルであるが，I.I.A 特性の緩和は十分とはいえない．
+NL モデルでは同一ネスト内に属する選択肢の間には，擬似的に相関が定義できるが，違うネストに属する選択肢の間は独立となる．
+同じ選択肢は複数のネストに属することができないため，複雑な相関関係をモデルの構造として与えることができない．
+これを解決すべく，選択肢を一対比較することによる NL モデルの構造を提案したのが Pair Combination Logit (PCL) モデル\cite{Chu81, Chu89}である．
+しかし，一対比較は，選択肢数が多くなるとネストが増加し，類似度パラメータも増加するという欠点があるため，実務においてはほとんど用いられるはない．
+
+NL モデルでは表現できない複雑な相関関係を与えることができるモデルとして，Multinomial Probit (MNP) モデル\cite{Dag79}や Mixed Logit (MXL) モデル\cite{McF89}が考案されている．
+MNP モデルの選択確率は次のように表わされる：
+\begin{align}
+Q_{k}^h &=\int_{\hat {\bm \epsilon}^h \in \Xi} g (\hat {\bm \epsilon}^h ) \d \hat {\bm \epsilon}^h , \label{eq2-7}\\
+g ( {\bm \epsilon }^h) &:= \frac{1}{(2 \pi )^{N_k /2} | \Omega |^{1/2}}  \exp \left( -\frac{1}{2} {\bm \epsilon}^{\prime h} \Omega^{-1} {\bm \epsilon}^h \right), \label{eq2-8}\\
+\Xi &\vcentcolon= \{ {\bm \epsilon}^h~{\rm s.t.}~ V_k^h + \epsilon_k^h >  V_{k^{\prime}}^h + \epsilon_{k^{\prime}}^h \forall k^{\prime} \not = k \}. \label{eq2-9}
+\end{align}
+ここで，$g ( {\bm \epsilon }^h)$ は，${\bm \epsilon }^h$の同時確率密度関数，${\bm \epsilon}^{\prime h}$ は消費者 $h$ の誤差項ベクトルであり，$\bm 0$ の平均，$\Omega$ の分散・共分散を持つ多次元正規分布である．
+BP モデルでは，この分散・共分散行列が $2\times2$ で構成され，対角成分以外は $0$ となる．
+一方 MXL モデルにおける選択確率は，
+\begin{align}
+Q_k^h = \int \left( \frac{\exp \left({\bm \alpha}^{\prime}{\bm X}_k \right)}{\sum_{k^{\prime} \in {\cal K}} \exp \left({\bm \alpha}^{\prime}{\bm X}_{k^{\prime}} \right)} \right) g({\bm \alpha}) \d {\bm \alpha} \label{eq2-10}
+\end{align}
+となる．ここで，${\bm \alpha}$ は効用関数パラメータ・ベクトル，${\bm X}_k$ はそのパラメータに対応する属性値ベクトル，$g({\bm \alpha})$ は $\bm \alpha$ の同時確率密度関数である．
+MNP，MXL 両方のモデルにいえることは，多重積分を内包し，選択確率が閉形式\footnote{閉形式とは，方程式の解が初等関数として求まらないことをいう．ここでは，積分が右辺に残るため閉形式とはならない．より詳しい議論は，Chow (1999)\cite{Cho99}を参照のこと．}で求まらないことである．
+そのため，パラメータ推定，利用時ともにモンテカルロ・シミュレーションが必要となる．
+このようなシミュレーションを内包したモデルは，学者にとっては利用しやすいため，多くの研究，拡張がなされている．
+
+しかし，シミュレーションを内包したモデルは，実務家にとって必ずしも利用しやすいものとはいえない．
+これは次の理由による：
+\begin{enumerate}
+\item 同じデータセットを用いても，乱数を利用したシミュレーションでは，パラメータ推定時にパラメータが一意に定まらない，
+\item 同様に，選択確率も一意に定まらない，
+\item 解が解析的に求まらないため，余剰等の副次的な数値についても解析的には得ることが出来ない．
+\end{enumerate}
+また，相関構造がパラメタライズに求められるため，その選択構造自体を十分説明しているとはいえないという批判もある．
+
+これらの問題点を解決すべく開発されたモデルが，本研究で対象とする GNL モデル \cite{WK01} である．
+GNL モデルは NL モデルにおいて，アロケーション・パラメータというパラメータを新たに導入することにより，複数のネストへの帰属を可能とし，
+複雑な相関関係が表現可能なモデルである．
+次節において，GNL モデルの選択確率式の導出を行なう．
+%****************************************************************************************************************************************
+\section{ランダム効用理論からの選択確率の導出}
+%****************************************************************************************************************************************
+一般的な経済学においては，ある財の組み合わせをある連続的な量を選ぶという連続量を選択することを想定している．
+しかし，離散選択モデルでは，ある離散的な選択肢集合から，一つの選択肢を選ぶこととなる．
+
+離散選択モデルは，その多くが，効用最大化の仮定より，選択確率式が導出される．
+代表的な離散選択モデルである Multinomial Logit (MNL) モデルを，実際に導出しよう．
+ある消費者 $h$ が選択可能な選択肢集合を $\cal K$ とし，その中に含まれている選択肢 $k$ を選択することにより得られる効用を $U_k^h$ とすると，
+消費者 $h$ が $\cal B$ の中から選択肢 $k$ を選ぶ条件は，
+\begin{align}
+U_k^h > U_{k^{\prime}}^h,~~\forall~k^{\prime} \not = k,~~k,k^{\prime} \in {\cal K} \label{eq2-11}
+\end{align}
+となる．
+
+ランダム効用理論\cite{Mar60, McF73, Man77, MR91} では，この効用 $U_k^h$ が次に示す理由で，観測者にとって確率的であるとする：
+\begin{enumerate}
+\item 観察者は，消費者の効用を完全に把握できない， 
+\item 把握できるとしても，測定誤差が存在する．
+\end{enumerate}
+効用 $\hat U_k^h$ が次のように分解可能であるとしよう：
+\begin{align}
+U_k^h= V_k^h + \epsilon_k^h. \label{eq2-12}
+\end{align}
+ここで，$V_k^h$ は観測者にとって観測可能な効用であり，確定的効用と呼ばれる．
+$\epsilon_k^h$ は真の効用 $U_k^h$ と観測可能な効用 $V_k^h$ との差であり，確率的効用と呼ばれる．
+注意すべきは，確率的効用 $\epsilon_k^h$ が消費者の選択状況に依存するのではなく，観測者の選択状況の描写に依存していると考えることである．
+Luce (1959)\cite{Luc59}, Tversky (1972b) \cite{Tve72b} といった心理学的なモデルの多くは，この確率的効用を消費者の選択状況に依存するものと考えている．
+この解釈の違いが，合理性（効用最大化）との整合性を巡る議論の原因である．
+これを，心理学の用語を用いて説明するならば，ランダム効用に従うモデルでは，客観的評価の定義にランダム性があるのに対し，心理学的なモデル（一定効用モデル）では，消費者の意思決定ルール自体にランダム性があるとしている．
+
+さて，式\eqref{eq2-11},\eqref{eq2-12} から各選択肢の選択確率を導出しよう．
+消費者 $h$ が選択肢 $k$ を選択する確率 $Q_k^h$ は，
+\begin{align}
+Q_k^h & = \Prob (U_k^h > U_{k^{\prime}}^h~\forall k^{\prime} \not = k) \notag\\
+        & = \Prob (V_k^h + \epsilon_k^h > V_{k^{\prime}}^h + \epsilon_{k^{\prime}}^h) \notag\\
+        & = \Prob (\epsilon_{k^{\prime}}^h - \epsilon_{k}^h < V_k^h - V_{k^{\prime}}^h). \label{eq2-13}
+\end{align}
+この確率は，ランダム項 $\epsilon_{k^{\prime}}^h-\epsilon_{k}^h$ が，確定項 $V_k^h - V_{k^{\prime}}^h$ を下回る確率の累積分布により表される．
+同時密度関数 $f({\bm \epsilon}^h)$ を用い，この累積確率は，次のように表わすことができる：
+\begin{align}
+Q_k^h & = \Prob ( \epsilon_{k^{\prime}}^h - \epsilon_{k}^h < V_k^h -  V_{k^{\prime}}^h) \notag\\
+  &= \int_{{\bm \epsilon}^h} \1_{\{\Prob ( \epsilon_{k^{\prime}}^h - \epsilon_{k}^h < V_k^h - V_{k^{\prime}}^h)\}}f( {\bm \epsilon}^h) \d {\bm \epsilon}^h, \label{eq2-14}
+\end{align}
+ここで，$\1_{\{\}}$ は$\{\}$ 内の条件を満たすとき $1$，それ以外は $0$ を示す指示関数である．
+式\eqref{eq2-14} はランダム項の確率密度関数 $f(\hat \epsilon^h)$ に関しての多重積分となっており，選択確率は，ランダム項に依存していることが分かる．
+このランダム項の密度分布がある特定の密度関数に従う場合のみ，多重積分が陽に解け，閉形式で解が求まる．
+%****************************************************************************************************************************************
+\subsection{MNL モデルの導出}
+ここでは，多くのモデルの基本となる，MNL モデルについてランダム効用最大化からの選択確率の導出を行なう．
+$\epsilon_k^h$ の確率密度関数を次のように，ガンベル分布と特定しよう：
+\begin{align}
+f(\epsilon_k^h) &:= \exp(-  \epsilon_k^h) \exp ( \exp (- \epsilon_k^h )),\label{eq2-15}\\
+F( \epsilon_k^h ) &:= \exp ( \exp (-  \epsilon_k^h )),\label{eq2-16}
+\end{align}
+ここで，$F( \epsilon_k^h)$ は累積確率密度関数である．
+選択肢の数を $N_k$ とすると，同時確率密度関数 $F( \epsilon_1^h, \epsilon_2^h,$ $\ldots,  \epsilon_k^h, \ldots,  \epsilon_{N_k}^h)$ は， $  \epsilon_k^h $ が互いに独立であるため，
+\begin{align}\
+F( \epsilon_1^h,  \epsilon_2^h, \ldots,  \epsilon_k^h \ldots,  \epsilon_{N_k}^h) &= F(  \epsilon_1^h) \cdot F(  \epsilon_2^h) \dots F(  \epsilon_k^h) \dots F(  \epsilon_{N_k}^h) \notag\\
+&= \prod \limits_{k^{\prime} =1}^{N_k} F( \epsilon_{k^{\prime}}^h ) = \prod \limits_{k^{\prime}=1}^{N_k} \exp ( \exp (-  \epsilon_{k^{\prime}}^h )) = \exp \left( - \sum \limits_{k^{\prime}=1}^{N_k}  \exp (-  \epsilon_{k^{\prime}}^h ) \right) \label{eq2-17}
+\end{align}
+となる．
+ここで，例えば $ \epsilon_{1}^h$ で偏微分すると，
+\begin{align}
+\frac{\partial F( \epsilon_1^h,  \epsilon_2^h, \ldots,  \epsilon_k^h \ldots,  \epsilon_{N_k}^h)}{\partial  \epsilon_{1}^h } &= \frac{\partial F(  \epsilon_k^h)}{\partial  \epsilon_1^h} \cdot (F( \epsilon_2^h) \dots F( \epsilon_k^h) \dots F( \epsilon_{N_k}^h)) \notag\\
+&= \exp( - \epsilon_1^h ) \exp (-\exp (-  \epsilon_1^h) ) \prod \limits_{k^{\prime}=2}^{N_k} F(  \epsilon_{k^{\prime}}^h ) \notag\\
+& = \exp (-\epsilon_1^h) \prod \limits_{k^{\prime}=1}^{N_k} F(\epsilon_{k^{\prime}}^h ) \notag\\
+& = \exp ( -\epsilon_1^h ) \exp \left( - \sum \limits_{k^{\prime}=1}^{N_k}  \exp (-\epsilon_{k^{\prime}}^h ) \right) \label{eq2-18}
+\end{align}
+を得る．ここで，式\eqref{eq2-18} を $1\rightarrow k$ とし，\eqref{eq2-14} に代入すると，
+\begin{align}
+Q_k^h &= \int_{-\infty }^{\infty} F(\epsilon_1^h,  \epsilon_2^h, \ldots,  \epsilon_k^h \ldots,  \epsilon_{N_k}^h) \d  \epsilon_k^h \notag\\
+        &= \int_{-\infty }^{\infty} \exp ( - \epsilon_k^h ) \exp \left( - \exp ( -  \epsilon_k^h) \sum \limits_{k=1}^{N_k}  \exp ( V_{k^\prime}^h -  V_k^h ) \right) \d  \epsilon_k^h \label{eq2-19}
+\end{align}
+を得る．ここで，
+\begin{align}
+\Theta := \sum \limits_{k=1}^{N_k}  \exp (  V_{k^\prime}^h - V_k^h ) \label{eq2-20}
+\end{align}
+とすると，
+\begin{align}
+ Q_k^h &= \frac{1}{\Theta} \int_{-\infty }^{\infty} \exp( -\Theta \exp (-  \epsilon_k^h ) ) \Theta \exp (-  \epsilon_k^h ) \d  \epsilon_k^h = \frac{ \exp  V_k^h}{\sum \limits_{k^{\prime}=1}^{N_k} \exp  V_{k^{\prime}}^h} \label{eq2-21}
+\end{align}
+と Mulitinomial Logit (MNL) モデル \cite{McF73} の選択確率式が導かれる．
+ここで，\eqref{eq2-21} に示した選択確率式は，数学の確率公理：
+\begin{align}
+&0 \leq \hat Q_k^h \leq 1~~\forall k \in {\cal K}, \label{eq2-22}\\
+&\sum \limits_{k^{\prime} \in {\cal K}} Q_{k^{\prime}}^h =1, \label{eq2-23}\\
+&k, k^{\prime} \in {\cal K}~~{\rm and}~~k \cap k^{\prime} = \emptyset~~\Rightarrow~~ Q_{k\cup k^{\prime}}^h = Q_k^h +  Q_{k^{\prime}}^h \label{eq2-24}
+\end{align}
+を明らかに満たす．ここで，${\cal K}$ は $N_k$ 個の単集合を持つ選択肢集合である．
+
+\subsection{GNL モデルの導出}
+本研究で対象とする Generalized Nested Logit (GNL) モデルの選択確率も，ランダム効用最大化仮説から，MNL モデルと同様に導出することができる．
+ここでは，Ben-Akiva and Bierlaire (1999) \cite{BB99} に習い，効用関数を次のとおり仮定する：
+\begin{align}
+ U_{jk}^h =&  V_k^h + \epsilon_k^h, \label{eq2-25}\\
+ V_k^h :=& \tilde V_j^h + V_{jk}^h + \hat V_{k}^h + \ln \gamma_{kj}, \label{eq2-26}\\
+\epsilon_k^h :=& \hat \epsilon_k^h + \epsilon_{jk}^h. \label{eq2-27}
+\end{align}
+ここで，$V_{j}^h$ はネスト $j$ を選択したことによる確定的効用，$V_{jk}^h$ は選択肢 $k$ をネスト $j$ で選択したことによる確定的効用，$\hat V_{k}^h$ は選択肢 $k$ にのみ依存する確定的効用，そして $V_k$ はそれらの和である．
+また同様に，$\hat \epsilon_{k}^h$ はネスト $j$ を選択したことによる確率的効用，$\hat \epsilon_{jk}^h$ は選択肢 $k$ の残りの確率的効用であり，
+\begin{itemize}
+\item $\hat \epsilon_{k}^h$ は$\max \limits_{k \in {\cal K}_j} \hat U_{jk}^h$ がスケール・パラメータ $\mu_{j}$ のガンベル分布となるような分布，
+\item $\epsilon_{jk}^h$ は独立同分布 (i.i.d) のガンベル分布，
+\item $\hat \epsilon_{k}^h$ と $\epsilon_{jk}^h$ は $\forall j,k$ に関して独立
+\end{itemize}
+と仮定する．ここで，${\cal K}_j$ は $j$ に属する選択肢集合である．
+
+効用関数を MNL モデルと同様に捉え，ネスト $j$，選択肢 $k$ の同時選択確率 $Q_{(k,j)}^h$ を導出すると，
+\begin{align}
+Q_{(k,j)}^h = \frac{\exp V_k^h}{\sum \limits_{(k^{\prime},j^{\prime} \in {\cal T}} \exp V_{k^{\prime}}^h} \label{eq2-28}  
+\end{align}
+となる．
+ここで，${\cal T}$ は，$k \times j$ の選択肢集合である．
+選択肢 $k$ の選択確率 $Q_k^h$ が
+\begin{align}
+Q_k^h = \sum_{j^{\prime}=1}^{N_j} P_{j^{\prime}}^h P_{k|j^{\prime}}^h \label{eq2-29}
+\end{align}
+と条件付き確率で表されるとする．そして，選択肢 $k$ がネスト $j$ に属することを，$k \in {\cal K}_j$ と標記する．
+すると，式 \eqref{eq2-28}, \eqref{eq2-29} より，
+\begin{align}
+P_{j}^h = \frac{\sum \limits_{k^{\prime} \in {\cal K}_j} \exp \left( \tilde V_j^h + V_{jk^{\prime}}^h + \hat V_{k^{\prime}}^h + \ln \gamma_{k^{\prime}j} \right)}{\sum \limits_{j^{\prime}=1}^{N_j} \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \exp \left( \tilde V_{j^{\prime}}^h + V_{j^{\prime} k^{\prime}}^h + \hat V_{k^{\prime}}^h + \ln \gamma_{k^{\prime}j^{\prime}} \right)} \label{eq2-30}
+\end{align}
+となる．ここで，$ V_j^h$ は $k$ とは独立であるため，
+ \begin{align}
+P_{j}^h = \frac{\exp \left(\tilde V_j^h \right) \sum \limits_{k^{\prime} \in {\cal K}} \exp \left(V_{jk^{\prime}}^h + \hat V_{k^{\prime}}^h + \ln \gamma_{k^{\prime}j} \right)}{\sum \limits_{j^{\prime}=1}^{N_j} \exp \left(\tilde V_{j^{\prime}}^h \right) \sum \limits_{k^{\prime} \in {\cal K}} \exp \left(V_{j^{\prime}k^{\prime}}^h + \hat V_{k^{\prime}}^h + \ln \gamma_{k^{\prime}j^{\prime}} \right)}
+=\frac{ \exp \left(\tilde V_{j}^h + V_{j}^{\prime h} \right)}{\sum \limits_{j^{\prime}=1}^{N_j} \exp \left( \tilde V_{j^{\prime}}^h + V_{j^{\prime}}^{\prime h} \right) } \label{eq2-31}
+\end{align}
+を得る．ここで，
+\begin{align}
+V_{j}^{\prime} := \mu_j \ln \sum_{k^{\prime} \in {\cal K}_j} \left( \gamma_{k^{\prime}j} \exp \left( V_{jk^{\prime}}^h + \hat V_{k^{\prime}}^h \right)  \right)^{1/\mu_j}. \label{eq2-32}
+\end{align}
+さらに，式\eqref{eq2-28} と \eqref{eq2-31} を \eqref{eq2-29} に代入し，整理すると，
+\begin{align}
+P_{k|j}^h = & \frac{\left( \gamma_{kj}\exp \left({ V_{jk}^h} + \hat V_k^h \right) \right)^{1/\mu_j}}
+{\sum \limits_{k^{\prime} \in {\cal K}_j} \left( \gamma_{k^{\prime}j}\exp \left({ V_{jk^\prime}^h + \hat V_{k^\prime}^h } \right) \right)^{1/\mu_j}} \label{eq2-33}
+\end{align}
+を得る．
+
+GNL モデルの選択確率式は，式\eqref{eq2-29},\eqref{eq2-31},\eqref{eq2-33} となる．
+これ以外に，効用最大化と整合的であるためには，類似度パラメータ $\mu_j$ が
+\begin{equation}
+0< \mu_j \leq 1,~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~\forall j \label{eq2-34}
+\end{equation}
+を満たす必要がある．同様に $\gamma_{kj}$ はアロケーション・パラメータであり，
+\begin{align}
+\gamma_{kj}\geq& 0,~~&\forall& j,k, \label{eq2-35}\\
+\sum_{j^{\prime}=1}^{N_j} \gamma_{kj^{\prime}}=&1, ~~&\forall& k \label{eq2-36}
+\end{align}
+が必要となる．このパラメータの制約条件については後に議論する．
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{Generalized Extreme Value Family からの選択確率の導出}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+離散選択モデルのうち解析的に選択確率を求めることができ，ランダム効用最大化と整合的なモデルの族として，
+McFadden (1978) \cite{McF78}, McFadden (1980) \cite{McF80} がGeneralized Extreme Value （GEV) Family を提唱している．
+この族に属しているモデルでは， GEV 母関数と呼ばれる選択確率の特性関数がある条件を満たせば，ランダム効用最大化と整合的となる．
+
+GEV 母関数，GEV Family とは，次のようなものである．
+\begin{difinition}[GEV 母関数]
+$Y_k^h:=\exp V_k^h$ としよう．すると，$Y_k$ は非負となる．
+次に，$Y_k~\forall k $ の関数，GEV 母関数 ${\cal G}$ を考え，${\cal G} = {\cal G}(Y_1,\ldots,Y_{N_k})$ と標記する．
+GEV 母関数の $Y_k$ による偏微分を ${\cal G}_k$ と標記しよう，すなわち ${\cal G}_k = \partial {\cal G} / \partial Y_k$．
+すると，${\cal G}$ によりもたらされる選択確率 $Q_k^h$ は次のようになる：
+\begin{align}
+Q_k^h = \frac{Y_k^h {\cal G}_k}{{\cal G}} \label{eq2-37}
+\end{align}
+\end{difinition}
+\begin{theorem}[GEV Family]
+GEV 母関数 ${\cal G}$ が次の条件を満たすとき，その母関数 ${\cal G}$ に対応する選択確率 $Q_k^h$ は，ランダム効用最大化と整合的である．
+\begin{enumerate}
+\item ${\cal G}(Y_1^h,\ldots,Y_{N_k}^h)\geq 0$．
+\item ${\cal G}$ は $n$ 次同次関数．いかなる実数 $r$ に関しても ${{\cal G}}(rY_1^h,\ldots,rY_{N_k}^h)=r^n {\cal G}(Y_1^h,\ldots,Y_{N_k}^h)$ が成立．
+\item 全ての $k$ に関して $Y_k^h \rightarrow\infty$ とすると，${\cal G} \rightarrow \infty $.
+\item ${\cal G}$ の相互偏導関数の符号が次のように変化する．全ての $k$ に関して ${\cal G}_k \geq 0$,全ての $k\not= l$ に関して ${\cal G}_{kl}=\partial {\cal G}_k/\partial Y_l \leq 0$,全ての異なる $k,l,m$ に関して ${\cal G}_{klm}=\partial {\cal G}_{kl}/\partial Y_m \geq 0$，そしてより高次についても同様．
+\end{enumerate}
+\end{theorem}
+\begin{proof}
+McFadden (1978) \cite{McF78}, McFadden (1980) \cite{McF80}, Ben-Akiva and Francois (1983) \cite{BF83} もしくは，McFadden (1984) \cite{McF84} をみよ．\QED
+\end{proof}
+
+\subsection{MNL モデルの導出}
+離散選択モデルの基本となる MNL モデルも GEV Familyに属している．
+次のような GEV 母関数を考える：
+\begin{align}
+{\cal G} = \sum \limits_{k^{\prime}=1}^{N_k} Y_{k^{\prime}}^h. \label{eq2-38}
+\end{align}
+式\eqref{eq2-28} は，明らかに条件1.-- 4.を満たしている．
+
+この母関数を式\eqref{eq2-37} に代入し整理すると，選択確率 $Q_k^h$ は
+\begin{align}
+Q_k = \frac{Y_k^h {\cal G}_k}{{\cal G}} = \frac{Y_k^h}{\sum \limits_{k^{\prime}=1}^{N_k} Y_{k^{\prime}}^h} = \frac{\exp V_k^h}{\sum\limits_{k^{\prime}=1}^{N_k} \exp V_{k^{\prime}}^h} \label{eq2-39}
+\end{align}
+となり，式\eqref{eq2-21} と同様の MNL モデルの選択確率が導出される．
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{GNL モデルの導出}
+MNL モデルと同様に，GNL モデルも GEV Family に属し，ランダム効用最大化と整合的である．
+次のような GEV 母関数を考える：
+\begin{align}
+{\cal G} = \sum \limits_{j^{\prime}=1}^{N_j} \left( \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime} }} \left( \gamma_{k^{\prime}j^{\prime}} Y_{k^{\prime}}^h \right)^{1/\mu_{j^{\prime}}} \right)^{\mu_{j^{\prime}}}. \label{eq2-40}
+\end{align}
+式\eqref{eq2-40} が，条件1.--4.を満たしているか確かめよう．
+1. については，$Y_k^h \geq 0$ より自明である．2. については，$1$ 次同次関数である．3. についても自明である．4. については，条件\eqref{eq2-34}--\eqref{eq2-36} のもとでは満たす．
+従って，式\eqref{eq2-40} より導かれる選択確率は，ランダム効用最大化と整合的である．
+
+この母関数を式\eqref{eq2-37} に代入し整理すると，選択確率 $Q_k^h$ は
+\begin{align}
+Q_k^h &= \frac{\sum \limits_{j^{\prime}=1}^{N_j} \left[ \left( \gamma_{kj^{\prime}} \exp V_k^h \right)^{1/\mu_{j^{\prime}}} \left( \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime }}} \left(\gamma_{k^{\prime}j^{\prime}} \exp V_{k^{\prime}}^h \right)^{1/\mu_{j^{\prime}}} \right)^{\mu_{j^{\prime}-1}} \right]}
+{ \sum \limits_{j^{\prime \prime}=1}^{N_j} \left( \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime \prime}}} \left( \gamma_{kj^{\prime \prime}} \exp V_{k^{\prime}}^h \right)^{1/\mu_{j^{\prime \prime}}} \right)^{\mu_{j^{\prime \prime}}}} \notag\\
+&= \sum \limits_{j^{\prime}=1}^{N_j} \left( \frac{\left(\gamma_{kj^{\prime}} \exp V_k^h \right)^{1/\mu_{j^{\prime}}}}{\sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left( \gamma_{k^{\prime}j^{\prime}} \exp V_{k^{\prime}}^h \right)^{1/\mu_{j^{\prime}}}} 
+\frac{\left( \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left(\gamma_{kj^{\prime}} \exp V_{k^{\prime}}^h \right)^{1/\mu_{j^{\prime}}} \right)^{\mu_{j^{\prime}}}}{\sum \limits_{j^{\prime\prime}=1}^{N_j} \left( \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime \prime}}} \left(\gamma_{k^{\prime}j^{\prime \prime}} \exp V_{k^{\prime}}^h \right)^{1/\mu_{j^{\prime \prime}}} \right)^{\mu_{j^{\prime \prime}}}} \right) \label{eq2-41}
+\end{align}
+となる．ここで式\eqref{eq2-29} と同様に次のような条件付き確率を用いて $Q_k^h$ が次のように表せるとする：
+\begin{align}
+Q_k^h = \sum_{j^{\prime}=1}^{N_j} P_{j^{\prime}}^h P_{k|{j^{\prime}}}^h. \label{eq2-42}
+\end{align}
+すると，次のように $P_j^h$，$P_{k|j}^h$ は
+\begin{align}
+P_j^h &= \frac{\left( \sum \limits_{k^{\prime} \in {\cal K}_j} \left(\gamma_{k^{\prime}j} \exp V_{k^{\prime}}^h \right)^{1/\mu_j} \right)^{\mu_j}}{\sum \limits_{j^{\prime}=1}^{N_j} \left( \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left(\gamma_{k^{\prime}j^{\prime}} \exp V_{k^{\prime}}^h \right)^{1/\mu_{j^{\prime}}} \right)^{\mu_{j^{\prime}}}} \label{eq2-43}\\
+P_{k|j}^h &= \frac{\left(\gamma_{kj} \exp V_k^h \right)^{1/\mu_j}}{\sum \limits_{k^{\prime} \in {\cal K}_j} \left( \gamma_{k^{\prime}j} \exp V_{k^{\prime}}^h \right)^{1/\mu_j}} \label{eq2-44}
+\end{align}
+となり，GNL モデルの選択確率式 \eqref{eq2-42}--\eqref{eq2-44} が導かれる．
+
+\subsection{GNL モデルの異なる定式化の等価性}
+直接ランダム効用最大化から導かれた選択式：\eqref{eq2-29},\eqref{eq2-31},\eqref{eq2-33} と，GEV Family から導出された選択確率式 \eqref{eq2-42}--\eqref{eq2-44}  は一見形が異なるように見える．
+しかし，この両者は等価である．
+
+\begin{difinition}[GNL モデルの選択確率式]
+次のように，GNL モデルの選択確率を二つ定義する：\\
+{\sf [LS-GNL]}
+\begin{align}
+\hat Q_k^h &= \sum \limits_{j^{\prime}=1}^{N_j} \hat P_{j^{\prime}}^h \hat P_{k|j^{\prime}}^h,\label{eq2-45}\\
+\hat P_{j}^h &= \frac{ \exp \left(\tilde V_{j}^h + V_{j}^{\prime h} \right)}{\sum \limits_{j^{\prime}=1}^{N_j} \exp \left(\tilde V_{j^{\prime}}^h + V_{j^{\prime}}^{\prime h} \right) } ,\label{eq2-46}\\
+\hat P_{k|j}^h = & \frac{\left( \gamma_{kj}\exp \left({ V_{jk}^h} + \hat V_k^h \right) \right)^{1/\mu_j}}
+{\sum \limits_{k^{\prime} \in {\cal K}_j} \left( \gamma_{k^{\prime}j}\exp \left({V_{jk^\prime}^h + \hat V_{k^\prime}^h } \right) \right)^{1/\mu_j}} .\label{eq2-47}
+\end{align}
+{\sf [O-GNL]}
+\begin{align}
+Q_k^h = & \sum \limits_{j^{\prime}=1}^{N_j} P_{j^{\prime}}^h P_{k|j^{\prime}}^h,\label{eq2-48}\\
+P_j^h= & \frac{\left( \sum \limits_{k^{\prime} \in {\cal K}_j} \left(\gamma_{k^{\prime}j}\exp{V_{k^\prime}^h} \right)^{1/\mu_j}\right)^{\mu_j}}
+{\sum \limits_{j^{\prime}=1}^{N_j} {\left( \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left(\gamma_{k^{\prime}j^{\prime}} \exp{V_{k^{\prime}}}\right)^{1/\mu_{j^{\prime}}} \right)^{\mu_{j^{\prime}}}}}:=\frac{p_1}{p_2},\label{eq2-49}\\
+P_{k|j}^h = & \frac{\left( \gamma_{kj}\exp{V_k^h}\right)^{1/\mu_j}}
+{\sum \limits_{k^{\prime} \in {\cal K}_j} \left( \gamma_{k^{\prime}j}\exp{V_{k^\prime}^h}\right)^{1/\mu_j}}:=\frac{p_3}{p_4}. \label{eq2-50}
+\end{align}
+{\sf [LS-GNL]}については，$\hat V_k$ 以外は$\hat　$ をつけていなかったが，ここでは，{\sf [O-GNL]}と区別するため確率，効用の各項につけるものとする．
+{\sf [LS-GNL]} は一般的にログサム・ベースの定式化と呼ばれ，{\sf [O-GNL]} は通常の定式化もしくは選択ベースの定式化と呼ばれる．
+\end{difinition}
+\begin{proposition}
+{\sf [LS-GNL]} と {\sf [O-GNL]} は等価である．
+\end{proposition}
+\begin{proof}
+基本的な導出の流れは，NL モデルにおける等価性を示している Train \cite{Tra09} と同様である．
+式\eqref{eq2-38}より，
+\begin{align}
+Q_k^h  & = \sum_{j^{\prime}=1}^{N_j} \left( \frac{\left( \gamma_{kj^{\prime}} \exp{V_k^h} \right)^{1/\mu_{j^{\prime}}}}{\sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left( \gamma_{k^{\prime}j^{\prime}}\exp{V_{k^\prime}^h} \right)^{1/\mu_{j^{\prime}}}} \frac{\left( \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left(\gamma_{k^{\prime}j^{\prime}}\exp{V_{k^\prime}^h} \right)^{1/\mu_{j^{\prime}}} \right)^{\mu_{j^{\prime}}}}
+{\sum \limits_{j^{\prime}=1}^{N_j} {\left( \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left(\gamma_{k^{\prime}j^{\prime}} \exp{V_{k^\prime}^h} \right)^{1/\mu_{j^{\prime}}} \right)^{\mu_{j^{\prime}}}}}  \right) \label{eq2-51}
+\end{align}
+である．ここで，式\eqref{eq2-41}の $V_k^h$ に式\eqref{eq2-16}を代入し整理すると，
+\begin{align}
+& Q_k^h  = \sum \limits_{j^{\prime}=1}^{N_j} \left( \frac{ \left( \gamma_{kj^{\prime}} \exp{\left( \tilde V_{j^{\prime}}^h + V_{j^{\prime}k}^h + \hat V_k^h \right)}\right)^{1/\mu_{j^{\prime}}}}
+{\sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left( \gamma_{k^{\prime}j^{\prime}} \exp { \left(\tilde V_{j^{\prime}}^h +  V_{j^{\prime} k^{\prime}}^h + \hat V_{k^\prime}^h \right)} \right)^{1/\mu_{j^{\prime}}} } \right.\notag\\
+& \cdot \left. \frac{\left( \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left(\gamma_{k^{\prime}j^{\prime}} \exp\left( \tilde V_{j^{\prime}}^h + V_{j^{\prime}k^{\prime}}^h + \hat V_{k^\prime}^h \right) \right)^{1/\mu_{j^{\prime}}} \right)^{\mu_{j^{\prime}}}}
+{\sum \limits_{j^{\prime}=1}^{N_j} {\left( \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime \prime}}} \left(\gamma_{k^{\prime}j^{\prime \prime}} \exp\left( \tilde V_{j^{\prime \prime}}^h + V_{j^{\prime \prime}k^{\prime}}^h + \hat V_{k^\prime}^h \right) \right)^{1/\mu_{j^{\prime \prime}}} \right)^{\mu_{j^{\prime \prime}}}}} \right) \notag\\
+&= \sum \limits_{j^{\prime}=1}^{N_j} \left( \frac{ \gamma_{kj^{\prime}}^{1/\mu_{j^{\prime}}} \exp \tilde V_{j^{\prime}}^h/\mu_{j^{\prime}} \exp V_{j^{\prime}k}^{h}/\mu_{j^{\prime}} \exp \hat V_{k}^{h}/\mu_{j^{\prime}}}
+{\sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left( \gamma_{k^{\prime}j^{\prime}}^{1/{\mu_{j^{\prime}}}} \exp \tilde V_{j^{\prime}}^h/\mu_{j^{\prime}} \exp V_{k^{\prime}j^{\prime}}^{h}/\mu_{j^{\prime}} \exp \hat V_{k^{\prime}}^{h}/\mu_{j^{\prime}} \right) } \right.\notag\\
+&~~\cdot \left. \frac{\left( \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left(\gamma_{k^{\prime}j^{\prime}}^{1/\mu_{j^{\prime}}} \exp \tilde V_{j^{\prime}}^h/ \mu_{j^{\prime}} \exp V_{j^{\prime}k^{\prime}}^{h}/\mu_{j^{\prime}} \exp \hat V_{k^{\prime}}^{h}/\mu_{j^{\prime}}\right) \right)^{\mu_{j^{\prime}}}}
+{\sum \limits_{j^{\prime \prime}=1}^{N_j} \left( \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime \prime}}} \left(\gamma_{k^{\prime}j^{\prime \prime}}^{1/\mu_{j^{\prime \prime}}} \exp \tilde V_{j^{\prime \prime}}^h/{\mu_{j^{\prime \prime}}} \exp V_{j^{\prime}k^{ \prime}}^{h}/{\mu_{j^{\prime \prime}}} \exp \hat V_{k^{ \prime}}^{h}/{\mu_{j^{\prime \prime}}} \right)\right)^{\mu_{j^{\prime \prime}}}} \right) \notag\\
+&= \sum \limits_{j^{\prime}=1}^{N_j} \left(\frac{ \gamma_{kj^{\prime}}^{1/ \mu_{j^{\prime}}} \exp  \tilde V_{j^{\prime}}^h / \mu_{j^{\prime}} \exp V_{j^{\prime}k}^{h} / \mu_{j^{\prime}} \exp \hat V_{k}^{h} / \mu_{j^{\prime}} }
+{ \exp \hat V_{j^{\prime}}^h / \mu_{j^{\prime}} \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left( \gamma_{k^{\prime}j^{\prime}}^{1/{\mu_{j^{\prime}}}} \exp V_{k^{\prime}j^{\prime}}^{h}/{\mu_{j^{\prime}}} \exp \hat V_{k^{\prime}}^{h}/{\mu_{j^{\prime}}} \right) } \right.\notag\\
+&~~\cdot \left. \frac{ \exp \tilde V_{j^{\prime}}^h \left( \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left(\gamma_{k^{\prime}j^{\prime}}^{1/\mu_{j^{\prime}}} \exp V_{j^{\prime}k^{\prime}}^h /{\mu_{j^{\prime}}} \exp \hat V_{k^{\prime}}^h /{\mu_{j^{\prime}}} \right)\right)^{\mu_{j^{\prime}}}}
+{\sum \limits_{j^{\prime \prime}=1}^{N_j} \exp \hat V_{j^{\prime \prime}}^h  \left(\sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left(\gamma_{k^{\prime}j^{\prime \prime}}^{1/\mu_{j^{\prime \prime}}} \exp V_{j^{\prime}k^{\prime}}^{h}/\mu_{j^{\prime \prime}} \exp \hat V_{k^{\prime}}^{h}/\mu_{j^{\prime \prime}} \right) \right)^{\mu_{j^{\prime \prime}}}} \right) \notag\\
+&=\sum_{j^{\prime} =1}^{N_j}  \left( \frac{ \left( \gamma_{kj^{\prime}} \exp \left(V_{j^{\prime}k}^{h} + \hat V_k^h \right) \right)^{1/\mu_{j^{\prime}} } } { \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left( \gamma_{k^{\prime}j^{\prime}} \exp \left(V_{j^{\prime}k^{\prime}}^{h} + \hat V_{k^{\prime}}^h \right)  \right)^{1/\mu_{j^{\prime}}} }
+\frac{ \exp  \left( \tilde V_{j^{\prime}}^h + V_{j^{\prime}}^{\prime h} \right) }{\sum \limits_{j^{\prime \prime}=1}^{N_j} \exp \left( \tilde V_{j^{\prime \prime}}^h + V_{j^{\prime \prime}}^{\prime h} \right) } \right) \notag\\
+&=\sum_{j^{\prime}=1}^{N_j}  P_{k|j^{\prime}}^h P_{j^{\prime}}^h = Q_k^h \label{eq2-52}
+\end{align}
+となり，両者は等価である．
+また，最後から $2$ 番目の等号の箇所では，式\eqref{eq2-32} 及び 
+\begin{align}
+\exp(x)b^c=\exp(x+c\ln b) \label{eq2-53}
+\end{align}
+という関係を用いている．\QED
+\end{proof}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{公理的アプローチ}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+2.2, 2.3 節の選択確率の導出は，ランダム効用最大化に消費者，観測者が従うと仮定のもとでの議論である．
+しかし，実際に観測者にとって観測可能なものは，消費者の効用 i.e. $V_k^h$ そのものではなく，何の選択肢が選択されたか否かという顕示される選好のみである．
+選択結果，より一般的な経済学の言葉でいうなら，需要から消費者の選好関係を導く手法を，顕示選好理論と呼ぶ．
+確定的な状況における顕示選好理論は，Samuelson (1947) \cite{Sam47}, Houthakker (1950) \cite{Hou50}, Richter (1966) \cite{Ric66} により確立され，
+ある顕示された結果が，効用最大化と整合的であるための必要十分条件が導かれている．
+この確定的な状況における顕示選好理論については付録\ref{sec:2-A-2} に示す．
+
+確率的な状況における顕示選好理論は，最初に Marschek (1960) \cite{Mar60} により提唱された．
+特に離散的な選択をする際の強公理について McFadden and Richter (1971) \cite{MR71}，McFadden (1980) \cite{McF80} ，McFadden (2005) \cite{McF05} が発展させている．
+弱公理については，Bandyopadhyay et al. (1999) \cite{BDK99}，Bandyopadhyay et al. (2002) \cite{BDK02}，Bandyopadhyay et al. (2004) \cite{BDK04}，Dasgupta and Pattanaik (2007) \cite{DP07} が提唱，拡張している．
+確定的な場合における弱公理と強公理の関係と同様の明確な関係性についての議論は発展途上である．
+
+\subsection{確率的選択系}
+\begin{difinition}[準備：確率的選択系]
+確率的選択系 （PCS) とはベクトル
+\begin{align}
+({\cal I}, \bm{X}, \xi, {\cal B}, {\cal Y}, {\cal P}) \label{eq2-54}
+\end{align}
+で定義される．ここで，$\cal{I}$ は選択肢を添え字付けする集合，$\bm{X}$ は観測された選択肢の属性ベクトルの母集団 (Universe), $\xi: {\cal I} \rightarrow \bm{X}$ なる観測された選択肢の属性を特定する写像，
+${\cal B}$ は ${\cal I}$ より得られる有限，非空の選択肢集合族であり，一般的には予算集合と呼ばれる．
+${\cal Y}$ は観測された選択者の属性ベクトル母集団，そして $ P: {\cal I} \times {\cal B} \times {\cal Y} \rightarrow [0,1] $ は選択確率である．
+添字集合 $\cal{I}$ は分析者により課されたものであり，実際の選択行動とは無関係である．
+選択に影響を与えるいかなる自然もしくは本質的な属性の添え字は観測された属性ベクトル $X \in \bm{X}$ に含まれる．
+観測された属性の母集団 $\bm{X}$ は，ここでは抽象集合である．
+選択が，選択肢集合 ${\bm B} \in {\cal B}$ より，$ {\bm Y} \in {\cal Y}$ の性質を持つ選択者によりなされるとすると，選択確率 $P(k|{\bm B},{\cal Y})$ は選択肢 $k \in {\bm B}$ を選択する確率として特定される．
+ここで，$P(\bm{C}|{\bm B}, {\bm Y}) = \sum_{k \in \bm{C}} P(k|{\bm B}, {\bm Y}) $　という標記を用いると，
+\begin{description}
+\item[PCS 1] 選択確率は非負であり，合計が $1$ となる：$P({\bm B}|{\bm B}, {\bm Y}) = 1$，
+\item[PCS 2] 選択確率は観測された選択肢の属性と個々人の性質にのみ依存する
+\end{description}
+という二つの条件を満たす．
+\end{difinition}
+\subsection{ランダム効用最大化仮説}
+\begin{difinition}[ランダム効用最大化仮説]
+ランダム効用最大化 (RUM) 仮説は，ベクトル
+\begin{align} 
+({\cal I}, \bm{X}, \xi, {\cal B}, {\cal Y}, {\cal P}) \label{eq2-55}
+\end{align}
+により定義される．ここで，$({\cal I}, \bm{X}, \xi, {\cal B}, \bm{Y}, P)$ は PCS の定義と同様であり，$\rho$ は，$\cal I$ 上の効用関数空間において，${\bm Y} \in {\cal Y}$ に依存する確率測度である．
+$\rho$ は，特性 ${\bm Y} \in {\cal Y}$ を持つ個人の母集団において，その分布を与える．
+
+$P_{\bm B}$ を確率 $P$ を ${\bm B} \in {\cal B}$ に対応付ける制約とする．すると，次の仮定が課される：
+ \begin{description}
+\item[RUM 1] もし，${\bm B} =\{1,2,\ldots,N_k \}$，${\bm  B}^{\prime} =\{1^{\prime}, 2^{\prime},\ldots,N_k^{\prime} \}$ が $k=1,2,\ldots,N_k$ において $\xi_k=\xi_k^{\prime}$ であるならば，${\cal P}_{\bm B} = {\cal P}_{{\bm B}^{\prime}} $
+\item[RUM 2] 合算されることによる確率の増分は $0$：${\cal P}(\{ {\bm U}  \in {\mathbb R}^{\cal I} | U(k) = U (k^{\prime}) \} , {\bm Y})=0$． 
+\end{description}
+ここで，$\bm U$ は効用関数集合，$U$ は効用関数である．
+
+次の仮定は，選択が効用最大化により決定されることを述べている：
+ \begin{description}
+\item[RUM 3] おのおのの RUM $({\cal I}, \bm{X}, \xi, {\cal B}, {\cal Y}, \rho)$ と選択肢集合族 ${\bm B} \in {\cal B}$ は次の写像により，PCS $({\cal I}, \bm{X}, \xi, {\cal B}, {\cal Y}, P)$ を生み出す：
+\begin{align}
+P(k| {\bm B}, y) = \rho (\{ {\bm U} \in {\mathbb R}^{\cal I} | U(k) \geq  U (k^{\prime})~{\rm for} k=1,\ldots,N_k \} , {\bm Y}) \label{eq2-56}
+\end{align}
+RUM 2 はほとんど確かに，一意に効用最大となる選択肢があることを保証している．
+\end{description}
+
+予算集合 ${\bm B} \in {\cal B}$ への $\cal P$ の制約が確率密度関数 $f^{\bm B}$ であらわされるなら，
+任意の部分集合 ${\bm b} \in {\mathbb R}^s$ に対し，
+\begin{align}
+\rho_{\bm B} ({\bm A}, {\bm Y}) = \int_{\bm A} f^{\bm B}(U_1, \ldots, U_{N_k}; {\bm Y}) \d{\bm U} \label{eq2-57}
+\end{align}
+と書き表され，選択確率も
+\begin{align}
+P(k|{\bm B},{\bm Y}) =\int_{- \infty}^{\infty} F_k^{\bm B}(U_1, \ldots, U_{N_k}; {\bm Y}) \d U \label{eq2-58}
+\end{align}
+となる．ここで，$F^{\bm B}$ は $f^{\bm B}$ の累積確率密度関数，$s$ はある試行である．
+\end{difinition}
+
+\subsection{確率的顕示選好の強公理}
+\begin{axiom}
+$({\bm B}, {\bm C})$ を ${\bm B} \in {\cal B}$，${\bm C} \subseteq {\bm B}$ なる集合のペアとしよう．
+消費者が $\bm B$ より選択肢を選択する状況で，$\bm C$ より選択したとすると，試行 $({\bm B}, {\bm C})$ は成功であるという．
+ここで，確率的顕示選好の強公理を満たすとは，有限かつ繰返しを許容した試行の列 $({\bm B}^1, {\bm C}^1),\ldots, ({\bm B}^M, {\bm C}^M)$ が
+次の条件を満たすことである：
+\begin{align}
+\sum \limits_{s=1}^{S} P({\bm C}^s| {\bm B}^s, {\bm Y}) \leq  \#(({\bm B}^1, {\bm C}^1),\ldots, ({\bm B}^S, {\bm C}^S)). \label{eq2-59}
+\end{align}
+ここで，$\#(({\bm B}^1, {\bm C}^1),\ldots, ({\bm B}^S, {\bm C}^S))$ はある一つの選好に基づく順序と整合的な列における成功となる試行の最大値である．
+\end{axiom}
+
+\subsection{選好の集計及び Williams-Daly-Zachary 定理}
+PCS が RUM と整合的であることを調べる方法として，整合的であるための十分条件に適合するかを調べればよい．
+その一つが，集計化された選好を調べるというものである．
+端的にいうならば，この PCS から計算される社会的余剰と，RUM からもたらされる 社会的需要関数により計算される社会的余剰が一致すればよい．
+これが Williams-Daly-Zachary 定理である．
+ Williams-Daly-Zachary 定理は GEV Family の一般化とも解釈できる．
+この定理は Williams (1977) \cite{Wil77}，Daly and Zachary (1979) \cite{DZ79} が独立に導いている．
+この導出には，非常に多くのスペースが必要なため省略するが，一番コンパクトにまとまっているのが McFadden (1981) \cite{McF81} である，参考にされたい．
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\section{GNL モデルの特性}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+本節では，GNL モデルの特性について，既存の離散選択モデルとの比較を行ないながら示す．
+
+\subsection{GNL モデルと他の GEV モデルとの対応}
+GNL モデルは，パラメータを特定することで，多くの GEV モデルを内包する \cite{WK01}．
+ここではその対応付けを示そう．
+
+\subsubsection{MNL モデルとの対応}
+MNL モデルとの対応付けをする方法は二つある．
+これは，GNL モデルのネスト・レベルを MNL モデルの選択肢レベルとして対応付けするのか，互いに選択肢レベルを対応付けするのかということである．
+\begin{description}
+\item[ネストレベルでの対応]\eqref{eq2-48}--\eqref{eq2-50} において $\mu_j\rightarrow 1,\gamma_{kj}\rightarrow 1,\gamma_{kj^{\prime}}\rightarrow 0 \forall j^{\prime} \not = j$ とする：
+\begin{align}
+Q_k^h &= \sum \limits_{j^{\prime}=1}^{N_j} \left(\frac{ \left( \sum \limits_{k^{\prime} \in N_{j^{\prime}}} \left(\gamma_{k^{\prime}j^{\prime}} \exp{V_{k^\prime}^h}\right)^{1/\mu_{j^{\prime}}} \right)^{\mu_{j^{\prime}}}}
+{\sum \limits_{j^{\prime \prime}=1}^{N_j} {\left( \sum \limits_{k^{\prime} \in N_{j^{\prime \prime}}} \left(\gamma_{k^{\prime}j^{\prime \prime}} \exp {V_{k^{\prime}}^h} \right)^{1/\mu_{j^{\prime \prime}}}\right)^{\mu_{j^{\prime \prime}}} }} \cdot
+ \frac{\left( \gamma_{kj^{\prime}}\exp{V_k^h}\right)^{1/\mu_{j^{\prime}}}}
+{\sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left( \gamma_{k^{\prime}j^{\prime}} \exp{V_{k^\prime}^h}\right)^{1/\mu_{j^{\prime}}}} \right) \notag\\
+ &= \frac{\exp \hat V_{k^{\prime}}^h}{\sum \limits_{k \in {\cal K}_j} \exp \hat V_{k^{\prime}}^h } \label{eq2-60}
+\end{align}
+となり，$k$ を選択する MNL モデルに帰着する．
+\item[選択肢レベルでの対応]\eqref{eq2-48}--\eqref{eq2-50} において $\mu_j\rightarrow 0$ とする：
+\begin{align}
+Q_k^h &= \frac{\left( \sum \limits_{k^{\prime} \in N_j} \left(\gamma_{k^{\prime}j}\exp{V_{k^\prime}^h}\right)^{1/\mu_j}\right)^{\mu_j}}
+{\sum \limits_{j^{\prime}=1}^{N_j} {\left( \sum \limits_{k^{\prime} \in N_{j^{\prime}}} \left(\gamma_{k^{\prime} j^{\prime}} \exp{V_{k^\prime}^h}\right)^{1/\mu_{j^{\prime}}} \right)^{\mu_{j^{\prime}}}}} 
+= \frac{\exp V_{j}^{\prime h}}{\sum \limits_{j^{\prime} =1}^{N_j} \exp V_{j^{\prime}}^{\prime h} } \label{eq2-61}
+\end{align}
+となり，$j$ を選択する MNL モデルに帰着する．
+\end{description}
+\subsubsection{NL モデルとの対応}
+NL モデルは，GNL モデルにおいて，$\gamma_{kj} \not= 0$ のうち，任意のものを $\gamma_{kj}=1$ とし，その他を $\gamma_{kj}=0$ としたものである．
+つまり，選択肢とネストの帰属関係を，多対多だったものを，$1$ 対多にしたものである．
+\subsubsection{PCL モデルとの対応}
+PCL モデルは，GNL モデルにおいて，${\cal K}_j \rightarrow \{{\bm k}{\bm k}^{\prime}\}$ 及び $\gamma_{kj} \rightarrow \frac{2}{N_k(N_k-1)}$ とすればよい．
+ここで，$\{{\bm k}{\bm k}^{\prime}\}$ は，選択肢 $k$ の一対比較のペア集合である．二番目の条件は，重み付けをなくすという意味である．
+\subsubsection{CNL モデルとの対応}
+CNL モデルは，単に GNL モデルの類似度パラメータを全て一定：$\mu_j~~\forall j\in {\cal K}_j \Rightarrow \mu$ とすればよい．
+
+\subsection{GNL モデルの価格弾力性}
+選択肢間の複雑な相関関係を表現できるとは，別の表現を用いるならば複雑な代替関係を表現できるということである．
+ここでは，価格に関して線形の効用関数を仮定する：
+\begin{align}
+V_k^h =\alpha_1 X_{1k} + \underline{V}_k^h \label{eq2-62}
+\end{align}
+ここで，$X_{1k}$ は選択肢 $k$ の価格，$\alpha_1$ はそのパラメータであり，通常負である．
+また，$\underline{V}_k^h $ は残りの効用である．
+すると，価格弾力性$E(k)$，交差弾力性 $E(k,k^{\prime})$ は次のように定義できる：
+\begin{align}
+E（k) &=\frac{X_{1k}}{Q_k^h}\frac{\partial Q_k^h}{\partial X_{1k}}, \label{eq2-63}\\
+E (k,k^{\prime}) &=\frac{X_{1k}}{Q_{k^{\prime}}^h}\frac{\partial Q_k^{\prime h}}{\partial X_{1k}}. \label{eq2-64}
+\end{align}
+
+GNL モデルを始め，解析的に弾力性を求めることができる GEV Family の各モデルの弾力性について表\ref{tb:2-1}に示す．
+ここで，PCL モデルの $P_{kk^{\prime}}^h$ は $k$，$k^{\prime}$ で構成されるネストの選択確率を表し，$\mu_{kk^{\prime}}$ も同様である．
+表\ref{tb:2-1} より，弾力性，交差弾力性ともに NL モデルでは同じネストに他の選択肢が所属しているか否かで決定される．
+しかし，GNL モデルでは複数のネストに所属するため，ネストの数，その所属確率，類似度パラメータにより，多様な弾力性，交差弾力性が表現できることがわかる．
+また，NL モデル，PCL モデルを内包していることが直感的に理解することができるだろう．
+
+\begin{landscape}
+\begin{center}
+\begin{table}
+\caption{GEV Family の各モデルにおける価格弾力性，交差弾力性} \label{tb:2-1}
+\begin{tabular}
+{p{1.0cm}p{9.0cm}p{9.0cm}}
+\toprule
+\multicolumn{1}{c}{Model} & \multicolumn{1}{c}{Direct elasticity} & \multicolumn{1}{c}{Cross-elasticity} \\
+\noalign{\smallskip}\hline\hline\noalign{\smallskip}
+\multicolumn{1}{l}{MNL} &$(1-Q_k^h) \alpha_1 X_{1k}$ & $-Q_k^h \alpha_1 X_{1k}$ \\
+\multirow{4}{*}{NL}& $k$ のみで構成されるネストに所属する場合 & $k$ と $k^{\prime}$ が別のネストに所属する場合 \\
+& $(1-Q_k^h) \alpha_1 X_{1k}$ & $-Q_k^h \alpha_1 X_{1k}$ \\
+& $k$ の所属するネストに $k$ 以外も所属する場合 & $k$ と $k^{\prime}$ が同じネストに所属する場合 \\
+&$ \left[ (1-Q_k^h) + \left(\frac{1}{\mu_j} \right) (1-P_{k|j}^h) \right] \alpha_1 X_{1k}$ & $\left[ Q_k^h + \frac{ \left ( \frac{1}{\mu_j} - 1 \right) P_j^h P_{k|j}^h P_{k^{\prime}|j}^h }{Q_{k^{\prime}}^h} \right]\alpha_1 X_{1k} $ \\\noalign{\smallskip}
+\multicolumn{1}{l}{PCL} &$\frac{\sum_{k^{\prime} \not= k} P_{kk^{\prime}}^h P_{k|kk^{\prime}}^h \left[ (1-Q_k^h) + \left(\frac{1}{\mu_{kk^{\prime}}}-1\right) (1 - P_{k|kk^{\prime}}^h)\right]}{Q_k^h} \alpha_1 X_{1k}$ &  $\left[ Q_k^h + \frac{ \left ( \frac{1}{\mu_{kk^{\prime}}} - 1 \right) P_{kk^{\prime}}^h P_{k|kk^{\prime}}^h P_{k^{\prime}|kk^{\prime}}^h }{Q_{k^{\prime}}^h} \right]\alpha_1 X_{1k} $ \\
+\multirow{4}{*}{GNL}& $k$ のみで構成されるネストに所属する場合 & $k$ と $k^{\prime}$ が別のネストに所属する場合 \\
+& $(1-Q_k^h) \alpha_1 X_{1k}$ & $-Q_k^h \alpha_1 X_{1k}$ \\
+& $k$ が $1$ 以上のネストに所属する場合 & $k$ と $k^{\prime}$ が $1$ つ以上の共通のネストに所属する場合 \\
+&$ \frac{\sum_{j^{\prime}=1}^{N_j} P_{j^{\prime}}^h P_{k|j^{\prime}}^h \left[ (1-Q_k^h) + \left(\frac{1}{\mu_{j^{\prime}}} \right) (1-P_{k|j^{\prime}}^h) \right]}{Q_k^h} \alpha_1 X_{1k}$ & $\left[ Q_k^h + \frac{ \sum_{j^{\prime}=1}^{N_j} \left ( \frac{1}{\mu_{j^{\prime}}} - 1 \right) P_{j^{\prime}}^h P_{k|j^{\prime}}^h P_{k^{\prime}|j^{\prime}}^h }{Q_{k^{\prime}}^h} \right]\alpha_1 X_{1k} $ \\
+\noalign{\smallskip}
+\bottomrule
+\end{tabular}\\
+\end{table}
+\end{center}
+\end{landscape}
+\subsection{GNL モデルにおける擬似相関係数}
+GNL モデルに関して，選択確率の擬似相関係数に関するものが多く行なわれている\cite{Pap04, ABT07, MP08}．
+これらのうち，Papola (2004) \cite{Pap04} では，擬似的な相関係数を解析的に求めている：
+\begin{align}
+\rho_{kk^{\prime}} = \sum \limits_{j^{\prime}=1}^{N_j} \gamma_{kj^{\prime}}^{1/2} \gamma_{k^{\prime}j^{\prime}}^{1/2} (1- \mu_j^2)~~\forall k, k^{\prime} \in {\cal K}, \label{eq2-65}
+\end{align}
+ここから NL モデルの擬似相関係数\cite{Bha97} を逆算すると，
+\begin{align}
+\rho_{kk^{\prime}} =
+  \begin{cases}
+ (1- \mu_j^2) & k,k^{\prime} \in {\cal K}_j\\
+   0 & \text{otherwise}
+  \end{cases}
+ \label{eq2-66}
+\end{align}
+を得る．
+\def\thesection{\thechapter.\Alph{section}}
+\setcounter{section}{0} 
+\section{付録：関連する公理}
+\subsection{Luce の選択公理}\label{sec:2-A-1}
+Luce の選択公理は，Luce (1959) \cite{Luc59} で提示された，個々人が確率的な選択を行なう際の公理である．
+特に公理を心理学や経済学に限定している\cite{Luc77} ものではなく，心理学，経済学，学習理論へと適用している．
+
+\begin{axiom}[Luce の選択公理]
+${\bm B}$ を ${\cal B}$ の有限な部分集合であり，全ての ${\cal M} \subset {\bm B}$ について選択確率 $P_{\cal M}^h$ が定義されるとする．
+次の $2$ つの条件を満たすとき，その意思決定ルールは Luce の選択公理に従うという：
+\begin{enumerate}
+\item もし $P_{k|\{k,k^{\prime}\}}^h\not=0,1~~\forall~k,k^{\prime} \in {\bm B}$ ならば，${\cal N} \subset {\cal M} \subset {\bm B}$ において，$P_{\cal N|{\bm B}}^h= P_{\cal N|{\cal M}}^hP_{\cal M|{\bm B}}^h$，
+\item 任意の $k,k^{\prime} \in {\bm B}$ において $P_{k|\{k,k^{\prime}\}}^h=0$ ならば，$P_{{\cal M}|{\bm B}}^h = P_{{\cal M}\setminus k|{\bm B} \setminus k}^h$．
+\end{enumerate} 
+\end{axiom}
+
+この二つの公理のうち，1. より Independence from irelevant alternatives (I.I.A) 特性が導かれる：
+\begin{lemma}[I.I.A 特性]
+もし $P_{k|\{k,k^{\prime}\}}^h \not=0,1~~\forall~k,k^{\prime} \in {\bm B}$ ならば，${\cal N} \subset {\cal M} \subset {\bm B}$ において
+\begin{align}
+\frac{P_{k|\{k,k^{\prime}\}}^h}{P_{k^{\prime}|\{k,k^{\prime}\}}^h} = \frac{P_{k|{\bm B}}^h}{P_{k^{\prime}|{\bm B}}^h}. \label{eq2-67}
+\end{align}
+\end{lemma}
+明らかに，NL，PCL，MNP，MXL，GNL の各モデルは式\eqref{eq2-67} を犯している．
+つまり，Luce の選択公理に反している．
+実際，Luce の選択公理に従うモデルは，紹介したもののうち，BP，MNL モデルだけである \cite{McF73}．
+
+Luce (1959) \cite{Luc59} は，経済学に適用する際に，期待効用理論\cite{Sav54} に公理を当てはめ，
+期待効用最大化と矛盾しないことを示している．
+つまり，I.I.A は，期待効用最大化の公理の一つである，独立性の公理の確率的選択時の表現と捉えられる．
+しかし，RUM 理論は効用に関しては確定的に扱っている\footnote{当然組み込むことはできる．その一例が de Palma et al. (2007)\cite{deP08} である．}ため，期待効用理論の公理を満たす必要はない．
+
+\subsection{確定的な場合における顕示選好公理}\label{sec:2-A-2}
+\begin{difinition}[確定的な選択における選択構造]
+選択構造は，$({\cal X},{\cal B}, C)$ で与えられる．
+ここで，$\cal X$ は，選択肢のユニバーサル集合である．$\cal B$ は，${\cal X}$の非空の部分集合であり，$\cal B$ の要素は，集合${\bm B} \subset {\cal X}$ となる．
+$C$ は選択ルールであり，任意の予算制約 ${\bm B} \subset {\cal B}$ のもとで非空の選択集合 $C({\bm B}) \subset {\bm B}$ を対応づける．
+$C({\bm B})$ は単集合である必要はない．
+\end{difinition}
+
+個々人の選択行動をモデリングするのに選択構造を用いるとき，個々人の行動を規定するある種の制約を用いる．
+これが，顕示選好の弱公理\cite{Sam47,Nis90} (Weak axiom of revealed preference) である．
+\begin{axiom}[顕示選好の弱公理]
+選択構造 $({\cal X},{\cal B}, C)$  が与えられ，これが顕示選好の弱公理を満たすとは，
+任意の ${\bm B} \in {\cal B},~x,y \in {\bm B}$ において，$x \in C({\bm B})$ であるなら，
+いかなる $x,y \in {\bm B}^{\prime},~y \in C({\bm B}^{\prime})$ なる ${\bm B}^{\prime} \in {\cal B}$ においても，$x \in C({\bm B}^{\prime})$ が成立する．
+\end{axiom}
+
+上記の顕示選好の弱公理は，選好関係について直接定義したものではない．
+あくまで，ある選択された状況（顕示された状況）から導かれる選好が合理的であるかということを述べている．
+
+この選好関係について，それ自体を直接定義する方法も存在する．
+
+\begin{axiom}[選好関係]
+選好関係 $\succeq$ が合理的であるとは，次の二つの性質を持つことをいう．\newline
+ 完備性: $\forall x,y \in {\cal N}$, $x \succeq y$ もしくは $y \succeq x$ が成立．\newline
+ 推移性: $\forall x, y, z \in {\cal N}$, $x \succeq y$ かつ $y \succeq z$ ならば，$x \succeq z$ が成立．
+\end{axiom}
+このうち，推移性について今後，選択行動自体の置かれている環境により，変化していく．
+
+これら二つの定義はある限られた状況下では等価である．
+\begin{proposition}[$\succeq \Rightarrow \succeq^{\ast} $]
+合理的選好関係 $\succeq$ を持つ意思決定者が ${\cal B}$ に含まれる予算集合から選択をする際，この意思決定者は，顕示選好の弱公理を満たす選択構造を必ずとる．
+\end{proposition}
+\begin{proof}
+Mas-Colell et al. (1995) \cite{MWG95} p.12 を見よ．
+\end{proof}
+\begin{proposition}[$\succeq^{\ast} \Rightarrow \succeq $]
+選択構造 $({\cal B}, R(\cdots))$ が弱公理を満たし，${\cal B}$ が三つまでの元からなる ${\cal N}$ の全ての部分集合を含むとき，
+合理的選好関係 $\succeq$ は ${\cal B}$ に関して $R(\cdots)$ を合理的であるとする，すなわち
+\begin{align}
+R(B) = R^{\ast} (B, \succeq)~~\forall B \subset {\cal B}.
+\end{align}
+さらに，この合理的選好関係は唯一のものである．
+\end{proposition}
+\begin{proof}
+Mas-Colell et al. (1995) p.13--14 を見よ．
+\end{proof}
+弱顕示選好は，限られた場合にしかその顕示された選好が合理的ではないことを意味している．
+
+Houthakker (1950) \cite{Hou50} はこれを多資産下における選択行動に拡張し，顕示された選好が合理的である，より一般的な条件を示している．
+\begin{axiom}[顕示選好の強公理]
+選択構造 $({\cal X},{\cal B},C(\cdot ))$ が与えられ，
+$x,y \in {\bm B} \in {\cal B}$ かつ $x,y \in {\bm B} \in {\cal B}^{\prime}$ であり，$x \in C({\bm B})$ かつ $y \in C({\bm B}^{\prime})$ のとき，$x \in C({\bm B}^{\prime})$
+を満たすとき，その選択構造は，顕示選好の強公理を満たすという．
+\end{axiom}

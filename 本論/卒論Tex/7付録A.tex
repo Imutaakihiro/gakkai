@@ -1,0 +1,97 @@
+\appendix
+\chapter{GNLにおける二つの選択確率定式化の等価性}
+ここでは，GNLにおける二つの選択確率の定式化が等価であるこ とを示す．
+一般的なGNLの定式化には2つ(スケールとパラメータの導入を含めるとそれぞれ2つで計4つ) の表現がある．
+一方が本研究で用いているログサム表記［GNL-LS］であり，もう一方が非類似度パラメータがネスト選択式にも現われ る［GNL-O]である．
+これら以外にログサム表記において$\hat V_m$を省略した表記も見られるが，これは［GNL-LS]の特殊形と見なせる．
+ネスト選択時にログサム表記を用いない場合の定式化［GNL-O]は次に示すとおりである：
+
+\textbf{[GNL-O]}
+\begin{align}
+P_l = \sum_m P_m  P_{l|m}，
+\end{align}
+\begin{align}
+P_m = \frac{\left( \sum_{l' \in \mathcal{N}_m} \left( \gamma_{l'm} \exp V_{l'} \right)^{1 / \mu_m} \right)^{\mu_m}}{\sum_{m} \left( \sum_{l' \in \mathcal{N}_m} \left( \gamma_{l'm} \exp V_{l'} \right)^{1 / \mu_m}\right)^{\mu_m}}
+\end{align}
+\begin{align}
+P_{l|m} = \frac{\left( \gamma_{lm} \exp V_{l} \right)^{1 / \mu_m}}{\sum_{l' \in \mathcal{N}_m} \left( \gamma_{l'm} \exp V_{l'} \right)^{1 / \mu_m}}
+\end{align}
+ここで，$V_l$は式（1) ブランド$h$の全ての属性を含めた確定的効用である．
+また非類似度パラメータ，アロケーションパラメータの効用最大化と整合的であるための条件は［GNL-LS］と全て同じ（式（8）-（10））である．
+
+式変形により，実際に両定式化が等価であることを示そう．基本的な導入の流れは，NL（Nested Logit Model）における場合を示しているTrain［6］と同様である．式(60)より，
+\begin{align}
+P_l = \sum_{m} \left(\frac{\left( \gamma_{lm} \exp V_{l} \right)^{1 / \mu_m}}{\sum_{l' \in \mathcal{N}_m} \left( \gamma_{l'm} \exp V_{l'} \right)^{1 / \mu_m}} \cdot \frac{\left( \sum_{l' \in \mathcal{N}_m} \left( \gamma_{l'm} \exp V_{l'} \right)^{1 / \mu_m} \right)^{\mu_m}}{\sum_{m} \left( \sum_{l' \in \mathcal{N}_m} \left( \gamma_{l'm} \exp V_{l'} \right)^{1 / \mu_m} \right)^{\mu_m}}\right)
+\end{align}
+である．ここで，式（63） の$V_m$に式（2） を代入し整理すると，
+\begin{align}
+\begin{split}
+P_l &= \sum_{m} \left(\frac{\left( \gamma_{lm} \exp \left(\hat V_{m}+\hat V_{ml}+\hat V_{l}\right) \right)^{1 / \mu_m}}{\sum_{l' \in \mathcal{N}_m} \left( \gamma_{l'm} \exp \left(\hat V_{m}+\hat V_{ml'}+\hat V_{l'}\right)\right)^{1 / \mu_m}} \right. \\
+&\cdot \left. \frac{\left( \sum_{l' \in \mathcal{N}_m} \left( \gamma_{l'm} \exp \left(\hat V_{m}+\hat V_{ml'}+\hat V_{l'}\right) \right)^{1 / \mu_m} \right)^{\mu_m}}{\sum_{m} \left( \sum_{l' \in \mathcal{N}_m} \left( \gamma_{l'm} \exp \left(\hat V_{m}+\hat V_{ml'}+\hat V_{l'}\right) \right)^{1 / \mu_m} \right)^{\mu_m}}\right) \notag \\
+&= \sum_{m} \left(\frac{
+        \gamma_{lm}^{1/\mu_m} 
+        \left( \exp \hat V_m/\mu_m + \exp \hat V'_l/\mu_m \right)
+    }{
+        \sum_{l' \in \mathcal{N}_m} 
+        \gamma_{l'm}^{1/\mu_m} 
+        \left( \exp \hat V_m/\mu_m + \exp \hat V'_{l'}/\mu_m \right)
+    }
+\right.  \\
+&\cdot \left. \frac{
+        \left(
+            \sum_{l' \in \mathcal{N}_m} 
+            \gamma_{l'm}^{1/\mu_m} 
+            \left( \exp \hat V_m/\mu_m + \exp \hat V'_{l'}/\mu_m \right)
+        \right)^{\mu_m}
+    }{
+        \sum_{m} 
+        \left(
+            \sum_{l' \in \mathcal{N}_m} 
+            \gamma_{l'm}^{1/\mu_m} 
+            \left( \exp \hat V_m/\mu_m + \exp \hat V'_{l'}/\mu_m \right)
+        \right)^{\mu_m}
+    }\right)  \notag \\
+&= \sum_{m} \left(\frac{
+        \gamma_{lm}^{1/\mu_m} 
+        \exp \hat V_m/\mu_m \exp \hat V'_{l'}/\mu_m
+    }{
+        \exp \hat V_,m/\mu_m \sum_{l' \in \mathcal{N}_m} 
+        \left(  \gamma_{l'm}^{1/\mu_m} \exp \hat V'_{l'}/\mu_m \right)
+    }
+\right. \\
+&\cdot \left. \frac{
+        \exp \hat V_m \left(
+            \sum_{l' \in \mathcal{N}_m} 
+            \left( \gamma_{l'm}^{1/\mu_m} 
+            \exp \hat V'_{l'}/\mu_m \right)
+        \right)^{\mu_m}
+    }{
+        \sum_{m} \exp \hat V_m
+        \left(
+            \sum_{l' \in \mathcal{N}_m} 
+            \left(\gamma_{l'm}^{1/\mu_m}  \exp \hat V'_{l'}/\mu_m \right)
+        \right)^{\mu_m}
+    }\right) \notag \\
+&= \sum_{m} \left( 
+    \frac{
+        \gamma_{lm} \exp\left(\hat V'_{l}\right)^{1/\mu_m}
+    }{
+        \sum_{l' \in \mathcal{N}_m} 
+        \left( \gamma_{l'm} \exp\left(\hat V'_{l'}\right) \right)^{1/\mu_m}
+    } 
+    \cdot 
+    \frac{
+        \hat V_m + \hat V'_m
+    }{
+        \sum_{m} \left( \hat V_m + \hat V'_m \right)
+    }
+    \right) \notag \\
+&= \sum_m \hat P_{l|m} \hat P_m = \hat P_l
+\end{split}
+\end{align}
+となり，両者は等価である．最初から2番目の等号の箇所で，
+\begin{align}
+\hat V'_l = \hat V_{ml} + \hat V_l
+\end{align}
+を用いる．また，最後から2番目の等号の箇所では，式（7）及び $\exp（x）b^c ＝\exp（x ＋ clnb ）$という関係を用いている．本研究で前者の定式化を用いたのは，
+式展開上，明示的にネストに関連する効用と選択肢に関連する効用を区別可能な［GNL-LS］の表記が都合が良いためである．

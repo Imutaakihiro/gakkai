@@ -1,0 +1,28 @@
+%
+% Hyper.sty for TeX for Windos (WinDvi) --- version 1.2
+% Copyright(C) 1994 by impress corporation.
+%
+%%%%%%%%%%%%%%%%%%%%%%
+%
+% BMPÉtÉ@ÉCÉãÇÃéÊÇËçûÇ›
+%
+% \bmpfile(#1,#2){#3}
+%
+% #1 : width
+% #2 : height
+% #3 : BMP filename
+
+\newdimen\bmp@tk \bmp@tk=0pt % thickness of rule
+
+\def\bmpfile(#1,#2)#3{%
+  \@tempdima\normalbaselineskip \advance\@tempdima by-1zh
+  \vskip\@tempdima
+  \leavevmode\vbox{\@ifundefined{yoko}{}{\yoko}%
+  \special{Windows org}
+  \hrule width#1 height\bmp@tk depth0pt\vss
+  \hbox to#1{%
+    \vrule width\bmp@tk height#2 depth0pt
+    \hss\vbox to#2{\vss}\hss
+    \vrule width\bmp@tk height#2 depth0pt
+    \special{Windows bmp #3}}\vss
+  \hrule width#1 height\bmp@tk depth0pt}}

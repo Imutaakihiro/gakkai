@@ -1,0 +1,17 @@
+%  centercolon.sty                 Dec 7, 2000
+%  Donald Arseneau                 asnd@triumf.ca
+%  Public domain.
+%  Vertically center colon characters (:) in math mode.
+%  Particularly useful for $ a:=b$, and still correct for
+%  $f : x\to y$.  May be used in any TeX.
+%
+\def\vcentcolon{\mathrel{\mathop\ordinarycolon}}%
+%
+\begingroup \catcode`\:=\active %
+  \lowercase{\endgroup%
+   \ifnum\mathcode`\:=32768 \let\ordinarycolon= :%
+   \else \mathchardef\ordinarycolon\mathcode`\: %
+   \fi%
+   \let :\vcentcolon%
+  }%
+\mathcode`\:=32768 %

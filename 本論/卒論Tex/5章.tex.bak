@@ -1,0 +1,561 @@
+%-----------------------------
+\chapter{GNL モデルの拡張：消費者異質性の導入}
+%-----------------------------
+\section{5 章の目的}\label{sec:5-1}
+前章までで，市場に存在する商品の複雑な類似性については，GNL モデルで表現でき，既存のモデルと比較し再現性の面で優れていることがわかった．
+しかし，実際の市場において消費者が商品を購買する過程においては，消費者の異質性が存在する．
+
+消費者の異質性とは，商品を購買する消費者に異質性の存在を仮定するものであり，
+マーケッティング・サイエンスにおいては，消費者が潜在的なクラスに所属すると仮定し，モデル構築がされる場合が多い
+ (Kamakura and Russell, 1989 \cite{KR89}; Gupta and Chintagunta, 1994 \cite{GC94}; Kamakura et al., 1996 \cite{KKL96}; Andrews and Currim, 2002 \cite{AC02})．
+これらのモデルは潜在クラス・モデルと呼ばれ，$0, 1$で表わされる商品購買履歴であるスキャン・パネル・データのみから
+潜在クラスへの帰属確率，各クラスの効用関数のパラメータ推定が可能である．
+また，潜在クラス自体の数についても，AIC (Kamakura and Russell, 1989 \cite{KR89}; BIC (Gupta and Chintagunta, 1994 \cite{GC94}; Kamakura et al., 1996 \cite{KKL96}; Andrews and Currim, 2002 \cite{AC02}) といった情報量基準により内生的に決定される．
+そして，推定された効用関数のパラメータ，商品の選択確率より各潜在クラスの意味づけを解釈することとなる．
+しかし，因子分析における因子の解釈と同様に，クラス数が多い場合，この意味づけが困難な場合がある．
+また実務において，新規の類似商品が登場し，その需要を予測するといった場合にも，
+潜在クラスの意味づけが困難であり，意味づけができても，現実にそぐわないクラスが生起する場合もある．
+これは，MNL モデルや MPL モデルといった非集計モデルの主要な適用範囲である
+需要予測，特に新規商品を導入した際，既存の類似商品への影響について意味解釈が伴った予測が困難となることを意味する．
+
+しかし，CNL，GNL モデルの階層構造は，あくまで経路選択モデルでは，経路選択行動における交通ネットワークの複雑さ，ブランド選択モデルでは，商品間の類似性を表わしたものである．
+したがって，これをそのまま商品購買行動における消費者の異質性のある意思決定に適用することは難しい．
+
+そこで，本章ではCNL，GNL モデルを基に商品選択行動において消費者異質性，商品類似性を同時に考慮できるモデル，Latent Generalized Nested Logit (LGNL) モデルを提案する．
+このモデルは，価格.com のようなサイトにおいて商品を選択する際に顕著である，商品構成要素，具体的構成要素指標，具体的商品という $3$ 段階の選択行動を表現する．
+このようなサイトにおいては，商品を構成する要素のスペックにより商品を絞り込んで表示し，多くの商品からそのスペックに合致した商品のみが列挙，比較検討することが可能である．
+本研究で提案するモデルにおいても，各商品構成要素指標に適合しない具体的商品はその下位階層には帰属しない．
+例えばメモリーが $4$ GBという具体的構成要素指標の下位階層には，メモリーが $2$ GBの商品は帰属しない．
+これはすべての商品が下位階層に所属する潜在クラス・モデルとは大きく異なる．
+この対応付けを外生的に定義することにより，潜在クラスの意味解釈が容易となる．
+この $3$ 段階の選択行動の表現及び，潜在クラスの設定方法は本研究のオリジナルであり，既存の研究にはみられないものである．
+次に，このモデルを具体的商品カテゴリーに適用し，スキャン・パネル・データよりパラメータ推定を行なうことにより，
+消費者異質性，商品類似性を考慮することによるモデルの妥当性の検証を行なう．
+
+本章の構成は次のとおりである．
+まず，\ref{sec:5-2}節では既存の消費者異質性，商品（選択肢）類似性を表現するモデルについてレビューし，これらの問題点についてそれぞれ指摘する．
+次に\ref{sec:5-3}節では提案モデル，LGNL モデルの定式化を行なう．そしてこのモデルが GNL モデルと同様に（ランダム）効用最大化と整合的であることを示す．
+また，\ref{sec:5-4}節では，提案モデルを具体的な商品に適用し，パラメータ推定を行なう．
+そして MNL，Latent Class Multinomial Logit (LML)，GNL，LGNL 計四つのモデルを比較，感度分析を行なう．
+最後に，\ref{sec:5-5}節において本章のまとめを述べる．
+
+%***************************************************************************************************************************
+\section{ 既存の消費者異質性を考慮したモデル}\label{sec:5-2}
+本節では，既存の消費者異質性考慮したモデルについてレビューし，それぞれの問題点を指摘する．
+
+\subsection{ 消費者異質性を考慮したモデル}
+一般的に消費者は異質であると考えられるが，これをスキャン・パネル・データから直接推定することは難しいため，
+潜在的なクラスを考え，そこに消費者が潜在的に所属すると仮定する潜在クラス・モデルというものが広く用いられている．
+消費者の異質性を考慮する潜在クラス・モデルには大きく分け，LML（例えば \cite{KR89}）と Latent Class Probit (LPL) （例えば \cite{DD91}）の各モデルが存在する．
+前者は効用関数の誤差項に一般化極値分布を，後者は正規分布を仮定したものである．
+後者については，選択確率の算出に多重積分が必要となり，多数の選択肢がある場合( $5$ 選択肢以上)には事実上計算が不可能である．
+そのため，LML モデルに絞ってレビューを行なう．
+
+LML モデルの代表的な研究としては，次に示す研究があげられる．
+これらのモデルの選択構造を図\ref{fig5-1}に示す．
+
+\begin{figure}[t]
+  \centering
+  \psbox[width=0.90 \linewidth]{clip5-1}
+\caption{既存の潜在クラス・ロジット・モデルの構造}
+\label{fig5-1}
+\end{figure}
+
+Kamakura and Russell (1989) \cite{KR89} では消費者に潜在的な異質性を仮定し，潜在クラスに確率的に所属するものとしている．
+そして消費者の潜在クラスへの所属確率 (セグメント・サイズ) の説明変数は $\lambda$ と定数としている．
+これを拡張した研究が Gupta and Chintagunta (1994) \cite{GC94} であり，消費者の年齢，世帯人数といったデモグラフィック変数によりこの $\lambda$ を説明（構造化）している．
+ただし，現実的にはデモグラフィック変数は通常スキャン・パネル・データには含まれず，含まれている場合もデータ更新がほとんどされないといった問題がある．
+
+これらに対し，Kamakura~et~al. (1996) \cite{KKL96}, Moriguchi (2003) \cite{Mor03} では，Gupta and Chintagunta (1994) \cite{GC94} や一般的な消費者セグメントとは異なり，外生的に商品が持つ属性によりセグメントを行なっていることが特徴である．
+Kamakura~et~al. (1996) \cite{KKL96} はこの潜在クラスの構造自体を拡張し，ネスティングされた異質性 (Structured Heterogeneity \cite{KW91}) を仮定している．
+消費者はブランド優先か，商品の形状優先か，無差別かという外生的な潜在クラスを選択し，その下に存在する商品を選択するとしている．
+また，Moriguchi (2003) \cite{Mor03} は特定のブランドにロイヤルティを感じるロイヤル・セグメントという外生的な潜在クラスの規定を導入している．
+ただし，Moriguchi (2003) \cite{Mor03} では，あるブランドにロイヤルティを感じるセグメントに属していても，それ以外のブランドの商品も含め，すべての商品の選択が可能である．
+
+\subsection{ 既存の消費者異質性を考慮したモデルの問題点}
+既存の潜在クラス・ロジット・モデルの特徴は，以下に示す二点である．
+\begin{enumerate}
+\item ある種，各潜在クラスへの所属確率を集計的 (aggregate) に決定している，従って（ランダム）効用最大化行動と整合的ではない．
+\item 潜在クラスを外生的に決定し，いかなる潜在クラスに所属している場合でもすべての商品が選択可能である．
+\end{enumerate}
+
+前者については，効用最大化行動と整合的なモデルである場合，店舗選択モデル，購買生起モデルといった，さらなるモデルの拡張を容易に行なうことが可能となる．
+また，店舗間競争といったゲーム論的状況についても，ミクロ経済学と整合的にモデルの拡張が可能となる．
+消費者の行動が明確に記述できない場合には，こういったシステマティックな拡張は行なえず，
+モデル拡張時に新たな拡張部との接続方法，その意味解釈がその都度必要となる．
+
+後者については，パラメータ推定時に，各クラスの意味解釈が行なえない可能性がある．
+例えば，Kamakura and Russell (1989) \cite{KR89} では，重回帰分析において符号条件が一致しないような効用関数パラメータが推定される可能性が大いにある．
+これは，あまり消費者に異質性が存在しない場合，平行的に消費者の潜在クラスを情報量を最大化するように内生的に定めるため，多重共線性に類似した問題が生起していると捉えることができる．
+例えば，後の適用において出てくる数値例のように，あるセグメントにおいて価格パラメータが負になってしまう可能性がある．
+これは，価格が高いほど効用が高いことを意味し，そのようなセグメントはコーラ等の一般消費財においてはありえない．
+また，ブランド・ロイヤルティにより外生的にセグメント分けしている Moriguchi (2003) \cite{Mor03} では，
+あるブランドにロイヤルティを感じる潜在クラスにおいても結果として，そのブランドの選択割合が低くなってしまう可能性がある．
+こういったことは，セグメント分けの失敗だけではなくモデル自体の説明力不足に繋がるため，極力避けるべきである．
+
+CNL，GNL モデルをそのまま，ブランド選択ではなく，Stock Keeping Unit (SKU) レベルの商品選択モデルへ適用した場合，つまり 3 章を考えよう．
+例えば対象商品としてパソコンを考えた場合，HDD 何 GB，メモリー何 GB，ディスプレイ何インチという具体的な
+商品構成要素によりネスティングされ，次に具体的商品を選択することとなる．
+しかし，商品選択行動において，我々は一般的に，まず HDD で選ぶ，ディスプレイで選ぶという構成要素を選択し，次に何 GB，何インチという
+具体的要素を選択するという $2$ 段階の事前選択行動をしていると考えられる．
+これは Elimination by Aspects (EBA) モデル \cite{Tve72b} における商品構成要素とそのカット・オフ値に相当する． 
+したがって，CNL，GNL モデルを拡張し，消費者が辿るような詳細な商品選択行動を表現するには，上記の商品選択とあわせ計 $3$ 段階の選択行動を構造的に表現する必要がある．
+
+%***************************************************************************************************************************
+\section{LGNL モデルの定式化}\label{sec:5-3}
+\subsection{定式化}
+本節では，消費者の異質性を GNL モデルに付加した提案モデル，LGNL モデルの定式化を行なう．
+LGNL モデルは，図\ref{fig5-2}に示すツリー構造を持つものとする．
+
+\begin{figure}[t]
+  \centering
+  \psbox[width=0.70 \linewidth]{clip5-2}
+\caption{LGNL モデルの構造例}
+\label{fig5-2}
+\end{figure}
+
+このモデル内で消費者はある商品カテゴリーの中から，まず商品を構成する要素 $i$ を選択，次にその具体的な数値 (もしくは有無) $j$ \footnote{今回は，GNL モデルの拡張ということで設定しなかったが，複数の要素，複数のスペックを，一般的な想起集合モデルと同様に潜在クラス，サブ潜在クラスとして明示的に設定することも可能である．}を選択，最後にその具体的な数値を満たす商品$k$を選択する．
+この商品構成要素 $i$ ごとに効用関数のパラメータが異なるものとし，$i$ を潜在クラス，$j$ をサブ潜在クラスと呼ぶこととする．
+そして，潜在クラス $i$ に所属する消費者はさらにサブ潜在クラス $j$ を選択し，商品 $k$ を選択することにより，効用 $U_{i,j,k}$ を得るものとする．
+
+このような商品の属性に着目した実際にみられる選択行動として，EBA \cite{Tve72a} が挙げられる．
+この選択行動は，自己が重視する商品属性値により考慮集合を考え，その考慮集合内において実際の選択を行なうというものである．
+本モデルはこのプロセスを確率的に複数の属性に拡張したものと捉えることもできる．
+
+効用 $U_{i,j,k}^h$ は確定的効用 $V_{i,k}^h$ と確率的効用 $\epsilon_{i,j,k}^h$ に分解される：
+\begin{equation}
+U_{i,j,k}^h=V_{i,k}^h + \epsilon_{i,j,k}^h~~\forall i,j,k. \label{eq5-1}
+\end{equation}
+確定的効用には線形の効用関数を仮定し，
+\begin{equation}
+V_{i,k}^h=\sum_{m^{\prime}=1}^{N_{m}} \alpha_{m^\prime} X_{m^\prime k}+\sum_{l^{\prime}}^{N_l} \alpha_{il^{\prime}} X_{l^{\prime}k}+\alpha_{0ik}~~\forall i,k \label{eq5-2}
+\end{equation}
+と表わされるものとする．ここで $X_{mk}$ は商品 $k$ 固有の $m$ 番目の説明変数，$X_{lik}$は商品$k$が属する潜在クラス固有の $l$ 番目の説明変数，$\alpha_{m}$，$\alpha_{il}$はそれぞれのパラメータ，そして $\alpha_{0ik}$ は固有選好度である．
+つまり，潜在クラス $i$ に属する消費者の商品 $k$ に対する確定的効用は，各潜在クラス共通の説明変数及び潜在クラス $i$ 固有の説明変数により説明されるものとする．
+以下の説明においては，簡便化のため，理解を妨げない範囲で $V_{i,k}$ を $V_k$ と略す．
+
+確率的効用が一般化極値分布に従うとすると，各商品 $k$ の選択確率 $Q_k^h$ は，
+\begin{align}
+&Q_k^h=\sum_{i^{\prime}=1}^{N_i} \left(P_{i^{\prime}}^h \sum_{j^{\prime} \in {\cal J}_{i^{\prime}}} \left(P_{j^{\prime}|i^{\prime}}^h P_{k|i^{\prime},j^{\prime}}^h \right) \right), \label{eq5-3}\\
+&P_{i}^h=\frac{\left( \sum \limits_{j^{\prime} \in {\cal J}_i} \left( \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left(\gamma_{k^{\prime}j^{\prime}} \exp V_{k^{\prime}}^h \right)^{1/\eta_{j^{\prime}}} \right)^{\eta_{j^{\prime}} /\mu_i} \right)^{\mu_i}}
+{\sum \limits_{i^{\prime}=1}^{N_i} \left( \sum \limits_{j \in {\cal J}_{i^{\prime}}} \left( \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left(\gamma _{k^{\prime}j^{\prime}} \exp V_{k^{\prime}}^h \right)^{1/\eta_{j^{\prime}}} \right)^{\eta_{j^{\prime}}/\mu_{i^{\prime}}} \right)^{\mu_{i^{\prime}}}}, \label{eq5-4}\\
+&P_{j|i}^h=\frac{ \left( \sum \limits_{k^{\prime} \in {\cal K}_j} \left(\gamma_{k^{\prime}j} \exp{V_{k^{\prime}}^h} \right)^{1/\eta_j} \right)^{\eta_j/\mu_i}}
+{ \sum \limits_{j^{\prime} \in {\cal J}_{i^{\prime}}} \left( \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left(\gamma_{k^{\prime}j^{\prime}} \exp V_{k^{\prime}}^h \right)^{1/\eta_{j^{\prime}}} \right)^{\eta_{j^{\prime}/\mu_i}}}, \label{eq5-5}\\
+&P_{k|i,j}^h =\frac{\left( \gamma_{kj}\exp{V_k^h}\right)^{1/\eta_j}}
+{\sum \limits_{k^{\prime} \in {\cal K}_j} \left( \gamma_{k^{\prime}j} \exp V_{k^{\prime}}^h \right)^{1/\eta_j}}. \label{eq5-6}
+\end{align}
+と表わされる．
+ここで，$N_i$ は潜在クラス集合，$N_j$ はサブ潜在クラス集合である．そして $\gamma_{kj}$ はアロケーション・パラメータ，$\eta_j,\mu_i$ は類似度パラメータであり，
+それぞれ，
+\begin{align}
+0&\leq \gamma_{kj} \leq 1&\forall k,j\label{eq5-7}\\
+0&\leq \mu _i \leq 1&\forall i \label{eq5-8}\\
+0&\leq \eta _j \leq 1&\forall j \label{eq5-9}\\
+\eta_j &\leq \mu_i &\forall i,j \label{eq5-10}
+\end{align}
+を満たすものとする．ここで新たに加わった式(\ref{eq5-10})の条件は，Three-Level Nested Logit モデルの類似度パラメータの制約条件と同様である\cite{Cas01,GH04}．
+このモデルは，Daly and M. Bierlaire (2006) \cite{DB06} の一例と捉えることもできる．
+
+以上のように定式化した LGNL モデルの利点は，次のようにまとめることができる．
+\begin{enumerate}
+\item 従来の LML モデルと比較し，潜在クラスを商品属性により外生的に定義しているためクラスの意味解釈が容易であり，マーケット・セグメンテーションの考え方に適合的である．
+\item 従来の LML モデルと比較し，多重共線性に類似した問題に起因するパラメータの符号条件が満たされない可能性が低い．
+\item （ランダム）効用最大化行動と整合的であり，モデルのシステマティックな拡張が可能である．
+\item GNL モデルとの商品間の類似性（構造的異質性）を NL モデルと比較し，より構造的に表現することが可能である．
+\end{enumerate}
+
+\subsection{パラメータ推定方法}
+LGNL モデルのパラメータ推定は一般的な最尤法を用いることが可能である．
+消費者（もしくは購買機会） $h$が，潜在クラス $i$，サブクラス $j\in N_i$ に属し，選択肢 $k$ を選択する確率を
+$P_{i,j,k}^h (\bm{\theta})$ としよう．すると，尤度関数 $\L(\bm{\theta})$ 及び対数尤度関数 $\L\L(\bm{\theta})$ は次の式で表される；
+\begin{align}
+L(\bm{\theta} )&= \prod^{N_h}_{h^{\prime}=1} \prod^{N_i}_{i^{\prime}=1} \prod_{j^{\prime} \in{{\cal J}_{i^{\prime}}}} \prod_{k^{\prime} \in{{\cal K}_j^{\prime}}} P_{i^{\prime},j^{\prime},k^{\prime}}^{h^{\prime}} (\bm{\theta} )^{\delta_{i^{\prime},j^{\prime},k^{\prime}}^{h^
+{\prime}}}, \label{eq5-11}\\
+{\cal L}(\bm{\theta} )&=\ln (L (\bm{\theta} )) = \sum^{N_h}_{h^{\prime}=1} \sum^{N_i}_{i^{\prime}=1} \sum_{j^{\prime} \in{{\cal J}_{i^{\prime}}}} \sum_{k^{\prime} \in{{\cal K}_{j^{\prime}}}} \delta_{i^{\prime},j^{\prime},k^{\prime}}^{h^{\prime}} \ln (P_{i^{\prime},j^{\prime},k^{\prime}}^{h^{\prime}} (\bm{\theta} )). \label{eq5-12}
+\end{align}
+ここで，$\delta_{i,j,k}^h$ は消費者 $h$ が潜在クラス $i$，サブクラス $j$，商品 $k$ を選択した場合 $1$ ,しない場合 $0$ となる変数である．
+この対数尤度を最大化するように，パラメータを推定する．ただし，一般的な NL モデルは階層別に段階推定が可能であるが，
+本モデルでは，潜在クラス及びサブクラスの選択結果が直接観測できないため，すべてのパラメータを同時推定する必要がある．
+パラメータ推定時の注意は，GNL モデルの推定時と同様である．
+%***************************************************************************************************************************
+\subsection{ランダム効用最大化行動との整合性}
+モデルが効用最大化行動と整合的であることを確かめることは，モデルの適用，拡張を考えるうえで重要である．
+しかし，従来のマーケッティング・サイエンスにおける離散選択モデルの多くは，消費者がどのような行動をしているのかという点に関心が払われていない．
+より具体的にいうならば，消費者の効用というものを定義しておきながら，それを最大化するといった行動原理を示していない．
+特に，確定的効用に他の選択肢の（部分的）効用値を説明変数として入れるということが多々行なわれており，多分にアドホックなモデルが多い．
+
+需要予測を行なう際には，将来にわたって消費者が効用を最大化するという仮定を置くことは妥当であり，インフレによる価格上昇，選択肢の変化があってもこの仮定は不変であると考えられる．
+集計的なモデルでは，このような変化があった場合への対応が恣意的になる恐れがある．
+また，商品選択モデルの上位に商店選択モデル等がある場合，その間には関連性があると考えるのが妥当であり，それがカテゴリー・バリューで説明できる効用最大化行動と整合的なモデル
+では拡張が容易となる．
+
+%\subsubsection{ General Extreme Value モデル}
+%McFadden (1978)\cite{McF78}, Manski and McFadden (1981) \cite{MM81} では，離散選択モデルの中でも効用最大化行動の結果より導かれるものをGEV (General Extreme Value) Familyと定義し，その条件を示している．
+%その条件とは以下に示す $4$ つである．まず，関数 $Y_k\equiv \exp(V_k)$ を定義する．次に，すべての選択肢 $k$ の $Y_k$ の関数 $\cal G$（GEV母関数）を考え，
+%${\cal G}={\cal G}(Y_1,Y_2,\ldots,Y_K)$ と表わされるとしよう．また，${\cal G}_k$ を $\cal G$ の $Y_k$ による偏微分，すなわち ${\cal G}_k=\partial {\cal G}/\partial Y_k$ としよう．
+%ここで，$K$ は選択肢数である．
+%
+%次の条件を満たす場合，$P_k=Y_k {\cal G}_k/{\cal G}$ は，効用最大化と整合的な離散選択モデルにおける選択肢 $k$ の選択確率となる．
+%\\
+%\begin{enumerate}
+%\item ${\cal G}(Y_1,Y_2,\ldots,Y_K)\geq 0$．
+%\item ${\cal G}$ は $n$ 次同次関数．すなわち，いかなる実数 $r$ に関しても ${\cal G}(rY_1,\ldots,rY_J)=r^n {\cal G}(Y_1,\ldots,Y_J)$ が成立．
+%\item すべての $k$ に関して $Y_k\rightarrow\infty$ とすると，${\cal G} \rightarrow \infty $.
+%\item ${\cal G}$ の相互偏導関数の符号が次のように変化する．すべての $k$ に関して ${\cal G}_k\geq 0$,すべての $k\not= l$ に関して ${\cal G}_{kl}=\partial {\cal G}_k/\partial Y_l\leq 0$,すべての異なる $k,l,m$ に関して ${\cal G}_{klm}=\partial {\cal G}_{kl}/\partial Y_m\geq 0$%，そしてより高次についても同様．
+%\end{enumerate}
+
+\begin{theorem}
+式\eqref{eq5-3}--\eqref{eq5-9} で表わされる LGNL モデルは，ランダム効用最大化と整合的である．
+\end{theorem}
+\begin{proof}
+ここでは，LGNL モデルが上記の $5$ つの条件を満たし，GEV Family に属し，効用最大化行動と整合的であることを証明する．
+Papola (2004) \cite{Pap04} と同様の手順で，まず GEV 母関数 ${\cal G}$ を次のとおり仮定しよう：
+\begin{align}
+{\cal G}= \sum \limits_{i^{\prime}=1}^{N_i} \left( \sum \limits_{j^{\prime} \in {\cal J}_{i^{\prime}}} \left( \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left(\gamma_{k^{\prime}j^{\prime}} Y_{k^{\prime}}^h \right)^{1/\eta_{j^{\prime}}} \right)^{\eta_{j^{\prime}}/\mu_{i^{\prime}}} \right)^{\mu_{i^{\prime}}}. \label{eq5-13}
+\end{align}
+すると，選択確率 $Q_k^h$ は次のとおり導かれる：
+
+\begin{align}
+Q_k^h&=\frac{Y_{k^{\prime}}^{h^{\prime}} {\cal G}_k}{{\cal G}}\notag\\
+&=\frac{\sum \limits_{i^{\prime}=1}^{N_i} \!\! \left( \! \left( \sum \limits_{j\in{\cal J}_{i^{\prime}}} \!\!\left( \sum \limits_{k \in {\cal K}_{j^{\prime}}} \!\! \left( \gamma_{k^{\prime}j^{\prime}} Y_{k^{\prime}}^{h^{\prime}} \! \right)^{1/\eta_{j^{\prime}}} \! \right)^{\eta_{j^{\prime}}/\mu_{i^{\prime}}} \right)^{\mu_{i^{\prime}}-1}
+   \hspace{-5mm} \left( \sum \limits_{k \in {\cal K}_{j^{\prime}}}  \left( \gamma_{k^{\prime}j^{\prime}} Y_{k^{\prime}}^{h^{\prime}} \right)^{1/\eta_{j^{\prime}}} \!\! \right)^{(\eta_{j^{\prime}}/\mu_{i^{\prime}})-1} \hspace{-12mm} (\gamma_{k^{\prime}j^{\prime}} Y_{k^{\prime}}^{h^{\prime}})^{1/\eta_{j^{\prime}}} \!\! \right)}
+    {\sum \limits_{i^{\prime}=1}^{N_i} \left( \sum \limits_{j\in{\cal J}_{i^{\prime}}} \left( \sum \limits_{k \in {\cal K}_{j^{\prime}}} \left(\gamma _{k^{\prime}j^{\prime}} Y_{k^{\prime}}^{h^{\prime}} \right)^{1/\eta_{j^{\prime}} } \right)^{\eta_{j^{\prime}}/\mu_{i^{\prime}}} \right)^{\mu_{i^{\prime}}}}\notag \\
+&=\sum \limits_{i^{\prime}=1}^{N_i} \left( \frac{ \left( \sum \limits_{j\in{\cal J}_{i^{\prime}}} \left( \sum \limits_{k \in {\cal K}_{j^{\prime}}} \left(\gamma_{k^{\prime}j^{\prime}} Y_{k^{\prime}}^{h^{\prime}} \right)^{1/\eta_{j^{\prime}}} \right)^{\eta_{j^{\prime}}/\mu_{i^{\prime}}} \right)^{\mu_{i^{\prime}}}}
+{\sum \limits_{i^{\prime}=1}^{N_i} \left( \sum \limits_{j\in{\cal J}_{i^{\prime}}}  \left( \sum \limits_{k \in {\cal K}_{j^{\prime}}} \left(\gamma _{k^{\prime}j^{\prime}} Y_{k^{\prime}}^{h^{\prime}} \right)^{1/\eta_{j^{\prime}}}  \right)^{\eta_{j^{\prime}}/\mu_{i^{\prime}}} \right)^{\mu_{i^{\prime}}}}\right.\notag \\
+&~~~~~~~~~~~~~~~~~~~\cdot \left. \sum \limits_{k \in {\cal K}_{j^{\prime}}} \left( \frac{ \left( \sum \limits_{k \in {\cal K}_{j^{\prime}}} \left(\gamma _{k^{\prime}j^{\prime}} Y_{k^{\prime}}^{h^{\prime}} \right)^{1/\eta_{j^{\prime}}}\right)^{\eta_{j^{\prime}}/\mu_{i^{\prime}}}}
+{ \sum \limits_{j^{\prime} \in {\cal J}_{i^{\prime}}} \left( \sum \limits_{k \in {\cal K}_{j^{\prime}}} \left( \gamma_{k^{\prime}j^{\prime}} Y_{k^{\prime}}^{h^{\prime}} \right)^{1/\eta_{j^{\prime}}}\right)^{\eta_{j^{\prime}}/\mu_{i^{\prime}}}} 
+\cdot \frac{\left( \gamma_{k^{\prime}j^{\prime}} Y_{k^{\prime}}^{h^{\prime}} \right)^{1/\eta_{j^{\prime}}}}
+{\sum \limits_{k \in {\cal K}_{j^{\prime}}} \left( \gamma_{k^{\prime}j^{\prime}} Y_{k^{\prime}}^{h^{\prime}} \right)^{1/\eta_{j^{\prime}}}} \right) \right) \notag \\
+&=\sum_{i^{\prime}=1}^{N_i} \left(P_{i^{\prime}}^h \sum_{j^{\prime} \in {\cal J}_{i^{\prime}}} \left(P_{j^{\prime}|i^{\prime}}^h P_{k^{\prime}|i^{\prime},j^{\prime}}^h \right)\right). \label{eq5-14}
+\end{align}
+したがって，この GEV 母関数 $\cal G$ は LGNL モデルと対応する．
+次に式 \eqref{eq2-5}--\eqref{eq2-5}で示した，GEV Family の各条件を満たすかを Papola (2004) \cite{Pap04} と同様に確かめよう．\\
+\\
+\bfseries[条件1]\mdseries
+\par 条件1については，次の条件を満たせば，いかなる $V_k,\eta_j,\mu_i$ のもとでも成立する：
+\begin{align}
+\gamma_{kj}\geq 0~~~~~\forall k,j. \label{eq5-15}
+\end{align}
+この条件はアロケーション・パラメータが満たすべき条件であり，式(\ref{eq5-6})に対応する．\\
+\\
+\bfseries[条件2]\mdseries
+\par 条件2については，次のとおり関数$\cal G$が一次同次であることが示される：
+\begin{align}
+{\cal G}(rY_1^h,rY_2^h,\ldots ,rY_{N_k}^h) = &\sum \limits_{i^{\prime}=1}^{N_i} \left( \sum \limits_{ j \in{\cal J}_{i^{\prime}}} \left( \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left(\gamma_{k^{\prime}j^{\prime}} r Y_{k^{\prime}}^h \right)^{1/\eta_{j^{\prime}} }\right)^{\eta_{j^{\prime}}/\mu_{i^{\prime}}} \right)^{\mu_{i^{\prime}}} \notag\\
+=&\sum \limits_{i^{\prime}=1}^{N_i}\left( \sum \limits_{j\in{\cal J}_{i^{\prime}}} \left( r^{1/\eta_{j^{\prime}}} \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left(\gamma_{k^{\prime}j^{\prime}} Y_{k^{\prime}}^h  \right)^{1/\eta_{j^{\prime}}}\right)^{\eta_{j^{\prime}}/\mu_{i^{\prime}}} \right)^{\mu_{i^{\prime}}} \notag\\
+=&\sum \limits_{i^{\prime}=1}^{N_i}\left( r^{1/\mu_{i^{\prime}}}  \sum \limits_{j\in{\cal J}_{i^{\prime}}} \left(\sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \left( \gamma_{k^{\prime}j^{\prime}} Y_{k^{\prime}}^h  \right)^{1/\eta_{j^{\prime}}} \right)^{\eta_{j^{\prime}}/\mu_{i^{\prime}}} \right)^{\mu_{i^{\prime}}} \notag\\
+=&r\sum \limits_{i^{\prime}=1}^{N_i}\left(  \sum \limits_{j\in{\cal J}_{i^{\prime}}} \left( \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}}\left(\gamma_{k^{\prime}j^{\prime}} Y_{k^{\prime}}^h \right)^{1/\eta_{j^{\prime}} }\right)^{\eta_{j^{\prime}}/\mu_{i^{\prime}}} \right)^{\mu_{i^{\prime}}} \notag\\
+=&r{\cal G}(Y_1^h,Y_2^h,\ldots ,Y_{N_k}^h). \label{eq5-16}
+\end{align}
+\\
+\bfseries[条件3]\mdseries
+\par 条件3については，次のとおり自明である：
+\begin{equation}
+\lim_{Y_k\to \infty} {\cal G}(Y_1^h,Y_2^h,\ldots ,Y_{N_k}^h)=\infty~~~~\forall  k. \label{eq5-17}
+\end{equation}
+\\
+\bfseries[条件4]\mdseries
+\par まず，関数${\cal G}$の$Y_l^h$についての一階偏微分${\cal G}_l^h$について考えよう：
+\begin{align}
+{\cal G}_m &= \sum_{i^{\prime}=1}^{N_i} \left[ \gamma_{lj} \hspace{-1.0mm} \left( \sum \limits_{j^{\prime} \in{\cal J}_{i^{\prime}}} \hspace{-2.0mm} \left( \sum \limits_{k^{\prime} \in {\cal K}_{j^{\prime}}} \hspace{-2.0mm} \left(\gamma_{kj} Y_{k^{\prime}}^h \right)^{1/\eta_j} \!\!\right)^{{\eta_{j^{\prime}}}/\mu_{i^{\prime}}} \right)^{\mu_{i^{\prime}}-1}
+\hspace{-2.0mm} \left( \sum \limits_{k^{\prime} \in {\cal K}_{j}} \hspace{-2.0mm} \left(\gamma_{k^{\prime}j}Y_{k^{\prime}}^h \right)^{1/\eta_j} \right)^{(\eta_j/\mu_{i^{\prime}})-1} \hspace{-7.0mm}(\gamma_{lj} Y_l^h)^{(1/\eta_j)-1} \right] \notag \\
+&:= \sum_{i^{\prime}=1}^{N_i} \left[  \gamma_{lj} \phi_k^{\mu_i-1} \chi_k^{(\eta_j/\mu_i)-1} \psi_l^{(1/\eta_j) -1} \right].\label{eq5-18}
+\end{align}
+ここで式(\ref{eq5-7})より，$\phi_k \geq 0, \chi_k\geq 0, \psi_k\geq 0 $ であるため，${\cal G}_l^h \geq 0$ となる．
+同様に関数${\cal G}$の二階相互偏微分${\cal G}_{ln}^h$ について考えよう：
+\begin{align}
+{\cal G}_{ln}= \sum_{i^{\prime}=1}^{N_i} \left[ \gamma_{lj} \gamma_{nj} \left( (\mu_i-1)\phi _k^{\mu_i-2} \varphi  _k^{2((\eta_j/\mu_i)-1)} +((\eta_j/\mu_i)-1) \phi _k^{\mu_i-1} \varphi _k^{\eta_j-2} \right) \chi _l^{1/\eta_j} \chi _n^{1/\eta_j}  \right]_.\label{eq5-19}
+\end{align}
+ここで，式(\ref{eq5-7})より，$\mu_i-1\leq 0$，同様に式\eqref{eq5-7}，\eqref{eq5-8}，\eqref{eq5-9} より，$(\eta_j/\mu_i)-1\leq 0$ であるため，${\cal G}_{mn}^h\leq 0$ となる．
+さらに高次の相互偏微分についても式 \eqref{eq5-16}，\eqref{eq5-17} が保たれる場合，同様の符号が成立する．
+
+以上より，LGNL モデルは GEV Family であり，ランダム効用最大化行動と整合的であることが示された．\QED
+\end{proof}
+%***************************************************************************************************************************
+\section{LGNL モデルの適用}\label{sec:5-4}
+\subsection{対象データ}
+本章では，3 章と同様に，同一スーパーチェーン 2 店舗 で 2001 年年間に販売されているペットボトル・コーラのスキャン・パネル・データを用い，パラメータの推定を行なう．
+全サンプル数は $903$ 世帯，$5,269$ 購買機会であり，約 $2/3$ に相当する $545$ 世帯，$3,505$ 購買機会を推定用サンプルとし，残り約 $1/3$ に相当する $458$ 世帯，$1,764$ 購買機会を検証用サンプルとする．この設定もすべて 3 章と同様である．
+
+\subsection{効用関数，選択構造の同定}
+選択肢の効用関数は，異質性を考慮することによる再現性の違いを比較し，需要予測にも適用可能とするため固有選好度を説明変数より省き，4 章の式\eqref{eq4-3}と同様に以下に示す変数を用いる：
+\begin{equation}
+V_{i,k}^h=\alpha_{i1} X_{1k}+\alpha_{i2} X_{2k}+\alpha_{i3} X_{3k}+\alpha_{i4} X_{4k}+\alpha_{i5} X_{5k}~~\forall i,k. \label{eq5-20}
+\end{equation}
+ここで $X_{1k}$ は商品 $k$ の価格（円），$X_{2k}$ はコカコーラ・ダミー（コカコーラ $=1$），$X_{3k}$ は容量 ($ml$)，$X_{4k}$ はノンシュガー・ダミー（ノンシュガー $=1$），
+$X_{5k}$ は前回購買商品ダミー（前回購買商品 $=1$）である．なお，初期購買時においては，すべての商品を $X_{5k}=1$ と設定する．
+潜在クラスとしては，ブランド選択 ($i=1$)，容量選択 ($i=2$)，内容（ノンシュガーか否か）選択 ($i=3$) の $3$ つを仮定する．
+以上より，具体的な選択ツリーは潜在クラス数 ${\cal I}=3$，サブ潜在クラス数 $6$，商品数 $8$ で構成される図\ref{fig5-3}に示すとおりとなる．
+
+\begin{figure}[t]
+  \centering
+  \psbox[width=0.80 \linewidth]{clip5-3}
+\caption{適用例における LGNL モデルの構造}
+\label{fig5-3}
+\end{figure}
+
+効用関数は線形を仮定したため基数的であり，説明変数内に（円）という単位を持つ価格が存在するため，
+各パラメータを $\alpha_{i1}$ で除し正規化することで，各説明変数の価値を金銭換算可能である．
+金銭換算することで各潜在クラス間の比較が容易となるため，これについても比較，検証時に併せて示す．
+
+\subsection{既存モデルとの比較，検証}
+異質性の有無によるモデル適合度を比較するため，異質性をまったく仮定しないモデル [MNL]，消費者の異質性を仮定するモデル [LML] (通常の潜在クラス・ロジット・モデル)，
+商品の類似性を仮定するモデル [GNL]，そして両者を仮定するモデル [LGNL] の$4$ つのモデルを比較することとする．
+ただし，[LML] については潜在クラス数を [LGNL] と揃えるため，$3$ クラスとする．
+
+\subsubsection{統計量の比較}
+$4$ つのモデルの統計量の比較を表\ref{tb:5-1}に示す．消費者，商品に異質性を考慮している [LGNL] は，$\bar\rho^2 $ が $0.2230$ と$0.2$を上回る値を示しており，十分な再現性を有しているといえる．
+$4$ つのモデルの比較においても，対数尤度，AIC，BIC，的中率すべてにおいて，[LGNL] がまさっており，
+両者の異質性を考慮することが再現性を向上しているといえる．また，[LML]，[GNL] を比較した場合，
+[GNL] の方がまさっていることから，今回の対象商品であるコーラにおいては，消費者の異質性を考慮するよりも商品の異質性を考慮するほうが
+重要であることが分かる．これは，[MNL] と [LML]，[GNL] を比較しても，その各統計量の改善度より確認できる．
+このような結果となった理由としては，コーラが比較的安価な商品であり，自動車やパソコンといった高額商品に存在する
+予算制約がなく，消費者の異質性があまり存在しないことが考えられる．
+本研究で取り扱ったコーラより異質性があると考えられる商品や異質性が的確に把握できる状況，パソコン，家電製品のオンライン・ショップ等に LGNL モデルを適用した場合は，また違った結果が得られると考えられる．
+
+\begin{table}[t]
+\begin{center}
+\caption{統計量の比較} \label{tb:5-1}
+\begin{tabular}{crrrr}
+\toprule
+\multicolumn{1}{c}{ } & \multicolumn{1}{c}{[MNL]}& \multicolumn{1}{c}{[LML]} & \multicolumn{1}{c}{[GNL]} & \multicolumn{1}{c}{[LGNL]} \\ \hline\hline
+$\cal L$ & $-3,006$ & $-2,859$ & $-2,844$ & $-2,825$ \\
+AIC & $6,022$ & $5,752$ & $5,738$ & $5,722$ \\
+$ \bar\rho^2 $ & $0.1781$ & $0.2162$ & $0.2194$ & $0.2230$ \\
+Hit Ratio& $0.4042$ & $0.4076$ & $0.4173$ & $0.4218$ \\\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+\subsubsection{パラメータの比較}
+$4$ つのモデルの主要パラメータを表\ref{tb:5-2}, \ref{tb:5-3}, \ref{tb:5-4}に示す．また，効用関数パラメータを金銭換算したものを表\ref{tb:5-5}に示す．
+
+表\ref{tb:5-2} より，各モデルの効用関数パラメータは概ね $99\%$ で統計的有意といえる．
+ただし，価格，容量については，[LML]，[LGNL] については有意水準を満たさないパラメータが存在する．
+これは，価格と容量の間に強いマイナスの相関があるためであると考えられる．
+また，[LML] のセグメント $3$ の前回購買ダミーについても，有意水準が低くなっている．
+このセグメントではこの $2$ つのパラメータの大きさが突出しており，ノンシュガーを避け，前回購買した商品とは異なる商品を選好するセグメントと位置付けられる．
+しかし，このようなセグメントが実際に $16.3\%$ も存在するということは現実には考えられないため，この位置づけの解釈は妥当とはいえず，
+\ref{sec:5-1}節で述べた潜在クラス・ロジット・モデルの欠点を如実に示している．
+これは，セグメント・サイズを単なる $\lambda$ という定数により説明しており，比較的サイズの小さなセグメントでは極端なパラメータが推定されやすいためであると考えられる．
+一方，[CHPS]の各セグメントへの所属確率より，消費者は $20.5\%$ がブランド優位，$39.6\%$ が内容量優位，$39.9\%$ が内容物優位で購買していることが推計される．
+この結果については，効用関数のパラメータが極端にはなっておらず，セグメント・サイズも偏りがないため妥当であるといえる．
+また，表\ref{tb:5-5}より $i=3$ 内容物優位セグメントの $\alpha_4/\alpha_1$ が他のセグメントと比較し小さいことから，内容物優位で購買生起している消費者は
+ノンシュガーに対し比較的不効用を感じず，選択しやすいことが分かる．同様に，やや意外ではあるが，$i=2$ 内容量優位セグメントの $\alpha_2/\alpha_1$ が他のセグメントと比較し大きいことから，
+内容量優位で購買生起している消費者はコカコーラというブランドに対し大きなロイヤルティをもっているといえる．
+
+表\ref{tb:5-3}より，商品類似性に加え消費者異質性を導入することにより，一部のネストにおいて商品類似性が緩和されていることが分かる．
+これは，特に $\eta_5$ で顕著である．このパラメータの相違は，次のように説明される．表\ref{tb:5-5}に示すように [LGNL]，$i=2$ 内容量優位セグメントのコカコーラ・ダミーの値が [GNL] のそれと比較し大きい．これにより
+商品の異質性がむしろ消費者の異質性として表現されたためであると考えられる．他方では，$\mu_1$ は逆に [LGNL] の方がより商品異質性が大きいという結果となっている．
+
+表\ref{tb:5-4}より，[LGNL] においてはアロケーション・パラメータ$\gamma_{11}$，$\gamma_{55}$ がそれぞれ $0$ であることから，
+図\ref{fig5-3}で示された選択行動は縮小され，それぞれ，コカコーラ $1.5l$ はブランド優位選択，ペプシコーラ  $1.5l$ は内容物優位選択はされていないことが分かる．
+消費者異質性を考慮しない [GNL] でもそれぞれのアロケーション・パラメータの値は $0$ もしくは比較的小さいことから，この結果は妥当であるといえる．
+
+
+\begin{table} [t]
+\begin{center}
+\caption{効用関数パラメータ及びセグメント・サイズ}  \label{tb:5-2}
+\begin{tabular} {crrrrrrrr}
+\toprule
+\multirow{3}{3em}{ } & \multirow{3}{4em}{[MNL]} & \multicolumn{3}{c}{[LML]} & \multirow{3}{4em}{[GNL]} & \multicolumn{3}{c}{[LGNL]} \\
+&&\multicolumn{1}{c}{$i=1$}&\multicolumn{1}{c}{$=2$}&\multicolumn{1}{c}{$=3$}&\multicolumn{1}{c}{}&\multicolumn{1}{c}{$i=1$}&\multicolumn{1}{c}{$=2$}&\multicolumn{1}{c}{$=3$}\\
+\hline
+\hline
+\multirow{2}{*}{$ \alpha_1 $} & $-0.020$ & $-0.036$ & $-0.023$ & $-0.024$ & $-0.011$ & $-0.006$ & $-0.006$ & $-0.028$ \\
+&Fixed&$\ast\ast$&$\ast\ast$&$\ast\ast$&$\ast\ast$&$\ast\ast$&$\ast\ast$&$\ast\ast$\\\hline
+\multirow{2}{*}{$ \alpha_2 $} & $0.446$ & $0.778$ & $0.304$ & $1.877$ & $0.041$ & $0.0911$ & $0.487$ & $0.262$ \\
+&$\ast\ast$&$\ast\ast$&$\ast\ast$&$\ast\ast$&$\ast\ast$&$\ast\ast$&$\ast\ast$&$\ast\ast$\\\hline
+\multirow{2}{*}{$ \alpha_3 $} & $0.003$ & $0.043$ & $0.002$ & $0.003$ & $0.002$ & $0.0014$ & $0.001$ & $0.004$ \\
+&$\ast$&$\ast\ast$&$\ast$&$\ast$ &$\ast\ast$&$\ast\ast$& &$\ast$\\\hline
+\multirow{2}{*}{$ \alpha_4 $} & $-0.000$ & $-0.041$ & $-0.426$ & $-14.477$ & $-0.208$ & $-0.819$ & $-1.045$ & $-0.410$ \\
+& &$\ast$&$\ast\ast$&$\ast\ast$&$\ast\ast$& $\ast\ast$ & $\ast\ast$ & $\ast\ast$ \\\hline
+\multirow{2}{*}{$ \alpha_5 $} & $1.362$ & $2.376$ & $1.458$ & $-14.410$ & $0.569$ & $0.254$ & $0.364$ & $1.673$ \\
+&$\ast\ast$&$\ast\ast$&$\ast\ast$&$\ast\ast$&$\ast\ast$&$\ast\ast$&$\ast$&$\ast\ast$\\\hline
+Segment&\multirow{2}{*}{--} & \multirow{2}{*}{$0.438$} & \multirow{2}{*}{$0.399$} & \multirow{2}{*}{$0.163$} & \multirow{2}{*}{--} & \multirow{2}{*}{$0.205$} & \multirow{2}{*}{$0.396$} & \multirow{2}{*}{$0.399$} \\
+Size &&&&&&&&
+\\\bottomrule
+\multicolumn{9}{l}{t検定において$\ast\ast$99\%有意，$\ast$95\%有意}
+\end{tabular}
+\end{center}
+\end{table}
+\begin{table}[t]
+\begin{center}
+\caption{類似度パラメータ} \label{tb:5-3}
+\begin{tabular}{crrcrrcrr}
+\toprule
+\multicolumn{1}{c}{} & \multicolumn{1}{c}{[GNL]} & \multicolumn{1}{c}{[LGNL]}&\multicolumn{1}{c}{} & \multicolumn{1}{c}{[GNL]} & \multicolumn{1}{c}{[LGNL]} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{[GNL]} & \multicolumn{1}{c}{[LGNL]} \\ \hline\hline
+\multirow{2}{*}{$ \mu_1 $} & $0.3249$ & $0.1417$ & \multirow{2}{*}{$ \eta_1 $} & $0.3249$ & $0.1417$ & \multirow{2}{*}{$ \eta_4 $} & $1.0000$ & $1.0000$ \\
+& $\ast\ast$ & $\ast\ast$ & &(Fixed)&(Fixed)& &(Fixed)&(Fixed)\\\hline
+\multirow{2}{*}{$ \mu_2 $} & $1.0000$ & $1.0000$ & \multirow{2}{*}{$ \eta_2 $} & $0.3249$ & $0.1417$ & \multirow{2}{*}{$ \eta_5 $} & $0.2008$ & $0.4781$ \\
+&(Fixed)&(Fixed)& & $\ast\ast$ & $\ast\ast$ & & $\ast$ & $\ast\ast$ \\\hline
+\multirow{2}{*}{$ \mu_3 $} & $1.0000$ & $1.0000$ & \multirow{2}{*}{$ \eta_3 $} & $0.3018$ & $0.3110$ & \multirow{2}{*}{$ \eta_6 $} & $1.0000$ & $1.0000$ \\
+& $\ast\ast$ & $\ast\ast$ & & $\ast\ast$ & $\ast\ast$ & &(Fixed)&(Fixed)\\\bottomrule
+\multicolumn{9}{l}{t検定において$\ast\ast$99\%有意，$\ast$95\%有意}
+\end{tabular}
+\end{center}
+\end{table}
+{\tabcolsep = 1.7mm
+\begin{table}[t]
+\begin{center}
+\caption{アロケーション・パラメータ} \label{tb:5-4}
+\begin{tabular}{crrcrrcrrcrr}
+\toprule
+\multicolumn{1}{c}{ } & \multicolumn{1}{c}{[GNL]} & \multicolumn{1}{c}{[LGNL]} & \multicolumn{1}{c}{ } & \multicolumn{1}{c}{[GNL]} & \multicolumn{1}{c}{[LGNL]} & \multicolumn{1}{c}{ } & \multicolumn{1}{c}{[GNL]} & \multicolumn{1}{c}{[LGNL]} & \multicolumn{1}{c}{ } & \multicolumn{1}{c}{[GNL]} & \multicolumn{1}{c}{[LGNL]}\\\hline\hline
+\multirow{2}{*}{$ \gamma_{11} $} & $0.0000$ & $0.0000$ & \multirow{2}{*}{$ \gamma_{31} $} & $0.7589$ & $0.6760$ &\multirow{2}{*}{$ \gamma_{52} $} & $0.6110$ & $0.3012$ & \multirow{2}{*}{$ \gamma_{72} $} & $0.5232$ & $0.4681$ \\
+& -- & -- & & $\ast\ast$ & $\ast\ast$ & &$\ast\ast$ & $\ast\ast$ & & $\ast\ast$ & $\ast\ast$ \\\hline
+\multirow{2}{*}{$ \gamma_{13} $} & $0.6546$ & $0.5192$ & \multirow{2}{*}{$ \gamma_{33} $} & $0.1594$ & $0.0935$ & \multirow{2}{*}{$ \gamma_{53} $} & $0.3031$ & $0.6988$ & \multirow{2}{*}{$ \gamma_{73} $} & $0.4768$ & $0.0860$ \\
+& $\ast\ast$ & $\ast\ast$ & & $\ast\ast$ & $\ast$ & & $\ast\ast$ & $\ast\ast$ && $\ast\ast$ &  \\\hline
+\multirow{2}{*}{$ \gamma_{15} $} & $0.3459$ & $0.4008$ & \multirow{2}{*}{$\gamma_{36} $} & $0.0817$ & $0.2305$ & \multirow{2}{*}{$ \gamma_{55} $} & $0.0859$ & $0.0000$ & \multirow{2}{*}{$ \gamma_{76} $} & $0.0000$ & $0.4459$ \\
+& $\ast\ast$ & $\ast\ast$ & & $\ast$ & $\ast$ & & & -- && -- & $\ast\ast$ \\\hline
+\multirow{2}{*}{$ \gamma_{21} $} & $0.2087$ & $0.0348$ & \multirow{2}{*}{$ \gamma_{41} $} & $0.8917$ & $0.4393$ & \multirow{2}{*}{$ \gamma_{62} $} & $0.0057$ & $0.0663$ & \multirow{2}{*}{$ \gamma_{82} $} & $1.0000$ & $0.5378$ \\
+&  &   & & $\ast\ast$ & $\ast\ast$ && & && $\ast\ast$ &$\ast\ast$  \\\hline
+\multirow{2}{*}{$ \gamma_{24} $} & $0.1278$ & $0.1459$ & \multirow{2}{*}{$ \gamma_{44} $} & $0.1083$ & $0.1810$ & \multirow{2}{*}{$ \gamma_{64} $} & $0.4233$ & $0.6988$ & \multirow{2}{*}{$ \gamma_{84} $} & $0.0000$ & $0.2250$ \\
+& $\ast$ & $\ast$ & & $\ast$ & $\ast\ast$ & & $\ast\ast$ & $\ast\ast$ & & -- & $\ast$ \\\hline
+\multirow{2}{*}{$ \gamma_{25} $} & $0.6635$ & $0.8193$ & \multirow{2}{*}{$ \gamma_{46} $} & $0.0000$ & $0.3786$ & \multirow{2}{*}{$ \gamma_{65} $} & $0.5710$ & $0.3128$ & \multirow{2}{*}{$ \gamma_{86} $} & $0.0000$ & $0.2372$ \\
+& $\ast\ast$ & $\ast\ast$ & & -- & $\ast\ast$ && $\ast\ast$ & $\ast\ast$ & & -- & $\ast\ast$ \\\bottomrule
+\multicolumn{12}{l}{t検定において$\ast\ast$ 99\% 有意，$\ast$95 \% 有意}
+\end{tabular}
+\end{center}
+\end{table}
+}
+
+\begin{table} [t]
+\begin{center}
+\caption{パラメータの金銭換算}  \label{tb:5-5}
+\begin{tabular} {clrrrr}
+\toprule
+\multirow{2}{2em}{} & \multirow{2}{4em}{} & \multirow{2}{5em}{ [GNL]} & \multicolumn{3}{c}{ [LGNL]} \\
+&&&\multicolumn{1}{c}{$i=1$}&\multicolumn{1}{c}{$~=2$}&\multicolumn{1}{c}{$~=3$}\\
+\hline
+\hline
+{$ \alpha_2/\alpha_1 $} & {(yen)} & $3.84$ & $14.90$ & $76.44$ & $9.49$  \\
+{$ \alpha_3/\alpha_1 $} & {(yen/$ml$)} & $0.15$ & $0.23$ & $0.13$ & $0.13$  \\
+{$ \alpha_4/\alpha_1 $} & {(yen)} & $-19.44$ & $-133.93$ & $-164.00$ & $-14.83$  \\
+{$ \alpha_5/\alpha_1 $} & {(yen)} & $53.11$ & $41.44$ & $57.14$ & $60.56$  \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+表\ref{tb:5-6} は，検証用データの集計量の比較結果を示している．
+各統計量が劣っている，[MNL]，[LML]，[GNL]，[LGNL]の順に平均二乗誤差(MSE)が小さくなっていることがわかる．
+ただし，[MNL]-[LML] 間，[MNL]-[GNL] 間の $MSE$ の減少幅を比較すると，選択肢間の類似性による誤差への影響と比較し，消費者の異質性を考慮することによる誤差への影響はわずかであるといえる．
+この理由として，対象商品がコーラという比較的低価格のカテゴリーであり，消費者の異質性が小さかったことが考えられる．
+
+\begin{table}
+\begin{center}
+\caption{集計量の比較}  \label{tb:5-6}
+\begin{tabular}{crrrrr} \toprule
+\multicolumn{1}{c}{}&\multicolumn{1}{c}{Actual}&\multicolumn{1}{c}{[MNL]}&\multicolumn{1}{c}{[LML]}&\multicolumn{1}{c}{[GNL]}&\multicolumn{1}{c}{[LGNL]}\\\hline\hline
+$P_1^{\A}$&$32.46$&$23.34$&$30.09$&$30.35$&$31.38$\\
+$P_2^{\A}$&$9.04$&$8.56$&$10.60$&$9.08$&$9.40$\\
+$P_3^{\A}$&$12.62$&$18.31$&$13.72$&$14.09$&$14.00$\\
+$P_4^{\A}$&$2.96$&$6.94$&$3.34$&$3.65$&$3.72$\\
+$P_5^{\A}$&$20.75$&$19.14$&$20.32$&$20.25$&$20.29$\\
+$P_6^{\A}$&$9.67$&$5.08$&$8.28$&$10.04$&$10.44$\\
+$P_7^{\A}$&$10.52$&$14.23$&$11.17$&$10.43$&$11.41$\\
+$P_8^{\A}$&$1.99$&$4.40$&$2.47$&$2.11$&$2.22$\\\hline
+MSE&--&$21.85$&$1.52$&$0.94$&$0.68$\\\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+
+\subsection{感度分析}
+ここでは，前節までで推定されたパラメータのもと，感度分析を行なう．
+具体的には，特定商品（今回は $k=1$，コカコーラ $1.5l$）を売切れとした場合，
+特定商品（今回はダイエットペプシ $1.5l$，$500ml$）に価格プロモーションを行なった場合の選択確率の変化を，モデル間で比較する．
+
+\subsubsection{特定商品を売切れとした場合の選択確率の比較}
+本小節では，特定商品（今回は $k=1$，コカコーラ $1.5l$）を売切れとし，消費者がすべて代替商品を購買するという仮定のもと，選択確率の変化をモデル間で比較する．
+ただし，価格その他の値については，パラメータ推定時と同様とする．
+通常時の各商品の選択確率，売切れ時，そしてその差について表\ref{tb:5-7}に示す．
+通常時の選択確率についても [GNL] は表\ref{tb:5-7}の実際の選択確率と大きく異なり，
+再現性が悪いことが分かる．また $k=2$ の選択確率の変化が [GNL] では $6.5\%$ であるのに対し，[LGNL] では $13.9\%$ と大きく異なる．
+これは，商品及び消費者の異質性をモデル内で考慮することにより生まれた差であると考えられる．$k=1$と $k=2$ はブランド，内容物が同じであるため，
+代替的に買い求める割合が高くなる．逆に，$k=7$ は，$k=1$ とブランド，内容物が異なるため代替的に買い求める割合は低い．
+つまり，消費者の異質性，商品の類似性を考慮することにより，売切れ時の選択確率は大きく異なることが分かる．
+
+\subsubsection{特定商品価格プロモーション時の選択確率の比較}
+本小節では，特定商品（今回はダイエットペプシ $2$ 商品 $k=7,8$）について，価格を表示価格の $30\%$ 引きとした場合の選択確率の変化をモデル間で比較する．
+通常時，プロモーション時，その差について表\ref{tb:5-8}に示す．$k=1$ の選択確率の変化が [MNL] では $-4.7\%$ であるのに対し，[LGNL] では $0.9\%$ と大きく異なる．
+これは，売切れ時と同様に商品及び消費者の異質性をモデル内で考慮することにより生まれた差である．
+$k=1$と$k=7,8$はブランド，内容物が異なるため，価格プロモーションの影響が少ない．
+逆に，$k=5$ は，$k=7,8$ とブランドが同じであるため，影響が大きい．
+また，$k=6$ が [LGNL] において $-0.5\%$ と比較的影響が少ない理由は，アロケーション・パラメータ $\gamma_{62}，\gamma_{65}$ が $\gamma_{64}$と比較し小さく，同一ブランド，同一内容量である影響を受けづらいためであると考えられる．
+以上より，消費者の異質性，商品の類似性を考慮することにより，価格プロモーション時の選択確率は大きく異なるといえる．
+{\tabcolsep = 1.7mm
+\begin{table} [b]
+\begin{center}
+\caption{商品売切れ時の選択確率の比較}  \label{tb:5-7}
+\begin{tabular} {crrrrrrrrrrrr}
+\toprule
+$P_k^{\A}$& \multicolumn{4}{c}{Normal{($\%$)}}  & \multicolumn{4}{c}{Sell out ($\%$) } & \multicolumn{4}{c}{Difference (point)} \\
+&\tiny{[MNL]}&\tiny{[LML]}&\tiny{[GNL]}&\tiny{[LGNL]}&\tiny{[MNL]}&\tiny{[LML]}&\tiny{[GNL]}&\tiny{[LGNL]}&\tiny{[MNL]}&\tiny{[LML]}&\tiny{[GNL]}&\tiny{[LGNL]}\\
+\hline
+\hline
+$P_1^{\A}$& $23.3$ & $30.1$ & $30.2$ & $31.4$ & $0.00$ & $0.00$ & $0.00$ & $0.00$ & $-23.3$ & $-30.1$ & $-30.2$ & $-31.4$ \\
+$P_2^{\A}$& $8.6$ & $10.6$ & $8.9$ & $9.4$ & $11.2$ & $17.9$ & $15.5$ & $23.3$ & $2.7$ & $7.3$ & $6.5$ & $13.9$ \\
+$P_3^{\A}$& $18.3$ & $13.7$ & $13.6$ & $14.0$ & $24.1$ & $20.1$ & $14.0$ & $13.6$ & $5.8$ & $6.4$ & $0.5$ & $-0.4$ \\
+$P_4^{\A}$& $6.9$ & $3.3$ & $3.5$ & $3.7$ & $9.2$ & $4.0$ & $3.5$ & $3.6$ & $2.3$ & $0.6$ & $0.0$ & $-0.1$ \\
+$P_5^{\A}$& $19.1$ & $20.3$ & $21.3$ & $20.3$ & $24.3$ & $20.7$ & $30.4$ & $34.9$ & $5.2$ & $9.3$ & $9.1$ & $14.6$ \\
+$P_6^{\A}$& $5.1$ & $8.3$ & $10.0$ & $10.4$& $6.6$ & $9.8$ & $12.2$ & $11.4$ & $1.6$ & $1.5$ & $2.1$ & $0.9$ \\
+$P_7^{\A}$& $14.2$ & $11.2$ & $10.3$ & $11.4$ & $18.7$ & $15.7$ & $22.3$ & $11.1$ & $4.4$ & $4.5$ & $12.0$ & $-0.3$ \\
+$P_8^{\A}$& $4.4$ & $2.5$ & $2.3$ & $2.2$ & $5.9$ & $3.0$ & $2.3$ & $2.2$ & $1.5$ & $0.5$ & $0.0$ & $-0.1$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+}
+{\tabcolsep = 1.7mm
+\begin{table} [b]
+\begin{center}
+\caption{価格プロモーション時の選択確率の比較}  \label{tb:5-8}
+\begin{tabular} {crrrrrrrrrrrr}
+\toprule
+$P_k^{\A}$& \multicolumn{4}{c}{Normal{($\%$)}}  & \multicolumn{4}{c}{Under promotion ($\%$) } & \multicolumn{4}{c}{Difference (point)} \\
+&\tiny{[MNL]}&\tiny{[LML]}&\tiny{[GNL]}&\tiny{[LGNL]}&\tiny{[MNL]}&\tiny{[LML]}&\tiny{[GNL]}&\tiny{[LGNL]}&\tiny{[MNL]}&\tiny{[LML]}&\tiny{[GNL]}&\tiny{[LGNL]}\\
+\hline
+\hline
+$P_1^{\A}$& $23.3$ & $30.1$ & $30.2$ & $31.4$ & $18.6$ & $24.6$ & $23.5$ & $30.5$ & $-4.7$ & $-5.4$ & $-6.7$ & $-0.9$ \\
+$P_2^{\A}$& $8.6$ & $10.6$ & $8.9$ & $9.4$ & $6.7$ & $9.3$ & $8.9$ & $9.1$ & $-1.9$ & $-1.4$ & $0.0$ & $-0.3$ \\
+$P_3^{\A}$& $18.3$ & $13.7$ & $13.6$ & $14.0$ & $14.4$ & $9.5$ & $13.5$ & $10.8$ & $-3.9$ & $-4.2$ & $-0.1$ & $-3.2$ \\
+$P_4^{\A}$& $6.9$ & $3.3$ & $3.5$ & $3.7$ & $5.4$ & $2.6$ & $3.5$ & $2.4$ & $-1.5$ & $-0.8$ & $0.0$ & $-1.3$ \\
+$P_5^{\A}$& $19.1$ & $20.3$ & $21.3$ & $20.3$ & $15.3$ & $15.6$ & $13.4$ & $17.4$ & $-3.8$ & $-4.8$ & $-7.9$ & $-2.9$ \\
+$P_6^{\A}$& $5.1$ & $8.3$ & $10.0$ & $10.4$& $4.0$ & $7.3$ & $10.0$ & $10.0$ & $-1.1$ & $-1.0$ & $0.0$ & $-0.5$ \\
+$P_7^{\A}$& $14.2$ & $11.2$ & $10.3$ & $11.4$ & $29.0$ & $27.2$ & $23.9$ & $17.5$ & $14.8$ & $16.0$ & $13.7$ & $6.1$ \\
+$P_8^{\A}$& $4.4$ & $2.5$ & $2.3$ & $2.2$ & $6.6$ & $3.9$ & $3.2$ & $2.4$ & $2.2$ & $1.4$ & $1.0$ & $0.1$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\end{table}
+}
+%***************************************************************************************************************************
+\section{5 章のまとめ}\label{sec:5-5}
+本章では，まず GNL モデルを拡張し，一般的な商品選択行動と整合的な商品選択行動モデル LGNL モデルを構築した．
+次に，このモデルが GEV Family であることより効用最大化行動と整合的であることを示た．
+モデルが効用最大化行動と整合的であることは，幾多の経済学的アプローチを用いた拡張が可能であることを示し，実務においても非常に有用である．
+例えば，LGNL モデルの上位階層及び内部に商店選択モデル，購買生起モデル等を効用最大化の枠内で統合することが可能である．
+
+さらに，実際の商品カテゴリー（ペットボトル・コーラ）に適用し，パラメータ推定を行なうことにより，消費者の異質性，商品の類似性の大きさについて比較した．
+その結果，消費者の異質性を考慮した場合に比べ，商品の類似性を考慮した場合が再現性を向上させることがわかった．
+また，パラメータを金銭換算することにより，異質性を考慮した場合により大きく，各属性の金銭的価値が異なることがわかった．
+最後に，感度分析を行ない，消費者の異質性，商品の類似性双方を考慮することにより，売切れ時，価格プロモーション時に商品の選択確率に大きな差が生まれることがわかった．
+
+今後の課題としては，より商品構成要素の区分が明確な商品，例えばパソコン，携帯電話への適用がまず挙げられる．
+iPod等のように，商品だけの要素ではなく，それに付随するサービスを含め選択行動をモデル化する際には，
+LGNLは多属性を構造的に取り扱うことが可能であるため，有用であると考えられる．
+特に，店頭ではなくオンライン・ショップでこれらの商品を購入する場合には，多属性を比較検討することや，
+属性により検討商品を絞り込むことが容易であるため，本章のモデルの有用性が増すものと考えられる．
+
+次に，今回はすべて単純パラメータとしたアロケーション・パラメータの構造化が挙げられる．
+交通計画における経路選択行動では，Prashker and Bekhor (1999) \cite{PB99}によりCNLのアロケーション・パラメータの構造化が提案されている．
+アロケーション・パラメータは選択肢数，サブ潜在クラス数の双方の増加に伴い，増加してしまう．
+商品選択行動においてもこの膨大になる恐れがあるアロケーション・パラメータを構造化することにより，より少ないパラメータでのモデル構築，新たなネストが誕生した場合の
+パラメータ設定が容易になると期待される．ただし，この構造そのものは適用する商品カテゴリーにより大きく異なることが予期されるため，
+適用する商品カテゴリーの範囲，応用には熟慮が必要である．
+
+
+
+
+

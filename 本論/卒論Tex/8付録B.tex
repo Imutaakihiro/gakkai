@@ -1,0 +1,59 @@
+\chapter{例示に用いたデータの詳細}
+本研究で用いたデータは，2001年の1年間にわたり収集されたものであり，調査対象は首都圏にある同一チェーンの2店舗である．データには，合計1，801世帯の購買履歴が含まれており，全購買機会の総数は31,582回にのぼる．
+各購買データには，購入された商品の詳細な属性情報が含まれており，購買機会の分布については表B.1に示す．また，ブランド統合の影響を分析するため，統合前および統合後の各選択肢の詳細を表B.2に整理している．
+
+これらのデータを基に，GNLモデルにおける集計問題の発生メカニズムを検討し，購買行動への影響を定量的に分析する．本研究で用いたデータは，2001年の1年間にわたり収集されたものであり，調査対象は首都圏にある同一チェーンの2店舗である．データには，合計1,801世帯の購買履歴が含まれており，全購買機会の総数は31,582回にのぼる．
+各購買データには，購入された商品の詳細な属性情報が含まれており，購買機会の分布については表B.1に示す．また，ブランド統合の影響を分析するため，統合前および統合後の各選択肢の詳細を表B.2に整理している．
+これらのデータを基に，GNLモデルにおける集計問題の発生メカニズムを検討し，購買行動への影響を定量的に分析する．
+\begin{table}[t]
+    \centering
+    \caption{集計問題例に用いたスキャンパネルデータ詳細}
+    \resizebox{0.5\textwidth}{!}{
+    \begin{tabular}{c c r c r } % 各列を中央揃え (c) に設定
+       \toprule
+       \multicolumn{1}{c}{$l$} & \multicolumn{1}{c}{Brand} & \multicolumn{1}{c}{Volume} & \multicolumn{1}{c}{pasteurization} & \multicolumn{1}{c}{Purchasing} \\ 
+\multicolumn{1}{c}{} & \multicolumn{1}{c}{} & \multicolumn{1}{c}{(ml)} & \multicolumn{1}{c}{or not} & \multicolumn{1}{c}{opportunities} \\ % ヘッダー部分
+        \hline\hline
+        $ 1 $ & aeon & $ 1,000 $ & $ $ & $ 1,703 $ \\ 
+        $ 2 $ & aeon & $ 500 $ & $ $ & $ 861 $ \\ 
+        $ 3 $ & furuya & $ 1,000 $ & pasteurization & $ 1,664 $ \\ 
+        $ 4 $ & furuya & $ 500 $ & pasteurization & $ 47 $ \\ 
+        $ 5 $ & furuya & $ 1,000 $ & $ $ & $ 19,625 $ \\ 
+        $ 6 $ & morinaga & $ 1,000 $ & $ $ & $ 1,458 $ \\ 
+        $ 7 $ & yukizirushi & $ 200 $ & $ $ & $ 350 $ \\ 
+        $ 8 $ & yukizirushi & $ 500 $ & $ $ & $ 193 $ \\ 
+        $ 9 $ & yukizirushi & $ 1,000 $ & $ $ & $ 356 $ \\ 
+        $ 10 $ & hellokitty & $ 1,000 $ & $ $ & $ 249 $ \\ 
+        $ 11 $ & satsuraku & $ 1,000 $ & $ $ & $ 4,558$ \\ 
+        $ 12 $ & haruna & $ 1,000 $ & $ $ & $ 187 $ \\ 
+        $ 13 $ & koiwai & $ 1,000 $ & $ $ & $ 331 $ \\
+ \bottomrule  
+    \end{tabular}
+    }
+\end{table}
+
+\begin{table}
+    \centering
+    \caption{ブランド統合前後の選択肢}
+    \resizebox{0.35\textwidth}{!}{
+    \begin{tabular}{c c c c } % 各列を中央揃え (c) に設定
+       \toprule
+       \multicolumn{1}{c}{$l$} & \multicolumn{1}{c}{Brand} & \multicolumn{1}{c}{$L$} & \multicolumn{1}{c}{Brand} \\ % ヘッダー部分
+        \hline\hline
+        $ 1 $ & aeon & $ 1 $ & AEON \\
+        $ 2 $ & aeon & $ 1 $ & AEON \\
+        $ 3 $ & furuya & $ 2 $ & FURUYA \\
+        $ 4 $ & furuya & $ 2 $ & FURUYA \\
+        $ 5 $ & furuya & $ 2 $ & FURUYA \\
+        $ 6 $ &morinaga & $ 4 $ & OTHER \\
+        $ 7 $ & yukizirushi & $ 3 $ & YUKIZIRUSHI \\
+        $ 8 $ & yukizirushi & $ 3 $ & YUKIZIRUSHI \\
+        $ 9 $ & yukizirushi & $ 3 $ & YUKIZIRUSHI \\
+        $ 10 $ & hellokitty & $ 4 $ & OTHER \\
+        $ 11 $ & satsuraku & $ 4 $ & OTHER \\
+        $ 12 $ & haruna & $ 4 $ & OTHER \\
+        $ 13 $ & koiwai  & $ 4 $ & OTHER \\
+ \bottomrule  
+    \end{tabular}
+    }
+\end{table}
