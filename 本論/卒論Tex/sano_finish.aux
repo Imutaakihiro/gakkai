@@ -2,63 +2,109 @@
 \@writefile{toc}{\contentsline {chapter}{\numberline {第1章}はじめに}{1}{}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\contentsline {section}{\numberline {1.1}背景}{1}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {1.2}研究の目的}{2}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {1.3}本研究の構成}{3}{}\protected@file@percent }
-\citation{kl}
-\citation{me}
-\@writefile{toc}{\contentsline {chapter}{\numberline {第2章}$k$匿名化}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1.1}研究背景}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1.2}課題の整理}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1.3}研究目的}{1}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1.4}研究仮説}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1.5}研究のアプローチと特徴}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1.6}研究の意義}{2}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {1.7}本研究の構成}{3}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {第2章}関連研究}{4}{}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\contentsline {section}{\numberline {2.1}$k$匿名化とは}{4}{}\protected@file@percent }
-\citation{ls}
-\@writefile{toc}{\contentsline {section}{\numberline {2.2}$k$匿名化の仕組みとその重要性}{5}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {chapter}{\numberline {第3章}GNLモデル}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2.1}授業評価研究}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2.2}自由記述分析と感情分析}{4}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2.3}自由記述分析の手法分類}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2.4}BERTと日本語感情分析}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2.5}マルチタスク学習}{5}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2.6}解釈可能AIとSHAP}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2.7}順序回帰}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2.8}教育分野への応用研究の整理}{6}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2.9}既存研究の限界と課題}{7}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {2.10}本研究の位置づけ}{7}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {第3章}データと手法}{8}{}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\contentsline {section}{\numberline {3.1}選択確率}{6}{}\protected@file@percent }
-\citation{wk}
-\@writefile{toc}{\contentsline {section}{\numberline {3.2}GNLモデルにおける集計問題の生成例}{8}{}\protected@file@percent }
-\citation{sr}
-\@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces $k$匿名化統合前後のGNL構造}}{9}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3.3}集計ルールが満たすべき条件}{9}{}\protected@file@percent }
-\citation{io}
-\citation{kt}
-\@writefile{toc}{\contentsline {section}{\numberline {3.4}GNLモデルにおける集計ルールの導入：ネストの集計}{10}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {3.5}GNLモデルにおける集計ルールの導入：選択肢の集計}{12}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {chapter}{\numberline {第4章}結果}{13}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.1}データセット}{8}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.2}授業評価アンケートの構成}{8}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.3}前処理}{8}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.1}{\ignorespaces データセット概要}}{9}{}\protected@file@percent }
+\providecommand*\caption@xref[2]{\@setref\relax\@undefined{#1}}
+\newlabel{tab:dataset}{{3.1}{9}{}{table.3.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.4}教師データ}{9}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.5}モデル構成}{9}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5.1}感情分類モデル}{9}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {3.2}{\ignorespaces 教師データのラベル分布（1,000件）}}{10}{}\protected@file@percent }
+\newlabel{tab:labeldist-method}{{3.2}{10}{}{table.3.2}{}}
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5.2}マルチタスク学習モデル}{10}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {subsection}{\numberline {3.5.3}順序回帰モデル}{10}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.6}学習設定}{10}{}\protected@file@percent }
+\@writefile{lof}{\contentsline {figure}{\numberline {3.1}{\ignorespaces 分析フローの概略}}{11}{}\protected@file@percent }
+\newlabel{fig:flow}{{3.1}{11}{}{figure.3.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {3.7}授業単位集約と相関分析}{11}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.8}SHAP分析}{11}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.9}評価指標}{11}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {3.10}分析フロー}{11}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {第4章}結果と考察}{12}{}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\contentsline {section}{\numberline {4.1}ブランド統合前の結果}{13}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {4.1}{\ignorespaces ブランド統合前の最尤推定されたパラメータ}}{14}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {4.2}{\ignorespaces ブランド統合後の最尤推定されたパラメータ}}{15}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4.2}ブランド統合後の結果}{15}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4.3}ブランド統合による影響}{16}{}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4.1}{\ignorespaces ブランド統合前後(1day) でのGNL構造}}{16}{}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4.2}{\ignorespaces ブランド統合前後(2week) でのGNL構造}}{17}{}\protected@file@percent }
-\@writefile{lof}{\contentsline {figure}{\numberline {4.3}{\ignorespaces ブランド統合前後(1month) でのGNL構造}}{17}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {4.4}選択肢を統計した場合の確定的効用の範囲}{18}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {4.3}{\ignorespaces 確定的効用の範囲}}{19}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {chapter}{\numberline {第5章}おわりに}{20}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.1}基礎統計量}{12}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.2}感情スコアと授業評価スコアの相関分析}{12}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.3}感情分類モデルの性能}{12}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.4}単一タスクモデルのSHAP分析}{12}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4.1}{\ignorespaces 感情スコアと授業評価スコアの基本統計量}}{13}{}\protected@file@percent }
+\newlabel{tab:basicstats}{{4.1}{13}{}{table.4.1}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.5}マルチタスク学習のSHAP分析}{13}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4.2}{\ignorespaces 教師データのラベル分布（1,000件）}}{14}{}\protected@file@percent }
+\newlabel{tab:labeldist}{{4.2}{14}{}{table.4.2}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.3}{\ignorespaces 感情スコアと授業評価スコアの相関分析結果}}{15}{}\protected@file@percent }
+\newlabel{tab:correlation}{{4.3}{15}{}{table.4.3}{}}
+\@writefile{lof}{\contentsline {figure}{\numberline {4.1}{\ignorespaces 要因タイプの割合（概念図）}}{15}{}\protected@file@percent }
+\newlabel{fig:shap_ratio}{{4.1}{15}{}{figure.4.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.4}{\ignorespaces 感情分類モデルの性能指標}}{16}{}\protected@file@percent }
+\newlabel{tab:perf}{{4.4}{16}{}{table.4.4}{}}
+\@writefile{toc}{\contentsline {section}{\numberline {4.6}順序回帰モデルの分析}{16}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {4.7}総合考察}{16}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {4.5}{\ignorespaces ポジティブ判定に寄与する重要語TOP10}}{17}{}\protected@file@percent }
+\newlabel{tab:shap_single}{{4.5}{17}{}{table.4.5}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.6}{\ignorespaces 語彙の要因タイプ別内訳}}{18}{}\protected@file@percent }
+\newlabel{tab:shap_types}{{4.6}{18}{}{table.4.6}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.7}{\ignorespaces 要因タイプの解釈例}}{18}{}\protected@file@percent }
+\newlabel{tab:shap_interpret}{{4.7}{18}{}{table.4.7}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.8}{\ignorespaces 共通要因（満足度要因）TOP5}}{19}{}\protected@file@percent }
+\newlabel{tab:shap_common}{{4.8}{19}{}{table.4.8}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.9}{\ignorespaces P2（中低評価確率）に寄与する語彙TOP5}}{20}{}\protected@file@percent }
+\newlabel{tab:shap_p2}{{4.9}{20}{}{table.4.9}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {4.10}{\ignorespaces P4（高評価確率）に寄与する語彙TOP5}}{21}{}\protected@file@percent }
+\newlabel{tab:shap_p4}{{4.10}{21}{}{table.4.10}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {第5章}おわりに}{22}{}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\contentsline {section}{\numberline {5.1}結論}{20}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {section}{\numberline {5.2}今後の課題}{20}{}\protected@file@percent }
-\@writefile{toc}{\contentsline {chapter}{\numberline {付 録A }GNLにおける二つの選択確率定式化の等価性}{21}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5.1}結論}{22}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5.2}実践的示唆}{22}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5.3}限界}{22}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {section}{\numberline {5.4}今後の課題}{23}{}\protected@file@percent }
+\@writefile{toc}{\contentsline {chapter}{\numberline {付 録A }感情ラベル定義と例}{24}{}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{toc}{\contentsline {chapter}{\numberline {付 録B }例示に用いたデータの詳細}{23}{}\protected@file@percent }
+\@writefile{lot}{\contentsline {table}{\numberline {A.1}{\ignorespaces 感情ラベルの定義}}{25}{}\protected@file@percent }
+\newlabel{tab:label_def}{{A.1}{25}{}{table.1.1}{}}
+\@writefile{toc}{\contentsline {chapter}{\numberline {付 録B }データセット詳細}{26}{}\protected@file@percent }
 \@writefile{lof}{\addvspace {10\p@ }}
 \@writefile{lot}{\addvspace {10\p@ }}
-\@writefile{lot}{\contentsline {table}{\numberline {B.1}{\ignorespaces 集計問題例に用いたスキャンパネルデータ詳細}}{24}{}\protected@file@percent }
-\@writefile{lot}{\contentsline {table}{\numberline {B.2}{\ignorespaces ブランド統合前後の選択肢}}{24}{}\protected@file@percent }
-\bibcite{kl}{1}
-\bibcite{me}{2}
-\bibcite{ls}{3}
-\bibcite{wk}{4}
-\bibcite{sr}{5}
-\bibcite{io}{6}
-\bibcite{kt}{7}
-\bibcite{tk}{8}
-\@writefile{toc}{\contentsline {chapter}{参考文献}{26}{}\protected@file@percent }
-\gdef \@abspage@last{32}
+\@writefile{lot}{\contentsline {table}{\numberline {B.1}{\ignorespaces データセット概要}}{27}{}\protected@file@percent }
+\newlabel{tab:dataset_overview}{{B.1}{27}{}{table.2.1}{}}
+\@writefile{lot}{\contentsline {table}{\numberline {B.2}{\ignorespaces 教師データのラベル分布（1,000件）}}{27}{}\protected@file@percent }
+\newlabel{tab:label_dist}{{B.2}{27}{}{table.2.2}{}}
+\bibcite{bert}{1}
+\bibcite{shap}{2}
+\bibcite{mtl}{3}
+\bibcite{coral}{4}
+\bibcite{gottipati2018}{5}
+\bibcite{rajput2016}{6}
+\bibcite{misuraca2021}{7}
+\bibcite{hujala2020}{8}
+\@writefile{toc}{\contentsline {chapter}{参考文献}{29}{}\protected@file@percent }
+\bibcite{santhanam2018}{9}
+\bibcite{sindhu2019}{10}
+\gdef \@abspage@last{37}

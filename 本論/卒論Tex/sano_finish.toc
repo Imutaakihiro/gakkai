@@ -1,24 +1,49 @@
 \contentsline {chapter}{\numberline {第1章}はじめに}{1}{}%
-\contentsline {section}{\numberline {1.1}背景}{1}{}%
-\contentsline {section}{\numberline {1.2}研究の目的}{2}{}%
-\contentsline {section}{\numberline {1.3}本研究の構成}{3}{}%
-\contentsline {chapter}{\numberline {第2章}$k$匿名化}{4}{}%
-\contentsline {section}{\numberline {2.1}$k$匿名化とは}{4}{}%
-\contentsline {section}{\numberline {2.2}$k$匿名化の仕組みとその重要性}{5}{}%
-\contentsline {chapter}{\numberline {第3章}GNLモデル}{6}{}%
-\contentsline {section}{\numberline {3.1}選択確率}{6}{}%
-\contentsline {section}{\numberline {3.2}GNLモデルにおける集計問題の生成例}{8}{}%
-\contentsline {section}{\numberline {3.3}集計ルールが満たすべき条件}{9}{}%
-\contentsline {section}{\numberline {3.4}GNLモデルにおける集計ルールの導入：ネストの集計}{10}{}%
-\contentsline {section}{\numberline {3.5}GNLモデルにおける集計ルールの導入：選択肢の集計}{12}{}%
-\contentsline {chapter}{\numberline {第4章}結果}{13}{}%
-\contentsline {section}{\numberline {4.1}ブランド統合前の結果}{13}{}%
-\contentsline {section}{\numberline {4.2}ブランド統合後の結果}{15}{}%
-\contentsline {section}{\numberline {4.3}ブランド統合による影響}{16}{}%
-\contentsline {section}{\numberline {4.4}選択肢を統計した場合の確定的効用の範囲}{18}{}%
-\contentsline {chapter}{\numberline {第5章}おわりに}{20}{}%
-\contentsline {section}{\numberline {5.1}結論}{20}{}%
-\contentsline {section}{\numberline {5.2}今後の課題}{20}{}%
-\contentsline {chapter}{\numberline {付 録A }GNLにおける二つの選択確率定式化の等価性}{21}{}%
-\contentsline {chapter}{\numberline {付 録B }例示に用いたデータの詳細}{23}{}%
-\contentsline {chapter}{参考文献}{26}{}%
+\contentsline {section}{\numberline {1.1}研究背景}{1}{}%
+\contentsline {section}{\numberline {1.2}課題の整理}{1}{}%
+\contentsline {section}{\numberline {1.3}研究目的}{1}{}%
+\contentsline {section}{\numberline {1.4}研究仮説}{2}{}%
+\contentsline {section}{\numberline {1.5}研究のアプローチと特徴}{2}{}%
+\contentsline {section}{\numberline {1.6}研究の意義}{2}{}%
+\contentsline {section}{\numberline {1.7}本研究の構成}{3}{}%
+\contentsline {chapter}{\numberline {第2章}関連研究}{4}{}%
+\contentsline {section}{\numberline {2.1}授業評価研究}{4}{}%
+\contentsline {section}{\numberline {2.2}自由記述分析と感情分析}{4}{}%
+\contentsline {section}{\numberline {2.3}自由記述分析の手法分類}{5}{}%
+\contentsline {section}{\numberline {2.4}BERTと日本語感情分析}{5}{}%
+\contentsline {section}{\numberline {2.5}マルチタスク学習}{5}{}%
+\contentsline {section}{\numberline {2.6}解釈可能AIとSHAP}{6}{}%
+\contentsline {section}{\numberline {2.7}順序回帰}{6}{}%
+\contentsline {section}{\numberline {2.8}教育分野への応用研究の整理}{6}{}%
+\contentsline {section}{\numberline {2.9}既存研究の限界と課題}{7}{}%
+\contentsline {section}{\numberline {2.10}本研究の位置づけ}{7}{}%
+\contentsline {chapter}{\numberline {第3章}データと手法}{8}{}%
+\contentsline {section}{\numberline {3.1}データセット}{8}{}%
+\contentsline {section}{\numberline {3.2}授業評価アンケートの構成}{8}{}%
+\contentsline {section}{\numberline {3.3}前処理}{8}{}%
+\contentsline {section}{\numberline {3.4}教師データ}{9}{}%
+\contentsline {section}{\numberline {3.5}モデル構成}{9}{}%
+\contentsline {subsection}{\numberline {3.5.1}感情分類モデル}{9}{}%
+\contentsline {subsection}{\numberline {3.5.2}マルチタスク学習モデル}{10}{}%
+\contentsline {subsection}{\numberline {3.5.3}順序回帰モデル}{10}{}%
+\contentsline {section}{\numberline {3.6}学習設定}{10}{}%
+\contentsline {section}{\numberline {3.7}授業単位集約と相関分析}{11}{}%
+\contentsline {section}{\numberline {3.8}SHAP分析}{11}{}%
+\contentsline {section}{\numberline {3.9}評価指標}{11}{}%
+\contentsline {section}{\numberline {3.10}分析フロー}{11}{}%
+\contentsline {chapter}{\numberline {第4章}結果と考察}{12}{}%
+\contentsline {section}{\numberline {4.1}基礎統計量}{12}{}%
+\contentsline {section}{\numberline {4.2}感情スコアと授業評価スコアの相関分析}{12}{}%
+\contentsline {section}{\numberline {4.3}感情分類モデルの性能}{12}{}%
+\contentsline {section}{\numberline {4.4}単一タスクモデルのSHAP分析}{12}{}%
+\contentsline {section}{\numberline {4.5}マルチタスク学習のSHAP分析}{13}{}%
+\contentsline {section}{\numberline {4.6}順序回帰モデルの分析}{16}{}%
+\contentsline {section}{\numberline {4.7}総合考察}{16}{}%
+\contentsline {chapter}{\numberline {第5章}おわりに}{22}{}%
+\contentsline {section}{\numberline {5.1}結論}{22}{}%
+\contentsline {section}{\numberline {5.2}実践的示唆}{22}{}%
+\contentsline {section}{\numberline {5.3}限界}{22}{}%
+\contentsline {section}{\numberline {5.4}今後の課題}{23}{}%
+\contentsline {chapter}{\numberline {付 録A }感情ラベル定義と例}{24}{}%
+\contentsline {chapter}{\numberline {付 録B }データセット詳細}{26}{}%
+\contentsline {chapter}{参考文献}{29}{}%
