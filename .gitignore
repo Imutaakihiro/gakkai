@@ -50,6 +50,11 @@ venv.bak/
 *.swo
 *~
 
+# Cursor/Codex設定（必要に応じてコメントアウト）
+# .codex/
+# .serena/
+# .cursor/agents/
+
 # OS関連
 .DS_Store
 .DS_Store?
