@@ -98,6 +98,65 @@ model.to(device)
 model.eval()
 print("✅ モデル読み込み完了")
 
+# ======================== 不要な単語の除外機能 ========================
+
+def create_stopword_ids(tokenizer, model_name="koheiduck/bert-japanese-finetuned-sentiment"):
+    """
+    日本語の助詞・格助詞の単語IDリストを作成
+    
+    Args:
+        tokenizer: トークナイザー
+        model_name: モデル名
+    
+    Returns:
+        stopword_ids: 除外する単語IDのセット
+    """
+    # 日本語の助詞・格助詞のリスト
+    stopwords = [
+        # 格助詞
+        'が', 'の', 'を', 'に', 'へ', 'と', 'から', 'より', 'で', 'まで',
+        # 係助詞
+        'は', 'も', 'こそ', 'さえ', 'でも', 'だって',
+        # 副助詞
+        'ばかり', 'だけ', 'のみ', 'まで', 'ほど', 'くらい', 'ぐらい',
+        # 終助詞
+        'か', 'な', 'ね', 'よ', 'ぞ', 'ぜ', 'わ', 'さ',
+        # 接続助詞
+        'て', 'で', 'ながら', 'つつ', 'し', 'が', 'けれど', 'のに',
+        # その他
+        'の', 'こと', 'もの', 'ため', 'とき', 'ところ',
+    ]
+    
+    stopword_ids = set()
+    
+    # トークナイザーでエンコードしてIDを取得
+    for word in stopwords:
+        # 単語をトークン化
+        tokens = tokenizer.tokenize(word)
+        token_ids = tokenizer.convert_tokens_to_ids(tokens)
+        
+        # 各トークンIDを追加
+        for token_id in token_ids:
+            stopword_ids.add(token_id)
+    
+    # 特殊トークンも除外（必要に応じて）
+    special_tokens = [
+        tokenizer.cls_token_id,
+        tokenizer.sep_token_id,
+        tokenizer.pad_token_id,
+        tokenizer.unk_token_id,
+    ]
+    for token_id in special_tokens:
+        if token_id is not None:
+            stopword_ids.add(token_id)
+    
+    return stopword_ids
+
+# 不要な単語IDの取得
+print("📝 不要な単語（助詞・格助詞）のIDリストを作成中...")
+stopword_ids = create_stopword_ids(tokenizer, BASE_MODEL)
+print(f"✅ 除外対象の単語ID数: {len(stopword_ids)}")
+
 # データ読み込み
 print("📊 データ読み込み中...")
 df = pd.read_csv(CSV_PATH)
@@ -222,6 +281,7 @@ def run_shap_analysis(predict_fn, texts, name, output_dir):
     マルチタスク学習（analyze_classlevel_multitask_shap_beeswarm.py）と同じ計算方法：
     - importance = np.abs(shap_values.values).mean(axis=0)
     - WordPieceの結合は行わない（トークンレベルのまま）
+    - 不要な単語（助詞・格助詞）を除外
     
     ただし、不規則な形状に対応するため、各サンプルごとに処理して集計
     """
@@ -229,6 +289,7 @@ def run_shap_analysis(predict_fn, texts, name, output_dir):
         print(f"\n🔍 SHAP分析実行: {name}")
         print(f"   サンプル数: {len(texts)}件")
         print(f"   ⚠️ マルチタスク学習と同じ方法で計算（WordPiece結合なし）")
+        print(f"   ✅ 不要な単語（助詞・格助詞）を除外中...")
         
         explainer = shap.Explainer(predict_fn, tokenizer)
         shap_values = explainer(texts)
@@ -236,6 +297,7 @@ def run_shap_analysis(predict_fn, texts, name, output_dir):
         # 不規則な形状に対応：各サンプルごとに処理
         # トークンごとのSHAP値を集計（WordPiece結合なし）
         token_importance_dict = defaultdict(lambda: {'shap_values': [], 'count': 0})
+        excluded_count = 0  # 除外されたトークン数を記録
         
         # shap_valuesはExplanationオブジェクトで、各サンプルにアクセス可能
         if isinstance(shap_values, shap.Explanation):
@@ -256,10 +318,27 @@ def run_shap_analysis(predict_fn, texts, name, output_dir):
                         vals_abs = np.abs(vals)
                     
                     # トークンとSHAP値を対応付け（WordPiece結合なし）
+                    # 不要な単語（助詞・格助詞）を除外
                     for token, val in zip(tokens, vals_abs):
-                        if token and str(token).strip() and str(token) not in ['[CLS]', '[SEP]', '[PAD]', '[UNK]']:
-                            token_importance_dict[str(token)]['shap_values'].append(float(val))
-                            token_importance_dict[str(token)]['count'] += 1
+                        # 特殊トークンをスキップ
+                        if not token or not str(token).strip() or str(token) in ['[CLS]', '[SEP]', '[PAD]', '[UNK]']:
+                            excluded_count += 1
+                            continue
+                        
+                        # 不要な単語（助詞・格助詞）を除外
+                        # トークンからIDを取得してチェック
+                        try:
+                            token_id = tokenizer.convert_tokens_to_ids([str(token)])[0]
+                            if token_id in stopword_ids:
+                                excluded_count += 1
+                                continue
+                        except:
+                            # トークンIDの取得に失敗した場合はスキップ（安全のため）
+                            excluded_count += 1
+                            pass
+                        
+                        token_importance_dict[str(token)]['shap_values'].append(float(val))
+                        token_importance_dict[str(token)]['count'] += 1
         
         # 各トークンごとの平均重要度を計算（マルチタスク学習と同じ方法）
         token_stats = {
@@ -279,8 +358,9 @@ def run_shap_analysis(predict_fn, texts, name, output_dir):
         df_importance.to_csv(csv_path, index=False, encoding='utf-8')
         print(f"✅ {name} 完了: {len(df_importance)}語")
         print(f"   📁 結果を保存しました: {csv_path}")
+        print(f"   📊 除外されたトークン数: {excluded_count}個（助詞・格助詞・特殊トークン）")
         
-        return shap_values, df_importance
+        return shap_values, df_importance, excluded_count
         
     except Exception as e:
         print(f"❌ {name} のSHAP分析でエラーが発生しました: {e}")
@@ -288,7 +368,7 @@ def run_shap_analysis(predict_fn, texts, name, output_dir):
         import traceback
         traceback.print_exc()
         # エラーが発生しても続行（空のDataFrameを返す）
-        return None, pd.DataFrame({'word': [], 'importance': []})
+        return None, pd.DataFrame({'word': [], 'importance': []}), 0
 
 # SHAP分析実行（エラーハンドリング付き、各分析完了後に即座に保存）
 print("\n" + "="*60)
@@ -310,10 +390,10 @@ analyses = [
 
 for name, predict_fn, key in analyses:
     try:
-        shap_val, df_imp = run_shap_analysis(predict_fn, sample_texts, name, OUTPUT_DIR)
+        shap_val, df_imp, excluded_count = run_shap_analysis(predict_fn, sample_texts, name, OUTPUT_DIR)
         # df_impが空でなければ成功（shap_valはNoneでも問題ない）
         if len(df_imp) > 0:
-            shap_results[key] = {'shap': shap_val, 'df': df_imp}
+            shap_results[key] = {'shap': shap_val, 'df': df_imp, 'excluded_count': excluded_count}
             completed_analyses.append(key)
             print(f"✅ {name} の分析と保存が完了しました")
         else:
@@ -635,6 +715,7 @@ report = f"""# 順序回帰モデル SHAP分析結果サマリー
 - サンプル数: {len(sample_texts)}件
 - 使用デバイス: {device}
 - PyTorch version: {torch.__version__}
+- 不要な単語の除外: 有効（助詞・格助詞・特殊トークンを除外）
 
 ## 分析結果サマリー
 - 完了した分析: {len(completed_analyses)}/{len(analyses)}件
@@ -645,7 +726,8 @@ for key, name in [('sentiment', '感情スコア'), ('course', '授業評価ス�
                   ('p1', 'P1（低評価確率）'), ('p2', 'P2（中低評価確率）'), 
                   ('p3', 'P3（中高評価確率）'), ('p4', 'P4（高評価確率）')]:
     if key in shap_results:
-        report += f"- {name}予測要因数: {len(shap_results[key]['df'])}単語\n"
+        excluded = shap_results[key].get('excluded_count', 0)
+        report += f"- {name}予測要因数: {len(shap_results[key]['df'])}単語（除外: {excluded}トークン）\n"
 
 # 共通要因数（P2とP4の比較、または感情スコアと授業評価スコアの比較）
 if 'p2' in shap_results and 'p4' in shap_results:

@@ -1,0 +1,12 @@
+# MacBook M4用 requirements.txt
+# CUDA版のPyTorchは不要（通常のpipインストールでMPSが自動的に有効）
+
+torch>=2.0.0
+transformers>=4.30.0
+pandas>=1.5.0
+numpy<2.0.0
+scikit-learn>=1.0.0
+matplotlib>=3.5.0
+seaborn>=0.12.0
+tqdm>=4.65.0
+shap>=0.42.0
