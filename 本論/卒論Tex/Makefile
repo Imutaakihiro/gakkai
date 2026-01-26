@@ -14,9 +14,9 @@ pdf: $(PDF)
 
 $(PDF): $(TEX)
 	@echo "=== 1回目のコンパイル ==="
-	uplatex -synctex=1 -interaction=nonstopmode -file-line-error -kanji=utf8 $(TEX)
+	platex -synctex=1 -interaction=nonstopmode -file-line-error -kanji=utf8 $(TEX)
 	@echo "=== 2回目のコンパイル ==="
-	uplatex -synctex=1 -interaction=nonstopmode -file-line-error -kanji=utf8 $(TEX)
+	platex -synctex=1 -interaction=nonstopmode -file-line-error -kanji=utf8 $(TEX)
 	@echo "=== DVIからPDFへの変換 ==="
 	dvipdfmx -f ptex-ipaex.map -o $(PDF) $(DVI)
 	@echo "=== 完了: $(PDF) が生成されました ==="
