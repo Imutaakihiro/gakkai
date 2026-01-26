@@ -9,14 +9,12 @@
 \contentsline {table}{\numberline {4.3}{\ignorespaces 感情スコアと授業評価スコアの相関分析結果}}{15}{}%
 \contentsline {table}{\numberline {4.4}{\ignorespaces 感情分類モデルの性能指標}}{16}{}%
 \contentsline {table}{\numberline {4.5}{\ignorespaces ポジティブ判定に寄与する重要語TOP10}}{17}{}%
-\contentsline {table}{\numberline {4.6}{\ignorespaces 語彙の要因タイプ別内訳}}{18}{}%
+\contentsline {table}{\numberline {4.6}{\ignorespaces 語彙の要因タイプ別内訳}}{17}{}%
 \contentsline {table}{\numberline {4.7}{\ignorespaces 要因タイプの解釈例}}{18}{}%
-\contentsline {table}{\numberline {4.8}{\ignorespaces 共通要因（満足度要因）TOP5}}{19}{}%
-\contentsline {table}{\numberline {4.9}{\ignorespaces P2（中低評価確率）に寄与する語彙TOP5}}{20}{}%
-\contentsline {table}{\numberline {4.10}{\ignorespaces P4（高評価確率）に寄与する語彙TOP5}}{21}{}%
+\contentsline {table}{\numberline {4.8}{\ignorespaces 共通要因（満足度要因）TOP5}}{18}{}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {A.1}{\ignorespaces 感情ラベルの定義}}{25}{}%
+\contentsline {table}{\numberline {A.1}{\ignorespaces 感情ラベルの定義}}{22}{}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {B.1}{\ignorespaces データセット概要}}{27}{}%
-\contentsline {table}{\numberline {B.2}{\ignorespaces 教師データのラベル分布（1,000件）}}{27}{}%
+\contentsline {table}{\numberline {B.1}{\ignorespaces データセット概要}}{24}{}%
+\contentsline {table}{\numberline {B.2}{\ignorespaces 教師データのラベル分布（1,000件）}}{24}{}%

@@ -14,17 +14,12 @@ pdf: $(PDF)
 
 $(PDF): $(TEX)
 	@echo "=== 1回目のコンパイル ==="
-	-uplatex -synctex=1 -interaction=nonstopmode -file-line-error -kanji=utf8 $(TEX) || true
+	uplatex -synctex=1 -interaction=nonstopmode -file-line-error -kanji=utf8 $(TEX)
 	@echo "=== 2回目のコンパイル ==="
-	-uplatex -synctex=1 -interaction=nonstopmode -file-line-error -kanji=utf8 $(TEX) || true
+	uplatex -synctex=1 -interaction=nonstopmode -file-line-error -kanji=utf8 $(TEX)
 	@echo "=== DVIからPDFへの変換 ==="
-	@if [ -f $(DVI) ]; then \
-		dvipdfmx -f ptex-ipaex.map -o $(PDF) $(DVI); \
-		echo "=== 完了: $(PDF) が生成されました ==="; \
-	else \
-		echo "=== エラー: $(DVI) が生成されませんでした ==="; \
-		exit 1; \
-	fi
+	dvipdfmx -f ptex-ipaex.map -o $(PDF) $(DVI)
+	@echo "=== 完了: $(PDF) が生成されました ==="
 
 # クリーンアップ（中間ファイルを削除）
 clean:
