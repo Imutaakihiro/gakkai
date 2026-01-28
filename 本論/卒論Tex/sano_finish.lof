@@ -1,13 +1,10 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {3.1}{\ignorespaces 各感情クラスの語彙的特徴（ワードクラウド）}}{18}{}%
-\contentsline {figure}{\numberline {3.2}{\ignorespaces 感情分類モデルのアーキテクチャ}}{22}{}%
-\contentsline {figure}{\numberline {3.3}{\ignorespaces マルチタスク学習モデルのアーキテクチャ}}{23}{}%
-\contentsline {figure}{\numberline {3.4}{\ignorespaces 分析フローの概略}}{29}{}%
+\contentsline {figure}{\numberline {3.1}{\ignorespaces マルチタスク学習モデルのアーキテクチャ}}{12}{}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces 分析フローの概略}}{15}{}%
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces 感情スコアと授業評価スコアの散布図（N=3,268）}}{35}{}%
-\contentsline {figure}{\numberline {4.2}{\ignorespaces SHAP分析による重要語の可視化（TOP20）}}{36}{}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces 感情スコアと授業評価スコアの散布図（N=3,268）}}{20}{}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
