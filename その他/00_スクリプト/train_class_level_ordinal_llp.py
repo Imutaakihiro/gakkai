@@ -41,7 +41,6 @@ ALPHA_SENT = 0.3   # 感情スコア平均の重み（補助情報なので小�
 # ------------------------- デバイス選択 -------------------------
 
 def get_device() -> torch.device:
-    # CUDA (NVIDIA GPU)
     if torch.cuda.is_available():
         try:
             _ = torch.tensor([1.0]).cuda()
@@ -49,15 +48,6 @@ def get_device() -> torch.device:
             return torch.device("cuda")
         except Exception:
             pass
-    # MPS (Apple Silicon - M1/M2/M3/M4)
-    if hasattr(torch.backends, 'mps') and torch.backends.mps.is_available():
-        try:
-            _ = torch.tensor([1.0]).to("mps")
-            print("✅ MPS (Apple Silicon) 利用")
-            return torch.device("mps")
-        except Exception:
-            pass
-    # DirectML (Windows)
     try:
         import torch_directml as dml
         if dml.is_available():

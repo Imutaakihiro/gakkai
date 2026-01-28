@@ -1,28 +1,30 @@
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {1.1}{\ignorespaces 本研究の対象データ}}{2}{}%
+\contentsline {table}{\numberline {1.1}{\ignorespaces 本研究の対象データ}}{3}{}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {2.1}{\ignorespaces 関連研究の焦点と本研究の位置づけ}}{7}{}%
+\contentsline {table}{\numberline {2.1}{\ignorespaces 既存研究との比較}}{14}{}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {3.1}{\ignorespaces データセット概要}}{9}{}%
-\contentsline {table}{\numberline {3.2}{\ignorespaces 教師データのラベル分布（1,000件）}}{10}{}%
-\contentsline {table}{\numberline {3.3}{\ignorespaces BERTモデルの基本構成}}{11}{}%
-\contentsline {table}{\numberline {3.4}{\ignorespaces 学習のハイパーパラメータ}}{13}{}%
-\contentsline {table}{\numberline {3.5}{\ignorespaces SHAP分析の設定}}{13}{}%
-\contentsline {table}{\numberline {3.6}{\ignorespaces 実装環境}}{14}{}%
+\contentsline {table}{\numberline {3.1}{\ignorespaces データセット概要}}{16}{}%
+\contentsline {table}{\numberline {3.2}{\ignorespaces トークナイザの設定}}{17}{}%
+\contentsline {table}{\numberline {3.3}{\ignorespaces 教師データのラベル分布（1,000件）}}{18}{}%
+\contentsline {table}{\numberline {3.4}{\ignorespaces BERTモデルの基本構成}}{20}{}%
+\contentsline {table}{\numberline {3.5}{\ignorespaces 学習のハイパーパラメータ}}{24}{}%
+\contentsline {table}{\numberline {3.6}{\ignorespaces SHAP分析の設定}}{26}{}%
+\contentsline {table}{\numberline {3.7}{\ignorespaces 実装環境}}{28}{}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {4.1}{\ignorespaces 感情スコアと授業評価スコアの基本統計量}}{17}{}%
-\contentsline {table}{\numberline {4.2}{\ignorespaces 教師データのラベル分布（1,000件）}}{18}{}%
-\contentsline {table}{\numberline {4.3}{\ignorespaces 感情分類モデルの性能指標（検証データ200件）}}{19}{}%
-\contentsline {table}{\numberline {4.4}{\ignorespaces クラス別の性能指標}}{19}{}%
-\contentsline {table}{\numberline {4.5}{\ignorespaces 感情スコアと授業評価スコアの相関分析結果（N=3,268）}}{20}{}%
-\contentsline {table}{\numberline {4.6}{\ignorespaces ポジティブ判定に寄与する重要語例（TOP10）}}{21}{}%
-\contentsline {table}{\numberline {4.7}{\ignorespaces ネガティブ判定に寄与する重要語例（TOP10）}}{22}{}%
-\contentsline {table}{\numberline {4.8}{\ignorespaces 語彙の要因タイプ別内訳（3,198語）}}{22}{}%
-\contentsline {table}{\numberline {4.9}{\ignorespaces 共通要因（満足度要因）の重要語例（TOP5）}}{23}{}%
+\contentsline {table}{\numberline {4.1}{\ignorespaces 感情スコアと授業評価スコアの基本統計量}}{31}{}%
+\contentsline {table}{\numberline {4.2}{\ignorespaces 教師データのラベル分布（1,000件）}}{32}{}%
+\contentsline {table}{\numberline {4.3}{\ignorespaces 感情分類モデルの性能指標（検証データ200件）}}{33}{}%
+\contentsline {table}{\numberline {4.4}{\ignorespaces クラス別の性能指標}}{33}{}%
+\contentsline {table}{\numberline {4.5}{\ignorespaces 混同行列}}{34}{}%
+\contentsline {table}{\numberline {4.6}{\ignorespaces 感情スコアと授業評価スコアの相関分析結果（N=3,268）}}{34}{}%
+\contentsline {table}{\numberline {4.7}{\ignorespaces ポジティブ判定に寄与する重要語TOP20}}{43}{}%
+\contentsline {table}{\numberline {4.8}{\ignorespaces ネガティブ判定に寄与する重要語TOP20}}{44}{}%
+\contentsline {table}{\numberline {4.9}{\ignorespaces 語彙の要因タイプ別内訳（1,564語）}}{45}{}%
+\contentsline {table}{\numberline {4.10}{\ignorespaces 共通要因（満足度要因）TOP10}}{45}{}%
+\contentsline {table}{\numberline {4.11}{\ignorespaces 要因タイプの解釈と代表語例}}{46}{}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {5.1}{\ignorespaces 研究の限界と対応の整理}}{25}{}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {A.1}{\ignorespaces 感情ラベルの定義}}{27}{}%
+\contentsline {table}{\numberline {A.1}{\ignorespaces 感情ラベルの定義}}{55}{}%
 \addvspace {10\p@ }
-\contentsline {table}{\numberline {B.1}{\ignorespaces データセット概要}}{29}{}%
-\contentsline {table}{\numberline {B.2}{\ignorespaces 教師データのラベル分布（1,000件）}}{29}{}%
+\contentsline {table}{\numberline {B.1}{\ignorespaces データセット概要}}{57}{}%
+\contentsline {table}{\numberline {B.2}{\ignorespaces 教師データのラベル分布（1,000件）}}{57}{}%
