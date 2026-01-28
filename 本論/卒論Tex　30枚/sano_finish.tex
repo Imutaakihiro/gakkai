@@ -1,0 +1,231 @@
+\documentclass[a4paper,11pt,twoside,dvipdfmx]{jreport}
+\usepackage{latexsym}
+\usepackage{ascmac}
+\usepackage{epsbox}
+\usepackage{array}
+\usepackage{fonts}
+\usepackage{centercolon}
+\usepackage{amsbsy} %
+\usepackage{ccaption}
+\usepackage{eclbkbox} %breakbox 
+\usepackage{multirow}
+\usepackage{theorem}
+\usepackage{bm}
+\usepackage{lscape}
+\usepackage[dvipdfmx]{graphicx}
+\usepackage[fleqn]{amsmath}
+\usepackage{booktabs}
+\usepackage{latexsym} %
+\usepackage{amssymb}
+\usepackage{otf}
+\usepackage[subrefformat=parens]{subcaption}
+\captionsetup{compatibility=false}
+\setcounter{page}{1}
+
+
+
+\pagestyle{myheadings} % 柱は上余白に
+\renewcommand{\bibname}{参考文献}
+%\usepackage{fancyhdr}	
+%\pagestyle{fancy}
+%\fancyhead[RE]{\leftmark}
+%\fancyhead[LE]{\textbf \thepage}
+%\fancyhead[RO]{\textbf \thepage}
+%\fancyhead[LO]{\leftmark}
+%\chead{}
+%\cfoot{}
+
+%\renewcommand{\chaptermark}[1]{\markboth{Chapter {\thechapter}\ \ #1}{}}
+%\renewcommand{\sectionmark}[1]{}
+%\pagestyle{plain}
+
+%\setcounter{page}{1}
+
+ \setlength{\textwidth}{160mm}        %本文全体の幅
+ \setlength{\textheight}{234mm}       %本文全体の高さ
+ \setlength{\oddsidemargin}{0mm}  %用紙左余白 -1inch(25.4mm)+15mm　奇数ページ
+ \setlength{\evensidemargin}{0mm} %用紙左余白 -1inch(25.4mm)+15mm　偶数ページ
+ \setlength{\topmargin}{0mm}      %用紙上の余白 -1inch(25.4mm)+15mm
+ \setlength{\headheight}{3mm}         %ヘッダーの高さ
+ \setlength{\headsep}{5mm}            %ヘッダーと本文までの高さ
+ \setlength{\footskip}{5mm}           %フッターと本文の高さ 
+
+%\addtolength{\textwidth}{25mm}
+%\addtolength{\oddsidemargin}{-10mm}
+%\addtolength{\evensidemargin}{-10mm}
+
+%\addtolength{\textheight}{15mm}
+%\addtolength{\topmargin}{-15mm}
+\addtolength{\footskip}{5mm}
+\allowdisplaybreaks
+\renewcommand{\baselinestretch}{1.5}
+\newlength\savedwidth
+\newcommand{\wcline}[1]{\noalign{\global\savedwidth\arrayrulewidth\global\arrayrulewidth 2pt} \cline{#1}
+\noalign{\global\arrayrulewidth\savedwidth}}
+%%%%%%%%%\setlength{\baselineskip}{100pt}
+
+%\kanjiskip 0.2zw plus 0.1zw minus 0.05zw
+
+\raggedbottom
+
+%\pagestyle{plain}                    % 柱は上余白に
+\theorembodyfont{\normalfont}
+\newtheorem{theorem}{定理}[section]
+\newtheorem{axiom}{公理}[section]
+\newtheorem{lemma}{補題}[section]
+\newtheorem{proof}{証明}[section]
+\newtheorem{difinition}{定義}[section]
+\newtheorem{proposition}{命題}[section]
+
+\def\qed{\hfill $\square $}
+\def\E{\mathbb{E}}
+\def\Var{\mathrm{Var}}
+\def\Cov{\mathrm{Cov}}
+\def\Prob{\mathrm{Prob}}
+\def\field{\mathcal{F}}
+\def\e{\mathrm{e}}
+\def\d{\mathrm{d}}
+\def\1{\mathbf{1}}
+\def\P{\mathrm{P}}
+\def \Q{\mathbb{Q}}
+\def\C{\mathcal{C}}
+\def\Mc{\mathcal{M}}
+\def\Ar{\rm A}
+\def\Br{\rm B}
+\def\Cr{\rm C}
+\def\Dr{\rm D}
+\def\Er{\rm D}
+\def\L{\mathcal{L}}
+\def\C{\mathcal{C}}
+\def\A{\bm{A}}
+\def\cA{\mathcal{A}}
+\def\W{\mathcal{W}}
+\def\S{\mathcal{S}}
+\def\K{\mathcal{K}}
+%%%%% boldmath macro %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\BM#1{{\mbox{\boldmath $#1$}}}
+\def\bm#1{{\mbox{\small \boldmath $#1$}}}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\argmax}[1]{\mathop{\arg\max}\limits_{#1}}% argmax
+\newcommand{\argmin}[1]{\mathop{\arg\min}\limits_{#1}}% argmin
+\newcommand{\mathbox}[1]{\mbox{~#1~}}% 数式環境で 空白＋rm＋空白
+\newcommand{\rmbox}[1]{{\rm{#1}}}% 数式環境で rm (下付，上付でサイズが変わる)
+\newcommand{\setbar}{{\, | \,}}% 集合の中の | 前後に空白
+\newcommand{\hadjust}[1]{&& \hspace*{#1}}% eqnarray 環境での 頭そろえ\hadjust{○ mm}
+\newcommand{\calig}[1]{{\cal #1}}% \calig{X}_i の表記可
+\newcommand{\Astar}{${\rm{\rmbox{A}^\star}}$ }% argmin
+\newcommand{\paren}[1]{{(#1)}}% {(x)} の表記
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\def\RN#1{\uppercase\expandafter{\romannumeral#1}}% 大文字ローマ数字の出力
+\def\rn#1{\expandafter{\romannumeral#1}} % 小文字ローマ数字
+
+%%%%%%%%%%%%%%%%%%%% tabular 環境の定義 %%%%%%%%%%%%%%%%%%
+%
+\newcommand{\tabtopsp}[1]{\vbox{\vbox to#1{}\vbox to1zw{}}}% 行の上の余白
+\newcommand{\eten}[1]{$\, \cdot 10^{#1}$}% 10のべき乗
+%
+
+%%%%% □ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\setlength{\jot}{8pt}
+\def\QED{\hfill$\Box$}
+
+%%%%% ↑ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\UpArrow}{\mbox{\kern-.2em$\uparrow$\kern-.05em}}
+
+%%%%% MP DP DMP %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\newcommand{\MP}{M\kern-0.17emP}
+\newcommand{\DP}{D\kern-0.17emP}
+\newcommand{\DMP}{D\kern-0.17emM\kern-0.17emP}
+
+%++++++++++++++++++++++++++++++++++++ Table環境 ++++++++++++++++++++++++++++++++++++++
+\newcommand\setTBstruts{\def\T{\rule{0pt}{2.6ex}}
+                        \def\B{\rule[-1.5ex]{0pt}{0pt}}}
+%++++++++++++++++++++++++++++++++++++ List環境 +++++++++++++++++++++++++++++++++++++++
+\newcounter{linenumber}
+
+\newenvironment{listing}{%
+	\begin{list}{%
+		\arabic{linenumber}}{%
+		\usecounter{linenumber}%
+		%\setlength{\baselineskip}{20pt}%
+		\setlength{\leftmargin}{30pt}%
+%		\setlength{\labelwidth}{8pt}%
+		\setlength{\labelsep}{4pt}%
+		\setlength{\itemsep}{0pt}%
+		\setlength{\parsep}{0pt}}}%
+	{\end{list}}
+
+\newenvironment{listing1}{%
+	\begin{list}{%
+		\arabic{linenumber}}{%
+		\usecounter{linenumber}%
+		%\setlength{\baselineskip}{20pt}% 行間
+		\setlength{\leftmargin}{10pt}% 左余白
+		\setlength{\labelwidth}{5pt}% ラベルの幅
+		\setlength{\labelsep}{4pt}% ラベルと item に続く分の間の空白
+		\setlength{\itemsep}{0pt}% アイテム間の距離 アイテム間の距離は itemsep+parsep
+		\setlength{\parsep}{0pt}% 
+%		\setlength{\itemindent}{1pt}% 段落先頭の字下げ幅
+		\setlength{\topsep}{2pt}}}% list の上下空白
+%		
+	{\end{list}}
+
+\newenvironment{listing2}{%
+	\begin{list}{%
+		\arabic{linenumber}}{%
+		\usecounter{linenumber}%
+		%\setlength{\baselineskip}{20pt}%
+		\setlength{\leftmargin}{20pt}%  %item の左マージン
+		\setlength{\labelwidth}{10pt}%
+		\setlength{\labelsep}{4pt}%
+		\setlength{\itemsep}{0pt}%
+		\setlength{\parsep}{0pt}}}%
+	{\end{list}}
+
+\newenvironment{listing3}{%
+	\begin{list}{%
+		\arabic{linenumber}}{%
+		\usecounter{linenumber}%
+		%\setlength{\baselineskip}{20pt}%
+		\setlength{\leftmargin}{25pt}%  %item の左マージン
+		\setlength{\labelwidth}{15pt}%
+		\setlength{\labelsep}{5pt}%
+		\setlength{\itemsep}{0pt}%
+	
+		\setlength{\parsep}{0pt}}}%
+	{\end{list}}
+
+%%%%% 脚注 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\renewcommand{\thefootnote}{\arabic{footnote}}
+
+%%%%% ヘッダー %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
+
+%%%%% 本文 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}	
+\input{表紙}
+%\input{Sebyoshi}
+%\setcounter{page}{0}
+\pagenumbering{roman}
+\tableofcontents
+\listoffigures
+\listoftables
+\input{1章}
+\input{2章}
+\input{3章}
+\input{4章}
+\input{5章}
+\input{7付録A}
+\input{8付録B}
+%\input{6章}
+%\input{7章}
+%\input{8章}
+\input{9謝辞}
+\input{10参考文献}
+%\input{11研究業績}
+%\input{Sebyoshi}
+\end{document}

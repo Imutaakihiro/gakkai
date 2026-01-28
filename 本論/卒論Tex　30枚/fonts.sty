@@ -1,0 +1,56 @@
+%% JY1 it
+\DeclareFontShape{JY1}{mc}{m}{it}{<->ssub*mc/m/n}{}
+\DeclareFontShape{JY1}{mc}{bx}{it}{<->ssub*gt/m/n}{}
+\DeclareFontShape{JY1}{gt}{m}{it}{<->ssub*gt/m/n}{}
+\DeclareFontShape{JY1}{gt}{bx}{it}{<->ssub*gt/m/n}{}
+%%
+\DeclareFontShape{JY1}{mc}{b}{it}{<->ssub*mc/m/n}{}
+\DeclareFontShape{JY1}{mc}{eb}{it}{<->ssub*mc/m/n}{}
+\DeclareFontShape{JY1}{gt}{b}{it}{<->ssub*mc/m/n}{}
+\DeclareFontShape{JY1}{gt}{eb}{it}{<->ssub*mc/m/n}{}
+\DeclareFontShape{JY1}{gt}{ub}{it}{<->ssub*mc/m/n}{}
+%% JT1 it
+\DeclareFontShape{JT1}{mc}{m}{it}{<->ssub*mc/m/n}{}
+\DeclareFontShape{JT1}{mc}{bx}{it}{<->ssub*gt/m/n}{}
+\DeclareFontShape{JT1}{gt}{m}{it}{<->ssub*gt/m/n}{}
+\DeclareFontShape{JT1}{gt}{bx}{it}{<->ssub*gt/m/n}{}
+%%
+\DeclareFontShape{JT1}{mc}{b}{it}{<->ssub*mc/m/n}{}
+\DeclareFontShape{JT1}{mc}{eb}{it}{<->ssub*mc/m/n}{}
+\DeclareFontShape{JT1}{gt}{b}{it}{<->ssub*mc/m/n}{}
+\DeclareFontShape{JT1}{gt}{eb}{it}{<->ssub*mc/m/n}{}
+\DeclareFontShape{JT1}{gt}{ub}{it}{<->ssub*mc/m/n}{}
+%% sc
+\DeclareFontShape{JY1}{mc}{m}{sc}{<->ssub*mc/m/n}{}
+\DeclareFontShape{JT1}{mc}{m}{sc}{<->ssub*mc/m/n}{}
+%% sl
+\DeclareFontShape{JY1}{mc}{m}{sl}{<->ssub*mc/m/n}{}
+\DeclareFontShape{JT1}{mc}{m}{sl}{<->ssub*mc/m/n}{}
+%% n
+\DeclareFontShape{JY1}{gt}{b}{n}{<->ssub*gt/m/n}{}
+\DeclareFontShape{JT1}{gt}{b}{n}{<->ssub*gt/m/n}{}
+
+%%%%% footnote ‹r’ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\makeatletter
+\footnotesep0pt
+\def\@fnsymbol#1{\ifcase#1\or \dagger\or%  %ƒ_ƒK[Žw’è
+    \dagger\kern-2pt\dagger\or 
+    \dagger\kern-2pt\dagger\kern-2pt\dagger\or
+    \dagger\kern-2pt\dagger\kern-2pt\dagger\kern-2pt\dagger\else
+    \dagger\kern-2pt\dagger\kern-2pt\dagger\kern-2pt\dagger\kern-2pt\dagger\fi\relax}
+\def\@makefnmark{\nolinebreak\hbox{$^{\scriptscriptstyle\@thefnmark}$}}
+\def\footnoterule{\kern-5\p@ \hrule width 37mm height0.1pt \kern 4\p@} %\kern 2.6\p@}
+\def\thefootnote{\fnsymbol{footnote}}
+% Page-Dependent Footnotes by S. Fujita 1995/06/06
+\newcount\@fn@total \@fn@total\z@ \newcount\CurrP@ge \CurrP@ge\z@
+\def\ftnt@page#1#2{\@tempcnta=#2 \ifnum\@tempcnta>\CurrP@ge
+\expandafter\gdef\csname @ftnt@#1\endcsname{#2}\CurrP@ge=\@tempcnta\fi}
+\def\Footnote#1{\global\advance\@fn@total\@ne
+  \@ifundefined{@ftnt@\the\@fn@total}{\footnote{#1}}
+  {\c@footnote\z@ \footnote{#1}}\edef\the@fn@total{\the\@fn@total}%
+   {\let\the\z@\edef\next{\write\@auxout{\string\ftnt@page
+   {\the@fn@total}{\the\c@page}}}\next}}
+\long\def\@makefntext#1{\parindent 1zw\noindent%
+  \hbox to 2zw{\hss$^{\@thefnmark}$~}%
+  \@tempdima\columnwidth\advance\@tempdima-2zw\parbox[t]{\@tempdima}{#1}}
+\makeatother

@@ -1,0 +1,153 @@
+\documentclass[9pt]{jarticle}
+\usepackage{amsmath,amssymb,graphicx,epsbox,multirow,ums}
+\setlength{\oddsidemargin}{-0.04cm}
+\setlength{\textwidth}{16cm}
+\setlength{\voffset}{0.46cm}
+\setlength{\topmargin}{0mm}
+\setlength{\headheight}{0mm}
+\setlength{\headsep}{0mm}
+\setlength{\textheight}{237mm}
+\setlength{\columnsep}{6mm}
+\pagestyle{plain}
+\allowdisplaybreaks[4]
+
+\renewcommand{\baselinestretch}{1.5}
+
+\makeatletter%% プリアンブルで定義する場合は必須
+
+\long\def\@makecaption#1#2{% \@makecaption を再定義します
+  \vskip\abovecaptionskip
+  \iftdir\sbox\@tempboxa{#1\hskip1zw#2}%
+    \else\sbox\@tempboxa{#1~ #2}% ここの : を ~ に変更する
+  \fi
+  \ifdim \wd\@tempboxa >\hsize% 
+    \iftdir #1\hskip1zw#2\relax\par
+      \else #1~ #2\relax\par\fi　% ここの : を ~ に変更する
+  \else
+    \global \@minipagefalse
+    \hbox to\hsize{\hfil\box\@tempboxa\hfil}% センタリング
+%   \hbox to\hsize{\box\@tempboxa\hfil}%      左詰め
+%   \hbox to\hsize{\hfil\box\@tempboxa}%      右詰め
+  \fi
+  \vskip\belowcaptionskip}
+
+\makeatother%%
+
+
+\newtheorem{proposition}{命題}
+\newcommand{\meidai}[1]{
+\begin{proposition} \upshape
+#1 
+\end{proposition}
+}
+\newtheorem{theorem}{定理}
+\newcommand{\teiri}[1]{
+\begin{theorem} \upshape
+#1 
+\end{theorem}
+}
+\newtheorem{definition}{定義}
+\newcommand{\teigi}[1]{
+\begin{definition} \upshape
+#1 
+\end{definition}
+}
+\newtheorem{example}{例}
+\newcommand{\rei}[1]{
+\begin{example} \upshape
+#1 
+\end{example}
+}
+\newtheorem{corollary}{系}
+\newcommand{\kei}[1]{
+\begin{corollary} \upshape
+#1 
+\end{corollary}
+}
+\newtheorem{remark}{注意}
+\newcommand{\chui}[1]{
+\begin{remark} \upshape
+#1 
+\end{remark}
+}
+\newtheorem{lemma}{補題}
+\newcommand{\hodai}[1]{
+\begin{lemma} \upshape
+#1 
+\end{lemma}
+}
+\newtheorem{proof}{証明：\hskip-0.9zw}
+\renewcommand{\theproof}{}
+\newcommand{\syomei}[1]{
+\begin{proof} \upshape
+#1 
+\qed 
+\end{proof}
+}
+
+\makeatletter
+\def\@cite#1{$^{\mbox{\scriptsize{[#1}]}}$}
+\makeatother
+
+\newcommand{\bm}[1]{\mbox{\boldmath{$#1$}}}
+
+\def\qed{\hfill $\square $}
+\def\E{\mathbb{E}}
+\def\Var{\mathrm{Var}}
+\def\Corr{\mathrm{Corr}}
+\def\Cov{\mathrm{Cov}}
+\def\field{\mathcal{F}}
+\def\Tau{\mathcal{T}}
+\def\filt{\mathbb{F}}
+\def\Pm{\mathbb{P}}
+\def\real{\mathbb{R}}
+\def\e{\mathrm{e}}
+\def\d{\mathrm{d}}
+\def\1{\mathbf{1}}
+\def\F{\mathrm{F}}
+\def\L{\mathrm{L}}
+\def\M{\mathrm{M}}
+\def\D{\mathrm{D}}
+\def\J{\mathrm{J}}
+\def\P{\mathrm{P}}
+\def\Q{\mathrm{Q}}
+\def\C{\mathcal{C}}
+\def\Mc{\mathcal{M}}
+\def\A{\mathcal{A}}
+
+\begin{document}
+
+\begin{table}
+\begin{tabular}{llllllll}\hline
+変数 & 定義 & 変数 & 定義& 変数 & 定義& 変数 & 定義\\
+\hline\hline
+$A$&選択肢&$\A$&集計を表わす添字&$\bm A$&&$a$&$ax+b$\\
+$B$&選択肢&$\cal B$&予算集合&$\bm B$&&$b$&$ax+b$\\
+$C$&選択肢&$\cal C$&妥協効果を表わす添字&$\bm C$&&$c$&\\
+$D$&選択肢&$\cal D$&&$\bm D$&&$d$&\\
+$E$&&$\cal E$&エントロピー・最大化問題&$\bm E$&&$e$&\\
+$F$&累積確率密度関数&$\cal F$&&$\bm F$&&$f$&確率密度関数\\
+$G$&&$\cal G$&GEV母関数&$\bm G$&&$g$&\\
+$H$&&$\cal H$&&$\bm H$&&$h$&消費者添字\\
+$I$&&$\cal I$&&$\bm I$&&$i$&潜在クラス添字\\
+$J$&&$\cal J$&&$\bm J$&&$j$&サブ潜在クラス添字\\
+$K$&&$\cal K$&&$\bm K$&&$k$&選択肢添字\\
+$L$&&$\cal L$&&$\bm L$&&$l$&汎用添字\\
+$M$&&$\cal M$&&$\bm M$&&$m$&効用関数添字\\
+$N$&数&$\cal N$&&$\bm N$&&$n$&汎用添字\\
+$O$&&$\cal O$&&$\bm O$&&$o$&\\
+$P$&確率&$\cal P$&&$\bm P$&&$p$&\\
+$Q$&確率&$\cal Q$&&$\bm Q$&&$q$&\\
+$R$&&$\cal R$&&$\bm R$&&$r$&次数\\
+$S$&&$\cal S$&選択肢集合&$\bm S$&&$s$&\\
+$T$&&$\cal T$&ネスト集合&$\bm T$&&$t$&時刻\\
+$U$&効用関数&$\cal U$&&$\bm U$&&$u$&\\
+$V$&確定項&$\cal V$&&$\bm V$&&$v$&\\
+$W$&&$\cal W$&&$\bm W$&&$w$&\\
+$X$&構成要素&$\cal X$&&$\bm X$&&$x$&$ax+b$\\
+$Y$&$\exp V$&$\cal Y$&&$\bm Y$&&$y$&\\
+$Z$&&$\cal Z$&&$\bm Z$&&$z$&\\\hline
+\end{tabular}
+\end{table}
+
+\end{document}
