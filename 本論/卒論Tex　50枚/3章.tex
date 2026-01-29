@@ -48,39 +48,13 @@
 \section{前処理}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\subsection{テキストの正規化}
-自由記述は，以下の前処理を施してモデル入力に適した形式へ変換した．
+\subsection{テキストの簡易整形}
+自由記述の前処理は最小限に留め，以下のみ実施した．Unicode正規化や記号除去，形態素解析などの高度な前処理は行っていない．
 
 \begin{enumerate}
-\item \textbf{Unicode正規化}: 全角・半角の統一，異体字の正規化を実施
-\item \textbf{記号除去}: 絵文字，特殊記号，不要な空白を除去
-\item \textbf{形態素解析}: MeCabを用いて日本語テキストをトークン化
-\item \textbf{最大長制限}: BERTの入力長制限（512トークン）に合わせて切り詰め
+\item \textbf{空白・改行の整理}: 連続する空白や改行を整形し，空欄を除外
+\item \textbf{最大長制限}: モデル入力長の上限（512トークン）に合わせて切り詰め
 \end{enumerate}
-
-\subsection{トークナイザ}
-本研究では，BERTの事前学習に用いられたトークナイザを使用した．具体的には，WordPieceアルゴリズムに基づくサブワード分割を採用している．日本語テキストに対しては，形態素解析による分かち書きを行った後にサブワード分割を適用した．
-
-トークナイザの設定を表\ref{tab:tokenizer}に示す．
-
-\begin{table}[t]
-    \centering
-    \caption{トークナイザの設定}
-    \label{tab:tokenizer}
-    \resizebox{0.7\textwidth}{!}{
-    \begin{tabular}{l l}
-        \toprule
-        項目 & 設定値 \\
-        \midrule
-        最大トークン長 & 512 \\
-        語彙サイズ & 32,000 \\
-        特殊トークン & [CLS], [SEP], [PAD], [UNK], [MASK] \\
-        パディング方向 & 右側（post） \\
-        切り詰め方向 & 右側（post） \\
-        \bottomrule
-    \end{tabular}
-    }
-\end{table}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{教師データ}
@@ -185,9 +159,7 @@ BERTの基本構成を表\ref{tab:bert_arch}に示す．本研究では，日本
 \end{table}
 
 \subsection{事前学習済みモデル}
-本研究では，日本語の大規模コーパスで事前学習されたBERTモデルを使用した．具体的には，東北大学が公開している「cl-tohoku/bert-base-japanese-whole-word-masking」を基盤とし，感情分析タスクで微調整されたモデル（koheiduck/bert-japanese-finetuned-sentiment）を使用した．
-
-事前学習では，Masked Language Model（MLM）タスクとNext Sentence Prediction（NSP）タスクにより，日本語の言語構造と文脈理解を学習している．この事前学習により，少量の教師データでも効果的な微調整が可能となる．
+本研究では，日本語BERTを基盤とする感情分類モデルを使用した\cite{bert,cl-tohoku}．本研究では事前学習そのものは実施しておらず，事前学習タスクの詳細には立ち入らない．
 
 \subsection{Transformerの仕組み}
 BERTの基盤となるTransformerは，Self-Attention機構により入力系列の全要素間の関係を並列に計算する\cite{transformer}．Self-Attentionは以下の式で表される．
@@ -232,8 +204,6 @@ BERTの基盤となるTransformerは，Self-Attention機構により入力系列
 \textbf{感情分類モデルの構成} \\
 \hline
 入力テキスト \\
-$\downarrow$ \\
-トークナイザ（WordPiece） \\
 $\downarrow$ \\
 BERTエンコーダ（12層，768次元） \\
 $\downarrow$ \\
@@ -301,61 +271,6 @@ $\downarrow$ \hspace{2.5cm} $\downarrow$ \\
 \caption{マルチタスク学習モデルのアーキテクチャ}
 \label{fig:mtl_model}
 \end{figure}
-
-\subsection{順序回帰モデル}
-授業評価スコアは1点から4点までの順序尺度であり，単純な回帰や分類では順序関係を適切に扱えない．本研究では，順序回帰モデルを構築し，評価段階の順序性を考慮した予測を行う\cite{coral}．
-
-順序回帰では，各閾値を超える確率を推定する．評価スコアが$k$以上となる確率$P(Y \geq k)$を累積確率として推定し，隣接する累積確率の差から各評価段階の確率を算出する．
-
-\begin{equation}
-P(Y = k) = P(Y \geq k) - P(Y \geq k+1)
-\label{eq:ordinal}
-\end{equation}
-
-順序回帰モデルの詳細な結果は，追加実験の完了後に第4章で報告する．
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{学習設定}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\subsection{ハイパーパラメータ}
-モデル学習のハイパーパラメータを表\ref{tab:hyperparams}に示す．これらのパラメータは予備実験により調整した．
-
-\begin{table}[t]
-    \centering
-    \caption{学習のハイパーパラメータ}
-    \label{tab:hyperparams}
-    \resizebox{0.75\textwidth}{!}{
-    \begin{tabular}{l r l}
-        \toprule
-        パラメータ & 値 & 選定理由 \\
-        \midrule
-        バッチサイズ & 16 & GPUメモリ制約を考慮 \\
-        学習率 & $5 \times 10^{-6}$ & 事前学習済みモデルの微調整に適した低学習率 \\
-        エポック数 & 5 & 早期終了により過学習を防止 \\
-        最大トークン長 & 512 & BERTの最大入力長 \\
-        ドロップアウト率 & 0.1 & 過学習抑制のための標準的な値 \\
-        ウォームアップステップ & 100 & 学習初期の安定化 \\
-        \bottomrule
-    \end{tabular}
-    }
-\end{table}
-
-\subsection{最適化手法}
-最適化にはAdamWオプティマイザを使用した\cite{bert}．AdamWは，重み減衰を正則化として分離することで，Adamの欠点を改善した手法である．学習率スケジューラには線形減衰を採用し，ウォームアップ期間の後に学習率を線形に減少させた．
-
-\subsection{早期終了}
-過学習を防ぐため，検証損失が3エポック連続で改善しない場合に学習を終了する早期終了を適用した．最終的なモデルは，検証損失が最小となったエポックのパラメータを採用した．
-
-\subsection{データ分割}
-教師データ1,000件を以下のように分割した．
-
-\begin{itemize}
-\item 訓練データ: 800件（80\%）
-\item 検証データ: 200件（20\%）
-\end{itemize}
-
-分割は層化抽出により行い，各セットでラベル分布が維持されるようにした．
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \section{授業単位集約と相関分析}
@@ -508,7 +423,7 @@ R^2 = 1 - \frac{\sum_{i=1}^{N}(y_i - \hat{y}_i)^2}{\sum_{i=1}^{N}(y_i - \bar{y})
 $\downarrow$ \\
 \hline
 \textbf{【前処理】} \\
-テキスト正規化，トークナイザによる分割 \\
+簡易整形，入力長の調整 \\
 \hline
 $\downarrow$ \\
 \hline
@@ -547,29 +462,4 @@ $\downarrow$ \\
 \label{fig:flow}
 \end{figure}
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\section{実装環境}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-本研究の実装環境を表\ref{tab:env}に示す．
-
-\begin{table}[t]
-    \centering
-    \caption{実装環境}
-    \label{tab:env}
-    \resizebox{0.7\textwidth}{!}{
-    \begin{tabular}{l l}
-        \toprule
-        項目 & 内容 \\
-        \midrule
-        プログラミング言語 & Python 3.10 \\
-        深層学習フレームワーク & PyTorch 2.0 \\
-        Transformersライブラリ & Hugging Face Transformers 4.30 \\
-        SHAP分析ライブラリ & SHAP 0.42 \\
-        統計分析ライブラリ & SciPy 1.11 \\
-        \bottomrule
-    \end{tabular}
-    }
-\end{table}
-
-本章では，データセットの概要，前処理手順，BERTを基盤とした感情分類モデルおよびマルチタスク学習モデルの構成，学習設定，SHAP分析の手法，および評価指標について詳述した．次章では，これらの手法を用いて得られた結果を報告する．
+本章では，データセットの概要，前処理手順，BERTを基盤とした感情分類モデルおよびマルチタスク学習モデルの構成，SHAP分析の手法，および評価指標について詳述した．次章では，これらの手法を用いて得られた結果を報告する．

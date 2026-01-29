@@ -1,0 +1,355 @@
+削除文保管（2026-01-28）
+
+==== 本論/卒論Tex　50枚/3章.tex ====
+
+[置換前の文]
+- \item \textbf{最大長制限}: トークナイザの最大長（512トークン）に合わせて切り詰め
+
+[削除した小節]
+\subsection{トークナイザ}
+本研究では，使用した事前学習済みモデルに付属するトークナイザを使用した．分かち書きやサブワード分割はトークナイザ内部の処理に委ね，独自の辞書追加や形態素解析の前処理は行っていない．
+
+トークナイザの設定を表\ref{tab:tokenizer}に示す．
+
+\begin{table}[t]
+    \centering
+    \caption{トークナイザの設定}
+    \label{tab:tokenizer}
+    \resizebox{0.7\textwidth}{!}{
+    \begin{tabular}{l l}
+        \toprule
+        項目 & 設定値 \\
+        \midrule
+        最大トークン長 & 512 \\
+        語彙サイズ & 32,000 \\
+        特殊トークン & [CLS], [SEP], [PAD], [UNK], [MASK] \\
+        パディング方向 & 右側（post） \\
+        切り詰め方向 & 右側（post） \\
+        \bottomrule
+    \end{tabular}
+    }
+\end{table}
+
+[削除した文]
+本研究では，Hugging Faceで公開されている日本語BERTの感情分類モデル「koheiduck/bert-japanese-finetuned-sentiment」を使用した\cite{koheiduck-bert}．
+
+[削除した行]
+トークナイザ（WordPiece） \\
+
+[削除した行]
+簡易整形，トークナイザによる分割 \\
+
+[削除した小節]
+\subsection{順序回帰モデル}
+授業評価スコアは1点から4点までの順序尺度であり，単純な回帰や分類では順序関係を適切に扱えない．本研究では，順序回帰モデルを構築し，評価段階の順序性を考慮した予測を行う\cite{coral}．
+
+順序回帰では，各閾値を超える確率を推定する．評価スコアが$k$以上となる確率$P(Y \geq k)$を累積確率として推定し，隣接する累積確率の差から各評価段階の確率を算出する．
+
+\begin{equation}
+P(Y = k) = P(Y \geq k) - P(Y \geq k+1)
+\label{eq:ordinal}
+\end{equation}
+
+順序回帰モデルの詳細な結果は，追加実験の完了後に第4章で報告する．
+
+[削除した章]
+\section{学習設定}
+
+\subsection{ハイパーパラメータ}
+モデル学習のハイパーパラメータを表\ref{tab:hyperparams}に示す．これらのパラメータは予備実験により調整した．
+
+\begin{table}[t]
+    \centering
+    \caption{学習のハイパーパラメータ}
+    \label{tab:hyperparams}
+    \resizebox{0.75\textwidth}{!}{
+    \begin{tabular}{l r l}
+        \toprule
+        パラメータ & 値 & 選定理由 \\
+        \midrule
+        バッチサイズ & 16 & GPUメモリ制約を考慮 \\
+        学習率 & $5 \times 10^{-6}$ & 事前学習済みモデルの微調整に適した低学習率 \\
+        エポック数 & 5 & 早期終了により過学習を防止 \\
+        最大トークン長 & 512 & BERTの最大入力長 \\
+        ドロップアウト率 & 0.1 & 過学習抑制のための標準的な値 \\
+        ウォームアップステップ & 100 & 学習初期の安定化 \\
+        \bottomrule
+    \end{tabular}
+    }
+\end{table}
+
+\subsection{最適化手法}
+最適化にはAdamWオプティマイザを使用した\cite{bert}．AdamWは，重み減衰を正則化として分離することで，Adamの欠点を改善した手法である．学習率スケジューラには線形減衰を採用し，ウォームアップ期間の後に学習率を線形に減少させた．
+
+\subsection{早期終了}
+過学習を防ぐため，検証損失が3エポック連続で改善しない場合に学習を終了する早期終了を適用した．最終的なモデルは，検証損失が最小となったエポックのパラメータを採用した．
+
+\subsection{データ分割}
+教師データ1,000件を以下のように分割した．
+
+\begin{itemize}
+\item 訓練データ: 800件（80\%）
+\item 検証データ: 200件（20\%）
+\end{itemize}
+
+分割は層化抽出により行い，各セットでラベル分布が維持されるようにした．
+
+[置換前の文]
+本章では，データセットの概要，前処理手順，BERTを基盤とした感情分類モデルおよびマルチタスク学習モデルの構成，学習設定，SHAP分析の手法，および評価指標について詳述した．
+
+==== 本論/卒論Tex　50枚/1章.tex ====
+
+[削除した文]
+教育分野においても，学生の自由記述から満足度や不満を把握する手段として，感情分析の応用が注目されている\cite{rajput2016,sindhu2019}．
+
+[削除した文]
+SHAPは協力ゲーム理論に基づく特徴量重要度の算出手法であり，単語レベルでの寄与度を定量化できる\cite{arrieta2020}．
+
+[置換前の文]
+\textbf{第2章 関連研究}: 授業評価研究，自然言語処理による感情分析，BERTと言語モデル，マルチタスク学習，解釈可能AI（SHAP），順序回帰に関する関連研究を整理し，本研究の位置づけを明確にする．
+
+==== 本論/卒論Tex　50枚/2章.tex ====
+
+[置換前の文]
+本章では，本研究に関連する先行研究を整理する．授業評価研究，感情分析，BERT，マルチタスク学習，解釈可能AI，順序回帰について概観し，本研究の位置づけを明確にする．
+
+[削除した文]
+教育分野においても，学生の満足度や不満の把握に活用できる\cite{rajput2016,sindhu2019}．Sinduらは，学生のフィードバックからアスペクトベースの意見マイニングを行い，教員の教育パフォーマンス評価に活用した\cite{sindhu2019}．
+
+[削除した文]
+教育分野の自由記述分析では，テキスト分析を通じた改善提案の抽出や意見整理が報告されている\cite{gottipati2018,misuraca2021}．Gottipatiらは，学生のフィードバックから授業改善の提案を自動抽出するテキスト分析手法を提案した\cite{gottipati2018}．Misuracaらは，意見マイニングを教育分析に応用し，学生フィードバックの統合的分析戦略を提案した\cite{misuraca2021}．
+
+[削除した文]
+辞書型手法は，極性語彙（ポジティブ・ネガティブな単語のリスト）を用いて感情を推定する手法である．実装が容易で解釈しやすい利点がある一方，文脈依存の表現や否定表現に弱いという欠点がある\cite{rajput2016}．Rajputらは，教員評価における辞書ベースの感情分析を行い，その有効性と限界を報告した\cite{rajput2016}．
+
+[削除した文]
+古典的機械学習手法（SVM，ナイーブベイズ，ランダムフォレストなど）は，特徴量設計により一定の精度を得られる．しかし，語彙の多様性が大きい自由記述では特徴量設計の負担が大きい\cite{santhanam2018}．Santhanamらは，学生フィードバックのテキスト分析において，共通語彙の適応と拡張を行った\cite{santhanam2018}．
+
+[削除した文]
+自然言語処理分野では，感情分析とアスペクト抽出などを同時に学習するマルチタスクモデルが報告されている\cite{ruder2019}．関連タスクを同時に扱うことで，文脈に依存した表現の理解が補助されるとされる．
+
+[削除した文]
+機械学習モデルの予測根拠を明確化するため，解釈可能AI（Explainable AI: XAI）が注目されている\cite{arrieta2020}．特に教育分野では，モデルの予測精度だけでなく説明可能性が重要であり，改善施策への翻訳可能性が求められる．
+
+[削除した節]
+\section{順序回帰}
+
+\subsection{順序尺度の特性}
+授業評価スコアは1点から4点までの順序尺度であり，単純な回帰（連続値として扱う）や分類（カテゴリとして扱う）では順序関係を適切に扱えない．順序回帰は，評価段階の順序性を考慮して確率分布を推定する手法である\cite{coral}．
+
+\subsection{ニューラルネットワークとの統合}
+近年は，ニューラルネットワークと順序回帰を組み合わせた手法が提案されている．Caoらは，CORAL（Consistent Rank Logits）を提案し，順序一貫性を保証しながらニューラルネットワークで順序回帰を行う手法を示した\cite{coral}．授業評価スコアの分析においても，順序回帰の導入は妥当である．
+
+[削除した文]
+教育分野では，学習ログやアンケートデータを用いた分析（Learning Analytics, Educational Data Mining）が進んでいる\cite{romero2020}．自由記述を対象としたテキスト分析や意見抽出の取り組みは報告されているが\cite{gottipati2018,misuraca2021,hujala2020}，評価スコアとの関係性を統合的に扱った研究は多くない．
+
+[削除した文]
+また，教育改善に直結する語彙や要因を整理するために，語彙辞書の拡張や分析手法の整理が試みられている\cite{santhanam2018}．このため，感情分析・マルチタスク学習・解釈可能AIを組み合わせた総合的な分析枠組みの構築が求められている．
+
+[置換前の文]
+第一に，評価スコアと自由記述の統合が不十分である．多くの研究は評価スコアの分析または自由記述の分析を別々に行っており，両者の関係を同時にモデル化した研究は限られている\cite{gottipati2018,misuraca2021}．
+
+[削除した行（表\ref{tab:comparison}）]
+Misuraca et al. (2021) & − & ○ & − & △ \\
+Sindhu et al. (2019) & − & ○ & − & △ \\
+
+==== 本論/卒論Tex　50枚/4章.tex ====
+
+[削除した節]
+\section{順序回帰モデルの結果}
+
+授業評価スコアは1点から4点までの順序尺度であるため，順序回帰モデルの導入を検討した．順序回帰では，各評価段階への遷移確率を推定し，評価段階ごとの寄与要因を分析できる．
+
+予備的な実験として，評価スコアが3点以上となる確率（P3+）と4点となる確率（P4）を個別に予測するモデルを構築した．結果の詳細は追加実験の完了後に報告する予定であるが，以下の傾向が示唆されている．
+
+\begin{itemize}
+\item 「普通（3点）」から「良い（4点）」への向上には，学習成果の実感に関わる要因が特に重要である．
+\item 評価段階によって寄与する要因が異なる可能性があり，きめ細かな改善施策の設計に活用できる．
+\end{itemize}
+
+==== 本論/卒論Tex　50枚/5章.tex ====
+
+[削除した小節]
+\subsection{順序回帰モデルの発展}
+授業評価スコアは順序尺度であるため，順序回帰モデルの導入により予測精度の向上が期待される．評価段階ごとの寄与要因を分析することで，「普通」から「良い」へ，「良い」から「非常に良い」への評価向上に寄与する要因を個別に特定できる可能性がある．
+
+==== 本論/卒論Tex　50枚/10参考文献.tex ====
+
+[削除した文献]
+\bibitem{koheiduck-bert} koheiduck: ``bert-japanese-finetuned-sentiment,'' Hugging Face Models, https://huggingface.co/koheiduck/bert-japanese-finetuned-sentiment (accessed 2026-01-28).
+
+\bibitem{arrieta2020} Arrieta, A. B., D{\'i}az-Rodr{\'i}guez, N., Del Ser, J., et al.: ``Explainable Artificial Intelligence (XAI): Concepts, Taxonomies, Opportunities and Challenges toward Responsible AI,'' \textit{Information Fusion}, Vol. 58, pp. 82--115 (2020).
+
+\bibitem{ruder2019} Ruder, S.: ``Neural Transfer Learning for Natural Language Processing,'' Ph.D. Thesis, National University of Ireland, Galway (2019).
+
+\bibitem{coral} Cao, W., Mirjalili, V., and Raschka, S.: ``Rank Consistent Ordinal Regression for Neural Networks with Application to Age Estimation,'' \textit{Pattern Recognition Letters}, Vol. 140, pp. 325--331 (2020).
+
+\bibitem{rajput2016} Rajput, Q., Haider, S., and Ghani, S.: ``Lexicon-Based Sentiment Analysis of Teachers' Evaluation,'' \textit{Applied Computational Intelligence and Soft Computing}, Vol. 2016, Article 2385429 (2016).
+
+\bibitem{misuraca2021} Misuraca, M., Scepi, G., and Spano, M.: ``Using Opinion Mining as an Educational Analytic: An Integrated Strategy for the Analysis of Students' Feedback,'' \textit{Studies in Educational Evaluation}, Vol. 68, Article 100979 (2021).
+
+\bibitem{santhanam2018} Santhanam, E., Lynch, B., and Jones, J.: ``Making Sense of Student Feedback Using Text Analysis -- Adapting and Expanding a Common Lexicon,'' \textit{Quality Assurance in Education}, Vol. 26, No. 1, pp. 60--69 (2018).
+
+\bibitem{sindhu2019} Sindhu, I., Daudpota, S. M., Badar, K., Bakhtyar, M., Baber, J., and Nurunnabi, M.: ``Aspect-Based Opinion Mining on Student's Feedback for Faculty Teaching Performance Evaluation,'' \textit{IEEE Access}, Vol. 7, pp. 108729--108741 (2019).
+
+\bibitem{romero2020} Romero, C., and Ventura, S.: ``Educational Data Mining and Learning Analytics: An Updated Survey,'' \textit{WIREs Data Mining and Knowledge Discovery}, Vol. 10, No. 3, Article e1355 (2020).
+
+\bibitem{kurohashi1994} 黒橋禎夫, 長尾真: ``日本語形態素解析システムJUMAN,'' 京都大学 (1994).
+
+\bibitem{kudo2004} Kudo, T., Yamamoto, K., and Matsumoto, Y.: ``Applying Conditional Random Fields to Japanese Morphological Analysis,'' \textit{Proceedings of the 2004 Conference on Empirical Methods in Natural Language Processing (EMNLP)}, pp. 230--237 (2004).
+
+\bibitem{pennington2014} Pennington, J., Socher, R., and Manning, C. D.: ``GloVe: Global Vectors for Word Representation,'' \textit{Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing (EMNLP)}, pp. 1532--1543 (2014).
+
+\bibitem{kim2014} Kim, Y.: ``Convolutional Neural Networks for Sentence Classification,'' \textit{Proceedings of the 2014 Conference on Empirical Methods in Natural Language Processing (EMNLP)}, pp. 1746--1751 (2014).
+
+==== 本論/卒論Tex　30枚/10参考文献.tex ====
+
+[削除した文献]
+\bibitem{arrieta2020} Arrieta, A. B., D{\'i}az-Rodr{\'i}guez, N., Del Ser, J., et al.: ``Explainable Artificial Intelligence (XAI): Concepts, Taxonomies, Opportunities and Challenges toward Responsible AI,'' \textit{Information Fusion}, Vol. 58, pp. 82--115 (2020).
+
+\bibitem{ruder2019} Ruder, S.: ``Neural Transfer Learning for Natural Language Processing,'' Ph.D. Thesis, National University of Ireland, Galway (2019).
+
+\bibitem{coral} Cao, W., Mirjalili, V., and Raschka, S.: ``Rank Consistent Ordinal Regression for Neural Networks with Application to Age Estimation,'' \textit{Pattern Recognition Letters}, Vol. 140, pp. 325--331 (2020).
+
+\bibitem{rajput2016} Rajput, Q., Haider, S., and Ghani, S.: ``Lexicon-Based Sentiment Analysis of Teachers' Evaluation,'' \textit{Applied Computational Intelligence and Soft Computing}, Vol. 2016, Article 2385429 (2016).
+
+\bibitem{misuraca2021} Misuraca, M., Scepi, G., and Spano, M.: ``Using Opinion Mining as an Educational Analytic: An Integrated Strategy for the Analysis of Students' Feedback,'' \textit{Studies in Educational Evaluation}, Vol. 68, Article 100979 (2021).
+
+\bibitem{sindhu2019} Sindhu, I., Daudpota, S. M., Badar, K., Bakhtyar, M., Baber, J., and Nurunnabi, M.: ``Aspect-Based Opinion Mining on Student's Feedback for Faculty Teaching Performance Evaluation,'' \textit{IEEE Access}, Vol. 7, pp. 108729--108741 (2019).
+
+==== 本論/卒論Tex　30枚/1章.tex ====
+
+[削除した文]
+また，感情分析は学生の満足度や不満を把握する方法として教育分野への応用が報告されている\cite{liu2012,rajput2016,sindhu2019}．
+
+[削除した文]
+さらに，SHAP分析により語彙単位の寄与度を算出し\cite{shap,arrieta2020}，共通要因と特化要因を整理する．
+
+==== 本論/卒論Tex　30枚/2章.tex ====
+
+[置換前の文]
+本章では，授業評価研究，自由記述分析，感情分析，BERT，マルチタスク学習，SHAP，順序回帰に関する先行研究を概観し，本研究の位置づけを示す．
+
+[削除した文]
+自由記述は授業評価の理由や具体的な改善要望を含むが，大規模分析には自然言語処理が必要である\cite{gottipati2018,hujala2020,misuraca2021}．感情分析はテキストから肯定・否定・中立を推定する手法であり\cite{liu2012}，教育分野でも学生フィードバックの把握に活用されている\cite{rajput2016,sindhu2019}．ただし，評価スコアとの統合的な分析は限定的である．
+
+[削除した文]
+マルチタスク学習は関連タスクを同時に学習し，共通表現を共有する枠組みである\cite{mtl}．感情分析などの自然言語処理タスクで有効性が報告されており\cite{ruder2019}，評価スコアと感情スコアの同時学習に適用可能である．
+
+[削除した文]
+予測根拠を説明する解釈可能AIが注目されており\cite{arrieta2020}，SHAPは協力ゲーム理論に基づく特徴量重要度の算出手法として広く利用されている\cite{shap}．テキストでは語彙単位の寄与度を提示できる点が利点である．
+
+[削除した節]
+\section{順序回帰}
+
+授業評価スコアは順序尺度であるため，順序回帰による予測が適している\cite{coral}．深層学習と統合した順序回帰は，評価段階の順序性を保った推定に有用である．
+
+[削除した行（表\ref{tab:comparison}）]
+Misuraca et al. (2021) & − & ○ & − & △ \\
+Sindhu et al. (2019) & − & ○ & − & △ \\
+
+==== 本論/卒論Tex　30枚/3章.tex ====
+
+[置換前の文]
+本章では，本研究で使用したデータセットの概要，前処理手順，モデル構成，学習設定，SHAP分析の設定，評価指標を述べる．
+
+[置換前の文]
+- \item \textbf{最大長制限}: トークナイザの最大長（512トークン）に合わせて切り詰め
+
+[削除した小節]
+\subsection{トークナイザ}
+使用した事前学習済みモデルに付属するトークナイザを使用し，独自の辞書追加や形態素解析は行っていない．設定を表\ref{tab:tokenizer}に示す．
+
+\begin{table}[t]
+    \centering
+    \caption{トークナイザの設定}
+    \label{tab:tokenizer}
+    \resizebox{0.7\textwidth}{!}{
+    \begin{tabular}{l l}
+        \toprule
+        項目 & 設定値 \\
+        \midrule
+        最大トークン長 & 512 \\
+        語彙サイズ & 32,000 \\
+        特殊トークン & [CLS], [SEP], [PAD], [UNK], [MASK] \\
+        パディング方向 & 右側（post） \\
+        切り詰め方向 & 右側（post） \\
+        \bottomrule
+    \end{tabular}
+    }
+\end{table}
+
+[削除した小節]
+\subsection{順序回帰モデル}
+授業評価スコアは1点から4点までの順序尺度であるため，順序回帰モデルの導入を検討した\cite{coral}．順序性を考慮した確率推定により，評価段階ごとの差異を扱うことを目的とする．
+
+[削除した章]
+\section{学習設定}
+
+\subsection{ハイパーパラメータ}
+モデル学習のハイパーパラメータを表\ref{tab:hyperparams}に示す．
+
+\begin{table}[t]
+    \centering
+    \caption{学習のハイパーパラメータ}
+    \label{tab:hyperparams}
+    \resizebox{0.75\textwidth}{!}{
+    \begin{tabular}{l r l}
+        \toprule
+        パラメータ & 値 & 選定理由 \\
+        \midrule
+        バッチサイズ & 16 & GPUメモリ制約を考慮 \\
+        学習率 & $5 \times 10^{-6}$ & 事前学習済みモデルの微調整に適した低学習率 \\
+        エポック数 & 5 & 早期終了により過学習を防止 \\
+        最大トークン長 & 512 & BERTの最大入力長 \\
+        ドロップアウト率 & 0.1 & 過学習抑制のための標準的な値 \\
+        ウォームアップステップ & 100 & 学習初期の安定化 \\
+        \bottomrule
+    \end{tabular}
+    }
+\end{table}
+
+\subsection{最適化手法}
+最適化にはAdamWオプティマイザを使用し\cite{bert}，学習率スケジューラには線形減衰を採用した．
+
+\subsection{早期終了}
+過学習を防ぐため，検証損失が3エポック連続で改善しない場合に学習を終了する早期終了を適用した．
+
+[削除した行]
+簡易整形，トークナイザによる分割 \\
+
+[置換前の文]
+本章では，データセットの概要，前処理手順，BERTを基盤としたモデル構成，学習設定，SHAP分析の設定，および評価指標について述べた．
+
+==== 本論/卒論Tex　30枚/4章.tex ====
+
+[削除した節]
+\section{順序回帰モデルの結果}
+
+授業評価スコアは順序尺度であるため，順序回帰モデルの導入を検討した．予備的な実験では，評価段階ごとに寄与要因が異なる可能性が示唆され，段階別の改善施策設計に活用できる余地がある．
+
+==== 本論/卒論Tex　30枚/5章.tex ====
+
+[削除した文]
+さらに，教師データ拡充や順序回帰モデルの改善を通じて，評価段階ごとの要因分析を精緻化することが求められる．
+
+==== 本論/卒論Tex　50枚/1章.tex（期間表記修正前） ====
+
+[置換前の文]
+本研究では，福岡工業大学における2018年度から2024年度までの7年間の授業評価データを分析対象とする．
+
+[置換前の行]
+対象期間 & 2018年度〜2024年度（7年間） \\
+
+==== 本論/卒論Tex　50枚/3章.tex（期間表記修正前） ====
+
+[置換前の文]
+本研究では，福岡工業大学の授業評価システムにおける2018年度から2024年度までの7年間のデータを使用した．
+
+[置換前の行]
+対象期間 & 2018年度〜2024年度（7年間） \\
+
+==== 本論/卒論Tex　50枚/5章.tex（期間表記修正前） ====
+
+[置換前の文]
+本研究では2018年度から2024年度までの7年間のデータを一括して分析したが，教育環境や学生の価値観は時間とともに変化している可能性がある．特に2020年以降のCOVID-19の影響によるオンライン授業の増加は，評価傾向に変化をもたらした可能性がある．
