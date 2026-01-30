@@ -1,0 +1,10 @@
+{
+  "timestamp": "20260129_141154",
+  "test_weighted_KL": 0.10685710690733863,
+  "base_model": "koheiduck/bert-japanese-finetuned-sentiment",
+  "max_length": 192,
+  "batch_size": 2,
+  "epochs": 3,
+  "lr": 2e-05,
+  "notes": "course-level LLP with ordinal (1-4)"
+}

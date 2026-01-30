@@ -45,9 +45,22 @@ plt.rcParams['axes.unicode_minus'] = False
 # パス設定
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 MODEL_PATH = os.path.join(BASE_DIR, "02_モデル", "授業レベルマルチタスクモデル", "class_level_ordinal_llp_20260114_101852.pth")
-CSV_PATH = os.path.join(BASE_DIR, "01_データ", "マルチタスク用データ", "授業集約データセット 回答分布付き.csv")
+DATA_DIR = os.path.join(BASE_DIR, "01_データ", "マルチタスク用データ")
 OUTPUT_DIR = os.path.join(BASE_DIR, "03_分析結果", "順序回帰SHAP分析_P2P4")
 
+# CSV: 回答分布付きを優先、無ければ授業集約データセット_*.csv の最新を使用（SHAPは自由記述まとめのみ使用）
+def _get_csv_path():
+    preferred = os.path.join(DATA_DIR, "授業集約データセット 回答分布付き.csv")
+    if os.path.exists(preferred):
+        return preferred
+    import glob
+    pattern = os.path.join(DATA_DIR, "授業集約データセット_*.csv")
+    candidates = glob.glob(pattern)
+    if not candidates:
+        return preferred  # エラーは読み込み時に
+    return max(candidates, key=os.path.getmtime)
+
+CSV_PATH = _get_csv_path()
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 # デバイス選択（GPU最優先）
@@ -100,6 +113,7 @@ print("✅ モデル読み込み完了")
 
 # データ読み込み
 print("📊 データ読み込み中...")
+print(f"   CSV: {CSV_PATH}")
 df = pd.read_csv(CSV_PATH)
 texts = df['自由記述まとめ'].fillna("").astype(str).tolist()
 print(f"総データ数: {len(texts)}")
